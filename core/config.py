@@ -60,6 +60,9 @@ class Settings(BaseSettings):
     
     # Configuración de integraciones
     INTEGRATIONS_ENABLED: bool = os.getenv("INTEGRATIONS_ENABLED", "True").lower() == "true"
+    
+    # Motor de búsqueda RAG (deshabilitado por defecto en producción)
+    SEARCH_ENGINE_ENABLED: bool = os.getenv("SEARCH_ENGINE_ENABLED", "False").lower() == "true"
 
     # Configuración de Email (SMTP)
     SMTP_HOST: str = os.getenv("SMTP_HOST", "smtp.gmail.com")

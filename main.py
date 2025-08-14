@@ -19,11 +19,14 @@ async def lifespan(app: FastAPI):
     # Startup
     await init_db()
     
-    # Inicializar motor de búsqueda RAG
+    # Inicializar motor de búsqueda RAG (opcional)
     try:
-        from core.search_engine import search_engine
-        await search_engine.initialize()
-        print("✅ Motor de búsqueda RAG inicializado")
+        if getattr(settings, "SEARCH_ENGINE_ENABLED", False):
+            from core.search_engine import search_engine
+            await search_engine.initialize()
+            print("✅ Motor de búsqueda RAG inicializado")
+        else:
+            print("ℹ️ SEARCH_ENGINE_ENABLED=False, omitiendo inicialización del motor RAG")
     except Exception as e:
         print(f"⚠️ Error inicializando motor de búsqueda: {e}")
     
