@@ -4,7 +4,7 @@ Esquemas Pydantic para usuarios
 
 from datetime import datetime
 from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 
 class UserResponse(BaseModel):
     """Esquema de respuesta para usuarios"""
@@ -36,3 +36,26 @@ class UserList(BaseModel):
     """Esquema para lista de usuarios"""
     users: list[UserResponse]
     total: int
+
+
+# Esquemas requeridos por rutas de autenticación
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+    full_name: Optional[str] = None
+    role: Optional[str] = None
+    phone: Optional[str] = None
+    telegram_id: Optional[str] = None
+    workspaces: Optional[Dict[str, Any]] = None
+
+
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    telegram_id: Optional[str] = None
+    avatar: Optional[str] = None
+    title: Optional[str] = None
+    language: Optional[str] = None
+    timezone: Optional[str] = None
+    workspaces: Optional[Dict[str, Any]] = None
