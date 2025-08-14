@@ -75,17 +75,14 @@ class Settings(BaseSettings):
     TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
     TELEGRAM_CHAT_ID: str = os.getenv("TELEGRAM_CHAT_ID", "")  # Chat ID por defecto (opcional)
 
-    # Configuración de SMS (Twilio)
-    SMS_ENABLED: bool = os.getenv("SMS_ENABLED", "True").lower() == "true"
-    TWILIO_ACCOUNT_SID: str = os.getenv("TWILIO_ACCOUNT_SID", "AC1eabd3bf2f333aa35d1d9a5839982d0c")
-    TWILIO_AUTH_TOKEN: str = os.getenv("TWILIO_AUTH_TOKEN", "d6e1c52f782f7ed8b6c5134541621e5d")
-    TWILIO_SMS_FROM: str = os.getenv("TWILIO_SMS_FROM", "+19063230356")  # Número de Twilio
+    # SMS deshabilitado: Twilio removido
+    SMS_ENABLED: bool = False
 
     # Campos personalizados de ClickUp para obtener destinatarios desde tareas
     # Coma-separados; pueden ser nombres de campo o IDs de campo
     TASK_EMAIL_FIELDS: str = os.getenv("TASK_EMAIL_FIELDS", "Email")
     TASK_TELEGRAM_FIELDS: str = os.getenv("TASK_TELEGRAM_FIELDS", "")  # CAMPO ELIMINADO - Telegram deshabilitado
-    TASK_SMS_FIELDS: str = os.getenv("TASK_SMS_FIELDS", "Celular")  # Campo "Celular" contiene números de teléfono para SMS
+    TASK_SMS_FIELDS: str = ""  # Sin campos SMS
     
     class Config:
         env_file = ".env"

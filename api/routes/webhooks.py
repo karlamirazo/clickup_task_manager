@@ -216,22 +216,19 @@ class WebhookProcessor:
                 # Recopilar destinatarios
                 recipient_emails = []
                 recipient_telegrams = []
-                recipient_sms = []
                 
                 for user in participants:
                     if user.email:
                         recipient_emails.append(user.email)
                     if user.telegram_id:
                         recipient_telegrams.append(user.telegram_id)
-                    if user.phone:
-                        recipient_sms.append(user.phone)
+                    
                 
                 # Extraer contactos adicionales desde custom fields
                 if task.custom_fields:
-                    extra_emails, extra_telegrams, extra_sms = extract_contacts_from_custom_fields(task.custom_fields)
+                    extra_emails, extra_telegrams, _ = extract_contacts_from_custom_fields(task.custom_fields)
                     recipient_emails.extend(extra_emails)
                     recipient_telegrams.extend(extra_telegrams)
-                    recipient_sms.extend(extra_sms)
                 
                 # Obtener nombre del asignado
                 assignee_name = None
@@ -244,12 +241,11 @@ class WebhookProcessor:
                     due_date_str = task.due_date.strftime("%Y-%m-%d %H:%M")
                 
                 # Enviar notificaciones usando el servicio avanzado
-                result = await notification_service.send_task_notification(
+                    result = await notification_service.send_task_notification(
                     action=action,
                     task_id=task.clickup_id,
                     task_name=task.name,
                     recipient_emails=recipient_emails,
-                    recipient_sms=recipient_sms,
                     recipient_telegrams=recipient_telegrams,
                     status=task.status,
                     priority=task.priority,
@@ -367,7 +363,6 @@ async def test_notification(background_tasks: BackgroundTasks):
         task_id="test-123",
         task_name="Tarea de Prueba del Sistema de Webhooks",
         recipient_emails=["karlamirazo@gmail.com"],
-        recipient_sms=["+525648752201"],
         recipient_telegrams=["6888123233"],
         status="in progress",
         priority=2,

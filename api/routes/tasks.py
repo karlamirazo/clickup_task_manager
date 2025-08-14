@@ -366,7 +366,6 @@ async def create_task(
             )
             recipient_emails: List[str] = []
             recipient_telegrams: List[str] = []
-            recipient_sms: List[str] = []
             
             print(f"👥 Participantes encontrados: {len(participants)}")
             
@@ -382,13 +381,7 @@ async def create_task(
                         recipient_telegrams.append(str(telegram))
                         print(f"🤖 Telegram agregado (usuario): {telegram}")
                         
-                    # SMS desde preferencias de usuario
-                    phone = None
-                    if u.preferences and isinstance(u.preferences, dict):
-                        phone = u.preferences.get("phone") or u.preferences.get("sms_number")
-                    if phone:
-                        recipient_sms.append(str(phone))
-                        print(f"📱 SMS agregado (usuario): {phone}")
+                    
                 except Exception:
                     pass
 
@@ -397,28 +390,22 @@ async def create_task(
                 from utils.notifications import (
                     send_email_async,
                     send_telegram_async,
-                    send_sms_async,
                     build_task_email_content,
                     build_task_telegram_message,
-                    build_task_sms_message,
                     extract_contacts_from_custom_fields,
                 )
                 
                 print(f"🔍 Campos personalizados de ClickUp: {clickup_custom_fields}")
-                extra_emails, extra_telegrams, extra_sms = extract_contacts_from_custom_fields(clickup_custom_fields)
+                extra_emails, extra_telegrams, _ = extract_contacts_from_custom_fields(clickup_custom_fields)
                 recipient_emails.extend(extra_emails)
                 recipient_telegrams.extend(extra_telegrams)
-                recipient_sms.extend(extra_sms)
                 
                 print(f"📧 Emails desde ClickUp: {extra_emails}")
                 print(f"🤖 Telegrams desde ClickUp: {extra_telegrams}")
-                print(f"📱 SMS desde ClickUp: {extra_sms}")
-                
                 print(f"📧 Emails totales: {recipient_emails}")
                 print(f"🤖 Telegrams totales: {recipient_telegrams}")
-                print(f"📱 SMS totales: {recipient_sms}")
 
-                if recipient_emails or recipient_telegrams or recipient_sms:
+                if recipient_emails or recipient_telegrams:
                     subject, text_body, html_body = build_task_email_content(
                         action="created",
                         task_id=db_task.clickup_id,
@@ -429,15 +416,6 @@ async def create_task(
                         due_date_iso=db_task.due_date.isoformat() if db_task.due_date else None,
                     )
                     telegram_msg = build_task_telegram_message(
-                        action="created",
-                        task_id=db_task.clickup_id,
-                        name=db_task.name,
-                        status=db_task.status,
-                        priority=db_task.priority,
-                        assignee_name=None,
-                        due_date_iso=db_task.due_date.isoformat() if db_task.due_date else None,
-                    )
-                    sms_msg = build_task_sms_message(
                         action="created",
                         task_id=db_task.clickup_id,
                         name=db_task.name,
@@ -458,9 +436,6 @@ async def create_task(
                             else asyncio.sleep(0),
                             send_telegram_async(list(dict.fromkeys(recipient_telegrams)), telegram_msg)
                             if recipient_telegrams
-                            else asyncio.sleep(0),
-                            send_sms_async(list(dict.fromkeys(recipient_sms)), sms_msg)
-                            if recipient_sms
                             else asyncio.sleep(0),
                         )
 
@@ -868,7 +843,6 @@ async def update_task(
             participants = db.query(User).all() if not db_task.workspace_id else db.query(User).filter(User.workspaces.isnot(None)).all()
             recipient_emails = []
             recipient_telegrams = []
-            recipient_sms = []
             for u in participants:
                 if u and u.email:
                     recipient_emails.append(u.email)
@@ -892,12 +866,11 @@ async def update_task(
                 extract_contacts_from_custom_fields,
             )
 
-            extra_emails, extra_telegrams, extra_sms = extract_contacts_from_custom_fields(db_task.custom_fields or {})
+            extra_emails, extra_telegrams, _ = extract_contacts_from_custom_fields(db_task.custom_fields or {})
             recipient_emails.extend(extra_emails)
             recipient_telegrams.extend(extra_telegrams)
-            recipient_sms.extend(extra_sms)
 
-            if recipient_emails or recipient_telegrams or recipient_sms:
+            if recipient_emails or recipient_telegrams:
                 subject, text_body, html_body = build_task_email_content(
                     action="updated",
                     task_id=db_task.clickup_id,
@@ -916,15 +889,6 @@ async def update_task(
                     assignee_name=None,
                     due_date_iso=db_task.due_date.isoformat() if db_task.due_date else None,
                 )
-                sms_msg = build_task_sms_message(
-                    action="updated",
-                    task_id=db_task.clickup_id,
-                    name=db_task.name,
-                    status=db_task.status,
-                    priority=db_task.priority,
-                    assignee_name=None,
-                    due_date_iso=db_task.due_date.isoformat() if db_task.due_date else None,
-                )
 
                 import asyncio
 
@@ -935,10 +899,7 @@ async def update_task(
                         else asyncio.sleep(0),
                         send_telegram_async(list(dict.fromkeys(recipient_telegrams)), telegram_msg)
                         if recipient_telegrams
-                        else asyncio.sleep(0),
-                        send_sms_async(list(dict.fromkeys(recipient_sms)), sms_msg)
-                        if recipient_sms
-                        else asyncio.sleep(0),
+                        else asyncio.sleep(0)
                     )
 
                 try:
