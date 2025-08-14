@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 
 async def send_email_async(recipients: List[str], subject: str, text_body: str, html_body: str) -> None:
@@ -12,14 +12,14 @@ async def send_telegram_async(recipients: List[str], message: str) -> None:
 # SMS eliminado
 
 
-def build_task_email_content(action: str, task_id: str, name: str, status: str, priority: int, assignee_name: str | None, due_date_iso: str | None) -> Tuple[str, str, str]:
+def build_task_email_content(action: str, task_id: str, name: str, status: str, priority: int, assignee_name: Optional[str], due_date_iso: Optional[str]) -> Tuple[str, str, str]:
     subject = f"Task {action}: {name}"
     text_body = f"Task {action}: {name} (ID: {task_id})"
     html_body = text_body
     return subject, text_body, html_body
 
 
-def build_task_telegram_message(action: str, task_id: str, name: str, status: str, priority: int, assignee_name: str | None, due_date_iso: str | None) -> str:
+def build_task_telegram_message(action: str, task_id: str, name: str, status: str, priority: int, assignee_name: Optional[str], due_date_iso: Optional[str]) -> str:
     return f"Task {action}: {name} (ID: {task_id})"
 
 
