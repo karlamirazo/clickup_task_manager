@@ -1,8 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.dialects.sqlite import JSON as SQLiteJSON
-from sqlalchemy.orm import declarative_base
-
-Base = declarative_base()
+from core.database import Base
 
 
 class Task(Base):
