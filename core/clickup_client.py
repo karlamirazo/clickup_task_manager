@@ -18,8 +18,7 @@ class ClickUpClient:
         self.api_token = api_token or settings.CLICKUP_API_TOKEN
         self.base_url = settings.CLICKUP_API_BASE_URL
         self.headers = {
-            "Authorization": f"Bearer {self.api_token}",  # ClickUp requiere Bearer + token
-            "X-API-Key": self.api_token,  # ClickUp también acepta X-API-Key
+            "X-API-Key": self.api_token,  # ClickUp API v2 requiere X-API-Key
             "Content-Type": "application/json"
         }
     
