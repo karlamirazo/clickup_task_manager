@@ -840,6 +840,9 @@ async function handleCreateTask(event) {
         custom_fields: Object.keys(customFields).length > 0 ? customFields : null
     };
     
+    console.log('📝 Datos que se enviarán al servidor:', formData);
+    console.log('📧 Custom fields preparados:', customFields);
+    
     try {
         const response = await fetch('/api/v1/tasks/', {
             method: 'POST',
@@ -850,6 +853,9 @@ async function handleCreateTask(event) {
         });
         
         if (response.ok) {
+            const result = await response.json();
+            console.log('✅ Tarea creada exitosamente:', result);
+            
             closeModal('create-task-modal');
             event.target.reset();
             
@@ -857,9 +863,6 @@ async function handleCreateTask(event) {
             document.getElementById('task-email').value = '';
             document.getElementById('task-phone').value = '';
             document.getElementById('task-due-date').value = '';
-            
-            // Mostrar mensaje de éxito
-            showNotification('✅ Tarea creada exitosamente con notificaciones configuradas!', 'success');
             
             // Recargar tareas
             if (currentTab === 'tasks') {
@@ -869,9 +872,12 @@ async function handleCreateTask(event) {
             // Actualizar dashboard
             await loadDashboardData();
             
-            showNotification('Tarea creada exitosamente', 'success');
+            // Mostrar mensaje de éxito (solo uno)
+            showNotification('✅ Tarea creada exitosamente!', 'success');
         } else {
-            showNotification('Error creando tarea', 'error');
+            const errorData = await response.json().catch(() => ({}));
+            console.error('❌ Error del servidor:', response.status, response.statusText, errorData);
+            showNotification(`Error creando tarea: ${errorData.detail || response.statusText}`, 'error');
         }
     } catch (error) {
         console.error('Error creando tarea:', error);
