@@ -92,15 +92,35 @@ class ClickUpClient:
     # Métodos para Workspaces (Teams en ClickUp)
     async def get_workspaces(self) -> List[Dict]:
         """Obtener todos los workspaces (teams en ClickUp)"""
-        # Probar primero con el endpoint correcto de ClickUp API v2
-        try:
-            response = await self._make_request("GET", "workspace")
-            return response.get("workspaces", [])
-        except Exception as e:
-            # Fallback al endpoint anterior si falla
-            logger.warning(f"⚠️ Endpoint 'workspace' falló, probando 'team': {e}")
-            response = await self._make_request("GET", "team", params={"include_archived": "false"})
-            return response.get("teams", [])
+        # Probar diferentes endpoints de ClickUp API v2
+        endpoints_to_try = [
+            ("team", {}),  # Sin parámetros
+            ("team", {"include_archived": "false"}),  # Con parámetros
+            ("workspace", {}),  # Endpoint alternativo
+        ]
+        
+        for endpoint, params in endpoints_to_try:
+            try:
+                logger.info(f"🔍 Probando endpoint: {endpoint} con parámetros: {params}")
+                response = await self._make_request("GET", endpoint, params=params if params else None)
+                
+                # Intentar diferentes claves de respuesta
+                if "teams" in response:
+                    return response.get("teams", [])
+                elif "workspaces" in response:
+                    return response.get("workspaces", [])
+                elif "data" in response:
+                    return response.get("data", [])
+                else:
+                    # Si no hay clave específica, devolver la respuesta completa
+                    return response if isinstance(response, list) else []
+                    
+            except Exception as e:
+                logger.warning(f"⚠️ Endpoint '{endpoint}' falló: {e}")
+                continue
+        
+        # Si todos fallan, lanzar error
+        raise Exception("Todos los endpoints de ClickUp API fallaron")
     
     async def get_teams(self) -> List[Dict]:
         """Obtener todos los teams (alias de get_workspaces)"""
