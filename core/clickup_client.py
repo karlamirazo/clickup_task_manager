@@ -18,11 +18,8 @@ class ClickUpClient:
         self.api_token = api_token or settings.CLICKUP_API_TOKEN
         self.base_url = settings.CLICKUP_API_BASE_URL
         self.headers = {
-            "Authorization": f"Bearer {self.api_token}",  # ClickUp puede requerir Bearer
-            "X-API-Key": self.api_token,  # ClickUp también puede requerir X-API-Key
-            "Content-Type": "application/json",
-            "Accept": "application/json",  # ClickUp puede requerir Accept header
-            "User-Agent": "ClickUp-Project-Manager/1.0"  # User-Agent personalizado
+            "Authorization": self.api_token,  # ClickUp usa token directo (sin Bearer)
+            "Content-Type": "application/json"
         }
     
     async def _make_request(
@@ -95,35 +92,8 @@ class ClickUpClient:
     # Métodos para Workspaces (Teams en ClickUp)
     async def get_workspaces(self) -> List[Dict]:
         """Obtener todos los workspaces (teams en ClickUp)"""
-        # Probar diferentes endpoints de ClickUp API v2
-        endpoints_to_try = [
-            ("team", {}),  # Sin parámetros
-            ("team", {"include_archived": "false"}),  # Con parámetros
-            ("workspace", {}),  # Endpoint alternativo
-        ]
-        
-        for endpoint, params in endpoints_to_try:
-            try:
-                logger.info(f"🔍 Probando endpoint: {endpoint} con parámetros: {params}")
-                response = await self._make_request("GET", endpoint, params=params if params else None)
-                
-                # Intentar diferentes claves de respuesta
-                if "teams" in response:
-                    return response.get("teams", [])
-                elif "workspaces" in response:
-                    return response.get("workspaces", [])
-                elif "data" in response:
-                    return response.get("data", [])
-                else:
-                    # Si no hay clave específica, devolver la respuesta completa
-                    return response if isinstance(response, list) else []
-                    
-            except Exception as e:
-                logger.warning(f"⚠️ Endpoint '{endpoint}' falló: {e}")
-                continue
-        
-        # Si todos fallan, lanzar error
-        raise Exception("Todos los endpoints de ClickUp API fallaron")
+        response = await self._make_request("GET", "team")
+        return response.get("teams", [])
     
     async def get_teams(self) -> List[Dict]:
         """Obtener todos los teams (alias de get_workspaces)"""
