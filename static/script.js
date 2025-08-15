@@ -3,14 +3,48 @@ let currentTab = 'dashboard';
 let tasks = [];
 let workspaces = [];
 
-// Función para asegurar URLs HTTPS
-function ensureHttpsUrl(path) {
-    // En producción, forzar HTTPS completo
-    if (window.location.host.includes('railway.app')) {
-        return `https://${window.location.host}${path}`;
-    }
-    // En desarrollo local, mantener relativo
-    return path;
+// Interceptor de fetch para forzar HTTPS en Railway
+if (window.location.hostname.includes('railway.app')) {
+    console.log('🚂 Aplicando interceptor de fetch para Railway...');
+    
+    // Guardar el fetch original
+    const originalFetch = window.fetch;
+    
+    // Crear interceptor personalizado
+    window.fetch = function(url, options = {}) {
+        // Convertir URL a string si es necesario
+        let urlString = url.toString();
+        
+        console.log('🔍 Interceptando fetch para URL:', urlString);
+        
+        // Si la URL es HTTP, convertir a HTTPS
+        if (urlString.startsWith('http://')) {
+            urlString = urlString.replace('http://', 'https://');
+            console.log('🔄 URL convertida a HTTPS:', urlString);
+        }
+        
+        // Si la URL es relativa y estamos en Railway, hacerla absoluta HTTPS
+        if (urlString.startsWith('/')) {
+            urlString = `https://${window.location.host}${urlString}`;
+            console.log('🔄 URL relativa convertida a HTTPS absoluta:', urlString);
+        }
+        
+        console.log('📡 Realizando fetch a:', urlString);
+        
+        // Agregar headers para forzar HTTPS
+        const httpsOptions = {
+            ...options,
+            headers: {
+                ...options.headers,
+                'Upgrade-Insecure-Requests': '1'
+            }
+        };
+        
+        // Llamar al fetch original con la URL modificada
+        return originalFetch(urlString, httpsOptions);
+    };
+    
+    console.log('✅ Interceptor de fetch aplicado exitosamente');
 }
 
 // Variables globales para reportes
@@ -506,19 +540,9 @@ async function showCreateTaskModal() {
 async function loadWorkspacesForTask() {
     try {
         console.log('🔄 Iniciando carga de workspaces para tarea...');
-        // Método alternativo: hardcode HTTPS para Railway
-        let apiUrl;
-        if (window.location.hostname.includes('railway.app')) {
-            // En Railway, forzar HTTPS siempre
-            apiUrl = 'https://clickuptaskmanager-production.up.railway.app/api/v1/workspaces';
-            console.log('🚂 Detectado Railway, usando URL HTTPS hardcoded:', apiUrl);
-        } else {
-            // En desarrollo local, usar relativo
-            apiUrl = '/api/v1/workspaces';
-            console.log('💻 Detectado desarrollo local, usando URL relativa:', apiUrl);
-        }
-        
-        console.log('🌐 URL final que se usará:', apiUrl);
+        // Usar URL relativa - el interceptor se encarga de HTTPS en Railway
+        const apiUrl = '/api/v1/workspaces';
+        console.log('🌐 Usando URL relativa (interceptor manejará HTTPS):', apiUrl);
         const response = await fetch(apiUrl);
         console.log('📡 Respuesta del servidor:', response.status, response.statusText);
         
@@ -577,15 +601,8 @@ async function loadWorkspacesForTask() {
 async function loadListsForWorkspace(workspaceId) {
     try {
         console.log('📋 Cargando listas para workspace:', workspaceId);
-        let apiUrl;
-        if (window.location.hostname.includes('railway.app')) {
-            apiUrl = `https://clickuptaskmanager-production.up.railway.app/api/v1/workspaces/${workspaceId}/spaces`;
-            console.log('🚂 Detectado Railway, usando URL HTTPS hardcoded:', apiUrl);
-        } else {
-            apiUrl = `/api/v1/workspaces/${workspaceId}/spaces`;
-            console.log('💻 Detectado desarrollo local, usando URL relativa:', apiUrl);
-        }
-        console.log('🌐 URL spaces final:', apiUrl);
+        const apiUrl = `/api/v1/workspaces/${workspaceId}/spaces`;
+        console.log('🌐 URL spaces (interceptor manejará HTTPS):', apiUrl);
         const response = await fetch(apiUrl);
         console.log('📡 Respuesta spaces:', response.status, response.statusText);
         
@@ -603,12 +620,7 @@ async function loadListsForWorkspace(workspaceId) {
             for (const space of data.spaces) {
                 try {
                     console.log('📋 Cargando listas para space:', space.name, space.id);
-                    let listsUrl;
-                    if (window.location.hostname.includes('railway.app')) {
-                        listsUrl = `https://clickuptaskmanager-production.up.railway.app/api/v1/spaces/${space.id}/lists`;
-                    } else {
-                        listsUrl = `/api/v1/spaces/${space.id}/lists`;
-                    }
+                    const listsUrl = `/api/v1/spaces/${space.id}/lists`;
                     const listsResponse = await fetch(listsUrl);
                     console.log('📡 Respuesta listas:', listsResponse.status, listsResponse.statusText);
                     
@@ -642,15 +654,8 @@ async function loadListsForWorkspace(workspaceId) {
 async function loadUsersForWorkspace(workspaceId) {
     try {
         console.log('👥 Cargando usuarios para workspace:', workspaceId);
-        let apiUrl;
-        if (window.location.hostname.includes('railway.app')) {
-            apiUrl = `https://clickuptaskmanager-production.up.railway.app/api/v1/users/?workspace_id=${workspaceId}`;
-            console.log('🚂 Detectado Railway, usando URL HTTPS hardcoded:', apiUrl);
-        } else {
-            apiUrl = `/api/v1/users/?workspace_id=${workspaceId}`;
-            console.log('💻 Detectado desarrollo local, usando URL relativa:', apiUrl);
-        }
-        console.log('🌐 URL users final:', apiUrl);
+        const apiUrl = `/api/v1/users/?workspace_id=${workspaceId}`;
+        console.log('🌐 URL users (interceptor manejará HTTPS):', apiUrl);
         const response = await fetch(apiUrl);
         console.log('📡 Respuesta usuarios:', response.status, response.statusText);
         
