@@ -151,7 +151,7 @@ async def create_task(
         if clickup_response.get("due_date"):
             print(f"✅ ClickUp recibió la fecha límite: {clickup_response['due_date']}")
             # Convertir el timestamp de ClickUp a datetime para comparar
-            clickup_due_date = datetime.fromtimestamp(clickup_response['due_date'] / 1000)
+            clickup_due_date = safe_timestamp_to_datetime()
             print(f"✅ ClickUp fecha límite convertida: {clickup_due_date}")
         else:
             print(f"⚠️ ClickUp NO recibió la fecha límite")
@@ -250,12 +250,12 @@ async def create_task(
                     print(f"📅 Due date ya es datetime: {due_date_datetime}")
                 elif isinstance(task_data.due_date, (int, float)):
                     # Es timestamp en milisegundos
-                    due_date_datetime = datetime.utcfromtimestamp(task_data.due_date / 1000)
+                    due_date_datetime = safe_timestamp_to_datetime()
                     print(f"📅 Timestamp convertido (UTC): {task_data.due_date} -> {due_date_datetime}")
                 elif isinstance(task_data.due_date, str):
                     # Es string, intentar convertir a timestamp
                     timestamp = int(task_data.due_date)
-                    due_date_datetime = datetime.utcfromtimestamp(timestamp / 1000)
+                    due_date_datetime = safe_timestamp_to_datetime()
                     print(f"📅 String convertido a timestamp (UTC): {task_data.due_date} -> {due_date_datetime}")
                 else:
                     print(f"⚠️ Tipo de due_date no reconocido: {type(task_data.due_date)}")
@@ -659,18 +659,18 @@ async def get_task(
                 priority=_priority_to_int(clickup_task.get("priority", 3)),
                 due_date=(
                     (lambda _v: (
-                        datetime.fromtimestamp(_v / 1000)
+                        safe_timestamp_to_datetime()
                         if isinstance(_v, (int, float))
-                        else (datetime.fromtimestamp(int(_v) / 1000) if isinstance(_v, str) and _v.isdigit() else None)
+                        else (safe_timestamp_to_datetime(int()) if isinstance(_v, str) and _v.isdigit() else None)
                     ))(clickup_task.get("due_date"))
                     if clickup_task.get("due_date") is not None
                     else None
                 ),
                 start_date=(
                     (lambda _v: (
-                        datetime.fromtimestamp(_v / 1000)
+                        safe_timestamp_to_datetime()
                         if isinstance(_v, (int, float))
-                        else (datetime.fromtimestamp(int(_v) / 1000) if isinstance(_v, str) and _v.isdigit() else None)
+                        else (safe_timestamp_to_datetime(int()) if isinstance(_v, str) and _v.isdigit() else None)
                     ))(clickup_task.get("start_date"))
                     if clickup_task.get("start_date") is not None
                     else None
@@ -1109,17 +1109,17 @@ async def sync_task(
         db_task.priority = _priority_to_int(clickup_task.get("priority", 3))
         _due = clickup_task.get("due_date")
         if isinstance(_due, (int, float)):
-            db_task.due_date = datetime.fromtimestamp(_due / 1000)
+            db_task.due_date = safe_timestamp_to_datetime()
         elif isinstance(_due, str) and _due.isdigit():
-            db_task.due_date = datetime.fromtimestamp(int(_due) / 1000)
+            db_task.due_date = safe_timestamp_to_datetime(int())
         else:
             db_task.due_date = None
 
         _start = clickup_task.get("start_date")
         if isinstance(_start, (int, float)):
-            db_task.start_date = datetime.fromtimestamp(_start / 1000)
+            db_task.start_date = safe_timestamp_to_datetime()
         elif isinstance(_start, str) and _start.isdigit():
-            db_task.start_date = datetime.fromtimestamp(int(_start) / 1000)
+            db_task.start_date = safe_timestamp_to_datetime(int())
         else:
             db_task.start_date = None
         db_task.workspace_id = clickup_task["team_id"]
@@ -1217,7 +1217,7 @@ async def sync_all_tasks(
                                 # Manejar fechas de forma segura
                                 if task.get("due_date"):
                                     try:
-                                        db_task.due_date = datetime.fromtimestamp(task["due_date"] / 1000)
+                                        db_task.due_date = safe_timestamp_to_datetime()
                                     except (ValueError, TypeError):
                                         db_task.due_date = None
                                 else:
@@ -1225,7 +1225,7 @@ async def sync_all_tasks(
                                 
                                 if task.get("start_date"):
                                     try:
-                                        db_task.start_date = datetime.fromtimestamp(task["start_date"] / 1000)
+                                        db_task.start_date = safe_timestamp_to_datetime()
                                     except (ValueError, TypeError):
                                         db_task.start_date = None
                                 else:
