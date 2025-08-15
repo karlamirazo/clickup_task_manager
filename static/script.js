@@ -506,12 +506,20 @@ async function showCreateTaskModal() {
 async function loadWorkspacesForTask() {
     try {
         console.log('🔄 Iniciando carga de workspaces para tarea...');
-        // Forzar HTTPS absoluto para evitar Mixed Content
-        const url = window.location.protocol === 'https:' 
-            ? `https://${window.location.host}/api/v1/workspaces`
-            : '/api/v1/workspaces';
-        console.log('🌐 URL generada:', url);
-        const response = await fetch(url);
+        // Método alternativo: hardcode HTTPS para Railway
+        let apiUrl;
+        if (window.location.hostname.includes('railway.app')) {
+            // En Railway, forzar HTTPS siempre
+            apiUrl = 'https://clickuptaskmanager-production.up.railway.app/api/v1/workspaces';
+            console.log('🚂 Detectado Railway, usando URL HTTPS hardcoded:', apiUrl);
+        } else {
+            // En desarrollo local, usar relativo
+            apiUrl = '/api/v1/workspaces';
+            console.log('💻 Detectado desarrollo local, usando URL relativa:', apiUrl);
+        }
+        
+        console.log('🌐 URL final que se usará:', apiUrl);
+        const response = await fetch(apiUrl);
         console.log('📡 Respuesta del servidor:', response.status, response.statusText);
         
         if (response.ok) {
@@ -569,11 +577,16 @@ async function loadWorkspacesForTask() {
 async function loadListsForWorkspace(workspaceId) {
     try {
         console.log('📋 Cargando listas para workspace:', workspaceId);
-        const url = window.location.protocol === 'https:' 
-            ? `https://${window.location.host}/api/v1/workspaces/${workspaceId}/spaces`
-            : `/api/v1/workspaces/${workspaceId}/spaces`;
-        console.log('🌐 URL spaces generada:', url);
-        const response = await fetch(url);
+        let apiUrl;
+        if (window.location.hostname.includes('railway.app')) {
+            apiUrl = `https://clickuptaskmanager-production.up.railway.app/api/v1/workspaces/${workspaceId}/spaces`;
+            console.log('🚂 Detectado Railway, usando URL HTTPS hardcoded:', apiUrl);
+        } else {
+            apiUrl = `/api/v1/workspaces/${workspaceId}/spaces`;
+            console.log('💻 Detectado desarrollo local, usando URL relativa:', apiUrl);
+        }
+        console.log('🌐 URL spaces final:', apiUrl);
+        const response = await fetch(apiUrl);
         console.log('📡 Respuesta spaces:', response.status, response.statusText);
         
         if (response.ok) {
@@ -590,9 +603,12 @@ async function loadListsForWorkspace(workspaceId) {
             for (const space of data.spaces) {
                 try {
                     console.log('📋 Cargando listas para space:', space.name, space.id);
-                    const listsUrl = window.location.protocol === 'https:' 
-                        ? `https://${window.location.host}/api/v1/spaces/${space.id}/lists`
-                        : `/api/v1/spaces/${space.id}/lists`;
+                    let listsUrl;
+                    if (window.location.hostname.includes('railway.app')) {
+                        listsUrl = `https://clickuptaskmanager-production.up.railway.app/api/v1/spaces/${space.id}/lists`;
+                    } else {
+                        listsUrl = `/api/v1/spaces/${space.id}/lists`;
+                    }
                     const listsResponse = await fetch(listsUrl);
                     console.log('📡 Respuesta listas:', listsResponse.status, listsResponse.statusText);
                     
@@ -626,11 +642,16 @@ async function loadListsForWorkspace(workspaceId) {
 async function loadUsersForWorkspace(workspaceId) {
     try {
         console.log('👥 Cargando usuarios para workspace:', workspaceId);
-        const url = window.location.protocol === 'https:' 
-            ? `https://${window.location.host}/api/v1/users/?workspace_id=${workspaceId}`
-            : `/api/v1/users/?workspace_id=${workspaceId}`;
-        console.log('🌐 URL users generada:', url);
-        const response = await fetch(url);
+        let apiUrl;
+        if (window.location.hostname.includes('railway.app')) {
+            apiUrl = `https://clickuptaskmanager-production.up.railway.app/api/v1/users/?workspace_id=${workspaceId}`;
+            console.log('🚂 Detectado Railway, usando URL HTTPS hardcoded:', apiUrl);
+        } else {
+            apiUrl = `/api/v1/users/?workspace_id=${workspaceId}`;
+            console.log('💻 Detectado desarrollo local, usando URL relativa:', apiUrl);
+        }
+        console.log('🌐 URL users final:', apiUrl);
+        const response = await fetch(apiUrl);
         console.log('📡 Respuesta usuarios:', response.status, response.statusText);
         
         if (response.ok) {
