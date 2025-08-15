@@ -5,9 +5,11 @@ Módulo principal de la aplicación
 
 import uvicorn
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
 from api.routes import tasks, workspaces, lists, users, automation, reports, integrations, spaces, webhooks, dashboard, search
 from core.config import settings
@@ -19,14 +21,11 @@ async def lifespan(app: FastAPI):
     # Startup
     await init_db()
     
-    # Inicializar motor de búsqueda RAG (opcional)
+    # Inicializar motor de búsqueda RAG
     try:
-        if getattr(settings, "SEARCH_ENGINE_ENABLED", False):
-            from core.search_engine import search_engine
-            await search_engine.initialize()
-            print("✅ Motor de búsqueda RAG inicializado")
-        else:
-            print("ℹ️ SEARCH_ENGINE_ENABLED=False, omitiendo inicialización del motor RAG")
+        from core.search_engine import search_engine
+        await search_engine.initialize()
+        print("✅ Motor de búsqueda RAG inicializado")
     except Exception as e:
         print(f"⚠️ Error inicializando motor de búsqueda: {e}")
     
@@ -39,6 +38,30 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+# Agregar middleware de seguridad HTTPS en producción
+import os
+if os.getenv("RAILWAY_ENVIRONMENT_NAME"):  # Detectar Railway
+    print("🚂 Detectado Railway - Configurando middleware de seguridad HTTPS")
+    
+    # Middleware para hosts confiables
+    app.add_middleware(
+        TrustedHostMiddleware, 
+        allowed_hosts=["clickuptaskmanager-production.up.railway.app", "*.up.railway.app"]
+    )
+    
+    # Middleware para forzar HTTPS (solo en Railway)
+    # app.add_middleware(HTTPSRedirectMiddleware)  # Comentado por ahora para evitar loops
+    
+    # Middleware personalizado para headers de seguridad
+    @app.middleware("http")
+    async def add_security_headers(request: Request, call_next):
+        response = await call_next(request)
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Content-Security-Policy"] = "upgrade-insecure-requests"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        return response
 
 # Configurar CORS
 app.add_middleware(

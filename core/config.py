@@ -41,7 +41,8 @@ class Settings(BaseSettings):
         "http://127.0.0.1:3000",
         "http://127.0.0.1:8000",
         "https://clickuptaskmanager-production.up.railway.app",
-        "https://*.up.railway.app"
+        "https://*.up.railway.app",
+        "*"  # Temporal para debugging - remover en producción
     ]
     
     # Configuración de seguridad
