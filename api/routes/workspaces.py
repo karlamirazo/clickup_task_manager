@@ -84,7 +84,7 @@ async def get_clickup_status():
             "can_connect": False
         }
 
-@router.get("/", response_model=WorkspaceList)
+@router.get("/")
 async def get_workspaces(
     db: Session = Depends(get_db)
 ):
@@ -97,50 +97,26 @@ async def get_workspaces(
                 detail="CLICKUP_API_TOKEN no está configurado. Por favor, configura la variable de entorno en Railway."
             )
         
-        # Obtener de ClickUp
+        # Obtener de ClickUp directamente y devolver formato simple
         clickup_workspaces = await clickup_client.get_workspaces()
         
+        # Convertir a formato simple para el frontend
         workspaces = []
-        for clickup_workspace in clickup_workspaces:
-            # Buscar en base de datos local
-            db_workspace = db.query(Workspace).filter(
-                Workspace.clickup_id == clickup_workspace["id"]
-            ).first()
-            
-            if not db_workspace:
-                # Crear nuevo registro
-                db_workspace = Workspace(
-                    clickup_id=clickup_workspace["id"],
-                    name=clickup_workspace["name"],
-                    description="",  # ClickUp API no devuelve description en teams
-                    color=clickup_workspace.get("color", ""),
-                    private=False,  # ClickUp API no devuelve private en teams
-                    multiple_assignees=True,  # ClickUp API no devuelve multiple_assignees en teams
-                    settings={},  # ClickUp API no devuelve settings en teams
-                    features={},  # ClickUp API no devuelve features en teams
-                    is_synced=True,
-                    last_sync=datetime.utcnow(),
-                    created_at=datetime.utcnow(),
-                    updated_at=datetime.utcnow()
-                )
-                db.add(db_workspace)
-                db.commit()  # Commit inmediato para obtener el ID
-                db.refresh(db_workspace)  # Refrescar para obtener todos los campos
-            else:
-                # Actualizar datos existentes
-                db_workspace.name = clickup_workspace["name"]
-                db_workspace.color = clickup_workspace.get("color", "")
-                db_workspace.is_synced = True
-                db_workspace.last_sync = datetime.utcnow()
-            
-            workspaces.append(WorkspaceResponse.from_orm(db_workspace))
+        for workspace in clickup_workspaces:
+            workspaces.append({
+                "id": workspace.get("id"),
+                "clickup_id": workspace.get("id"),
+                "name": workspace.get("name"),
+                "color": workspace.get("color", "#000000"),
+                "private": False,
+                "multiple_assignees": True,
+                "is_synced": True
+            })
         
-        db.commit()
-        
-        return WorkspaceList(
-            workspaces=workspaces,
-            total=len(workspaces)
-        )
+        return {
+            "workspaces": workspaces,
+            "total": len(workspaces)
+        }
         
     except ValueError as e:
         # Error de configuración (token faltante)
