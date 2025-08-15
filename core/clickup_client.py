@@ -42,6 +42,9 @@ class ClickUpClient:
             raise ValueError("CLICKUP_API_TOKEN no está configurado")
         
         logger.info(f"🔗 Haciendo petición a ClickUp API: {method} {url}")
+        logger.info(f"🔑 Headers: {self.headers}")
+        if params:
+            logger.info(f"📋 Parámetros: {params}")
         
         async with aiohttp.ClientSession() as session:
             try:
@@ -89,7 +92,7 @@ class ClickUpClient:
     # Métodos para Workspaces (Teams en ClickUp)
     async def get_workspaces(self) -> List[Dict]:
         """Obtener todos los workspaces (teams en ClickUp)"""
-        response = await self._make_request("GET", "team")
+        response = await self._make_request("GET", "team", params={"include_archived": "false"})
         return response.get("teams", [])
     
     async def get_teams(self) -> List[Dict]:
