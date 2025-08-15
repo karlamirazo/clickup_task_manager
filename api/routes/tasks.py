@@ -657,8 +657,24 @@ async def get_task(
                 description=clickup_task.get("description", ""),
                 status=clickup_task["status"]["status"],
                 priority=_priority_to_int(clickup_task.get("priority", 3)),
-                due_date=datetime.fromtimestamp(clickup_task["due_date"] / 1000) if clickup_task.get("due_date") else None,
-                start_date=datetime.fromtimestamp(clickup_task["start_date"] / 1000) if clickup_task.get("start_date") else None,
+                due_date=(
+                    (lambda _v: (
+                        datetime.fromtimestamp(_v / 1000)
+                        if isinstance(_v, (int, float))
+                        else (datetime.fromtimestamp(int(_v) / 1000) if isinstance(_v, str) and _v.isdigit() else None)
+                    ))(clickup_task.get("due_date"))
+                    if clickup_task.get("due_date") is not None
+                    else None
+                ),
+                start_date=(
+                    (lambda _v: (
+                        datetime.fromtimestamp(_v / 1000)
+                        if isinstance(_v, (int, float))
+                        else (datetime.fromtimestamp(int(_v) / 1000) if isinstance(_v, str) and _v.isdigit() else None)
+                    ))(clickup_task.get("start_date"))
+                    if clickup_task.get("start_date") is not None
+                    else None
+                ),
                 workspace_id=clickup_task["team_id"],
                 list_id=clickup_task["list"]["id"],
                 assignee_id=str(clickup_task["assignees"][0]["id"]) if clickup_task.get("assignees") else None,
@@ -1091,8 +1107,21 @@ async def sync_task(
         db_task.description = clickup_task.get("description", "")
         db_task.status = clickup_task["status"]["status"]
         db_task.priority = _priority_to_int(clickup_task.get("priority", 3))
-        db_task.due_date = datetime.fromtimestamp(clickup_task["due_date"] / 1000) if clickup_task.get("due_date") else None
-        db_task.start_date = datetime.fromtimestamp(clickup_task["start_date"] / 1000) if clickup_task.get("start_date") else None
+        _due = clickup_task.get("due_date")
+        if isinstance(_due, (int, float)):
+            db_task.due_date = datetime.fromtimestamp(_due / 1000)
+        elif isinstance(_due, str) and _due.isdigit():
+            db_task.due_date = datetime.fromtimestamp(int(_due) / 1000)
+        else:
+            db_task.due_date = None
+
+        _start = clickup_task.get("start_date")
+        if isinstance(_start, (int, float)):
+            db_task.start_date = datetime.fromtimestamp(_start / 1000)
+        elif isinstance(_start, str) and _start.isdigit():
+            db_task.start_date = datetime.fromtimestamp(int(_start) / 1000)
+        else:
+            db_task.start_date = None
         db_task.workspace_id = clickup_task["team_id"]
         db_task.list_id = clickup_task["list"]["id"]
         db_task.assignee_id = str(clickup_task["assignees"][0]["id"]) if clickup_task.get("assignees") else None
