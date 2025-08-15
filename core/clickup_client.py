@@ -19,7 +19,9 @@ class ClickUpClient:
         self.base_url = settings.CLICKUP_API_BASE_URL
         self.headers = {
             "X-API-Key": self.api_token,  # ClickUp API v2 requiere X-API-Key
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Accept": "application/json",  # ClickUp puede requerir Accept header
+            "User-Agent": "ClickUp-Project-Manager/1.0"  # User-Agent personalizado
         }
     
     async def _make_request(
