@@ -495,12 +495,22 @@ async function showCreateTaskModal() {
 
 async function loadWorkspacesForTask() {
     try {
+        console.log('🔄 Iniciando carga de workspaces para tarea...');
         const response = await fetch('/api/v1/workspaces');
+        console.log('📡 Respuesta del servidor:', response.status, response.statusText);
+        
         if (response.ok) {
             const data = await response.json();
+            console.log('📊 Datos recibidos:', data);
+            
             const workspaceSelect = document.getElementById('task-workspace');
             const listSelect = document.getElementById('task-list');
             const assigneeSelect = document.getElementById('task-assignee');
+            
+            if (!workspaceSelect) {
+                console.error('❌ No se encontró el elemento task-workspace');
+                return;
+            }
             
             // Limpiar opciones existentes
             workspaceSelect.innerHTML = '<option value="">Seleccionar workspace...</option>';
@@ -508,16 +518,21 @@ async function loadWorkspacesForTask() {
             assigneeSelect.innerHTML = '<option value="">Sin asignar</option>';
             
             // Agregar workspaces
-            (data.workspaces || data.items || []).forEach(workspace => {
+            const workspaces = data.workspaces || data.items || [];
+            console.log('🏢 Workspaces a agregar:', workspaces.length);
+            
+            workspaces.forEach(workspace => {
                 const option = document.createElement('option');
                 option.value = workspace.clickup_id;
                 option.textContent = workspace.name;
                 workspaceSelect.appendChild(option);
+                console.log('✅ Workspace agregado:', workspace.name, 'ID:', workspace.clickup_id);
             });
             
             // Agregar event listener para cargar listas y usuarios cuando se seleccione un workspace
             workspaceSelect.addEventListener('change', async function() {
                 const workspaceId = this.value;
+                console.log('🔄 Workspace seleccionado:', workspaceId);
                 if (workspaceId) {
                     await loadListsForWorkspace(workspaceId);
                     await loadUsersForWorkspace(workspaceId);
@@ -526,54 +541,81 @@ async function loadWorkspacesForTask() {
                     assigneeSelect.innerHTML = '<option value="">Sin asignar</option>';
                 }
             });
+            
+            console.log('✅ Workspaces cargados exitosamente');
+        } else {
+            console.error('❌ Error en respuesta del servidor:', response.status, response.statusText);
         }
     } catch (error) {
-        console.error('Error cargando workspaces para tarea:', error);
+        console.error('❌ Error cargando workspaces para tarea:', error);
     }
 }
 
 async function loadListsForWorkspace(workspaceId) {
     try {
+        console.log('📋 Cargando listas para workspace:', workspaceId);
         const response = await fetch(`/api/v1/workspaces/${workspaceId}/spaces`);
+        console.log('📡 Respuesta spaces:', response.status, response.statusText);
+        
         if (response.ok) {
             const data = await response.json();
+            console.log('📊 Spaces recibidos:', data);
+            
             const listSelect = document.getElementById('task-list');
             
             // Limpiar opciones existentes
             listSelect.innerHTML = '<option value="">Seleccionar lista...</option>';
             
             // Para cada space, obtener sus listas
+            console.log('🔄 Procesando', data.spaces.length, 'spaces');
             for (const space of data.spaces) {
                 try {
+                    console.log('📋 Cargando listas para space:', space.name, space.id);
                     const listsResponse = await fetch(`/api/v1/spaces/${space.id}/lists`);
+                    console.log('📡 Respuesta listas:', listsResponse.status, listsResponse.statusText);
+                    
                     if (listsResponse.ok) {
                         const listsData = await listsResponse.json();
+                        console.log('📊 Listas recibidas:', listsData);
+                        
                         listsData.lists.forEach(list => {
                             const option = document.createElement('option');
                             option.value = list.id;
                             option.textContent = `${space.name} - ${list.name}`;
                             listSelect.appendChild(option);
+                            console.log('✅ Lista agregada:', list.name);
                         });
+                    } else {
+                        console.error('❌ Error obteniendo listas del space:', space.id);
                     }
                 } catch (error) {
-                    console.error(`Error cargando listas para space ${space.id}:`, error);
+                    console.error(`❌ Error cargando listas para space ${space.id}:`, error);
                 }
             }
+            console.log('✅ Listas cargadas exitosamente');
+        } else {
+            console.error('❌ Error obteniendo spaces del workspace:', workspaceId);
         }
     } catch (error) {
-        console.error('Error cargando listas para workspace:', error);
+        console.error('❌ Error cargando listas para workspace:', error);
     }
 }
 
 async function loadUsersForWorkspace(workspaceId) {
     try {
+        console.log('👥 Cargando usuarios para workspace:', workspaceId);
         const response = await fetch(`/api/v1/users/?workspace_id=${workspaceId}`);
+        console.log('📡 Respuesta usuarios:', response.status, response.statusText);
+        
         if (response.ok) {
             const data = await response.json();
+            console.log('📊 Usuarios recibidos:', data);
+            
             const assigneeSelect = document.getElementById('task-assignee');
             assigneeSelect.innerHTML = '<option value="">Sin asignar</option>';
             
             if (data.users && data.users.length > 0) {
+                console.log('👥 Procesando', data.users.length, 'usuarios');
                 data.users.forEach(user => {
                     // Construir nombre completo
                     let displayName = '';
@@ -593,8 +635,11 @@ async function loadUsersForWorkspace(workspaceId) {
                     option.value = user.clickup_id;
                     option.textContent = displayName;
                     assigneeSelect.appendChild(option);
+                    console.log('✅ Usuario agregado:', displayName);
                 });
+                console.log('✅ Usuarios cargados exitosamente');
             } else {
+                console.log('⚠️ No hay usuarios disponibles');
                 // Si no hay usuarios, agregar un mensaje informativo
                 const option = document.createElement('option');
                 option.value = "";
@@ -603,12 +648,12 @@ async function loadUsersForWorkspace(workspaceId) {
                 assigneeSelect.appendChild(option);
             }
         } else {
-            console.error('Error en respuesta del servidor:', response.status);
+            console.error('❌ Error en respuesta del servidor:', response.status);
             const assigneeSelect = document.getElementById('task-assignee');
             assigneeSelect.innerHTML = '<option value="">Error cargando usuarios</option>';
         }
     } catch (error) {
-        console.error('Error cargando usuarios del workspace:', error);
+        console.error('❌ Error cargando usuarios del workspace:', error);
         const assigneeSelect = document.getElementById('task-assignee');
         assigneeSelect.innerHTML = '<option value="">Error de conexión</option>';
     }
