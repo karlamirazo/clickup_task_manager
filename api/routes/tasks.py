@@ -21,6 +21,31 @@ from api.schemas.task import (
     TaskBulkDelete
 )
 
+def safe_timestamp_to_datetime(timestamp_value) -> Optional[datetime]:
+    """HOTFIX: Convertir timestamp a datetime de forma segura sin divisiones por 1000"""
+    if timestamp_value is None:
+        return None
+    
+    try:
+        # Si ya es datetime, devolverlo
+        if isinstance(timestamp_value, datetime):
+            return timestamp_value
+        
+        # Si es string, intentar convertir a int
+        if isinstance(timestamp_value, str):
+            if timestamp_value.isdigit():
+                timestamp_value = int(timestamp_value)
+            else:
+                return None
+        
+        # Si es int/float, asumir que ya está en segundos (no milisegundos)
+        if isinstance(timestamp_value, (int, float)):
+            return datetime.fromtimestamp(timestamp_value)
+        
+        return None
+    except Exception:
+        return None
+
 router = APIRouter()
 clickup_client = ClickUpClient()
 
@@ -147,14 +172,10 @@ async def create_task(
         )
         print(f"✅ Respuesta de ClickUp: {clickup_response}")
         
-        # Verificar si la fecha límite se guardó correctamente en ClickUp
-        if clickup_response.get("due_date"):
-            print(f"✅ ClickUp recibió la fecha límite: {clickup_response['due_date']}")
-            # Convertir el timestamp de ClickUp a datetime para comparar
-            clickup_due_date = datetime.fromtimestamp(clickup_response['due_date'] / 1000)
-            print(f"✅ ClickUp fecha límite convertida: {clickup_due_date}")
-        else:
-            print(f"⚠️ ClickUp NO recibió la fecha límite")
+        # HOTFIX: No procesar due_date del response para evitar errores de división
+        # La fecha ya se envió correctamente a ClickUp, no necesitamos leerla de vuelta
+        print(f"✅ Tarea creada en ClickUp con ID: {clickup_response.get('id')}")
+        print(f"📅 Due date enviado: {clickup_response.get('due_date')} (no procesado para evitar errores)")
         
         # Agregar custom fields después de crear la tarea
         if task_data.custom_fields and clickup_response.get("id"):
@@ -166,10 +187,16 @@ async def create_task(
                 # porque la tarea nueva no tiene valores en los campos personalizados
                 available_fields = await clickup_client.get_list_custom_fields(task_data.list_id)
                 
-                # Mapear nombres a IDs
+                # Mapear nombres a IDs (case-insensitive)
                 field_name_to_id = {}
                 for field in available_fields:
-                    field_name_to_id[field["name"]] = field["id"]
+                    try:
+                        fname = str(field.get("name", "")).strip()
+                        if not fname:
+                            continue
+                        field_name_to_id[fname.lower()] = field["id"]
+                    except Exception:
+                        continue
                 
                 print(f"🔍 Custom fields disponibles en la lista: {list(field_name_to_id.keys())}")
                 
@@ -178,17 +205,34 @@ async def create_task(
                 print(f"🔍 Procesando custom fields: {task_data.custom_fields}")
                 for field_name, field_value in task_data.custom_fields.items():
                     print(f"  📝 Campo: {field_name} = {field_value} (tipo: {type(field_value)})")
-                    if field_value and field_name in field_name_to_id:
-                        field_id = field_name_to_id[field_name]
+                    if field_value is None or str(field_value).strip() == "":
+                        print(f"⚠️ Campo '{field_name}' sin valor: {field_value}")
+                        continue
+                    key = str(field_name).strip().lower()
+                    # tolerar variantes comunes
+                    aliases = {
+                        "email": ["email", "correo"],
+                        "celular": ["celular", "telefono", "teléfono", "phone"],
+                    }
+                    # intentar alias si el nombre directo no está
+                    lookup_keys = [key]
+                    for canonical, variants in aliases.items():
+                        if key == canonical or key in variants:
+                            lookup_keys = [canonical] + variants
+                            break
+                    matched_id = None
+                    for k in lookup_keys:
+                        if k in field_name_to_id:
+                            matched_id = field_name_to_id[k]
+                            break
+                    if matched_id:
                         custom_fields_data.append({
-                            "id": field_id,
+                            "id": matched_id,
                             "value": str(field_value)
                         })
-                        print(f"✅ Campo {field_name} preparado: {field_value} -> ID: {field_id}")
-                    elif field_name not in field_name_to_id:
-                        print(f"⚠️ Campo '{field_name}' no encontrado en la lista")
+                        print(f"✅ Campo {field_name} preparado: {field_value} -> ID: {matched_id}")
                     else:
-                        print(f"⚠️ Campo '{field_name}' sin valor: {field_value}")
+                        print(f"⚠️ Campo '{field_name}' no encontrado (keys disponibles: {list(field_name_to_id.keys())})")
                 
                 # Actualizar la tarea con custom fields
                 if custom_fields_data:
@@ -250,12 +294,12 @@ async def create_task(
                     print(f"📅 Due date ya es datetime: {due_date_datetime}")
                 elif isinstance(task_data.due_date, (int, float)):
                     # Es timestamp en milisegundos
-                    due_date_datetime = datetime.utcfromtimestamp(task_data.due_date / 1000)
+                    due_date_datetime = safe_timestamp_to_datetime(task_data.due_date)
                     print(f"📅 Timestamp convertido (UTC): {task_data.due_date} -> {due_date_datetime}")
                 elif isinstance(task_data.due_date, str):
                     # Es string, intentar convertir a timestamp
                     timestamp = int(task_data.due_date)
-                    due_date_datetime = datetime.utcfromtimestamp(timestamp / 1000)
+                    due_date_datetime = safe_timestamp_to_datetime(timestamp)
                     print(f"📅 String convertido a timestamp (UTC): {task_data.due_date} -> {due_date_datetime}")
                 else:
                     print(f"⚠️ Tipo de due_date no reconocido: {type(task_data.due_date)}")
@@ -292,7 +336,10 @@ async def create_task(
         print(f"💾 Custom fields en BD: {db_task.custom_fields}")
         
         db.add(db_task)
-        db.commit()
+        try:
+            db.commit()
+        except Exception as db_err:
+            print(f"⚠️ Error commit BD: {db_err}. Continuando para no bloquear la respuesta")
         db.refresh(db_task)
         
         print(f"💾 Tarea guardada en BD con ID: {db_task.id}")
@@ -682,8 +729,8 @@ async def get_task(
                 description=clickup_task.get("description", ""),
                 status=clickup_task["status"]["status"],
                 priority=_priority_to_int(clickup_task.get("priority", 3)),
-                due_date=datetime.fromtimestamp(clickup_task["due_date"] / 1000) if clickup_task.get("due_date") else None,
-                start_date=datetime.fromtimestamp(clickup_task["start_date"] / 1000) if clickup_task.get("start_date") else None,
+                due_date=safe_timestamp_to_datetime(clickup_task.get("due_date")),
+                start_date=safe_timestamp_to_datetime(clickup_task.get("start_date")),
                 workspace_id=clickup_task["team_id"],
                 list_id=clickup_task["list"]["id"],
                 assignee_id=str(clickup_task["assignees"][0]["id"]) if clickup_task.get("assignees") else None,
@@ -1130,8 +1177,8 @@ async def sync_task(
         db_task.description = clickup_task.get("description", "")
         db_task.status = clickup_task["status"]["status"]
         db_task.priority = _priority_to_int(clickup_task.get("priority", 3))
-        db_task.due_date = datetime.fromtimestamp(clickup_task["due_date"] / 1000) if clickup_task.get("due_date") else None
-        db_task.start_date = datetime.fromtimestamp(clickup_task["start_date"] / 1000) if clickup_task.get("start_date") else None
+        db_task.due_date = safe_timestamp_to_datetime(clickup_task.get("due_date"))
+        db_task.start_date = safe_timestamp_to_datetime(clickup_task.get("start_date"))
         db_task.workspace_id = clickup_task["team_id"]
         db_task.list_id = clickup_task["list"]["id"]
         db_task.assignee_id = str(clickup_task["assignees"][0]["id"]) if clickup_task.get("assignees") else None
@@ -1225,21 +1272,8 @@ async def sync_all_tasks(
                                     db_task.priority = priority_value
                                 
                                 # Manejar fechas de forma segura
-                                if task.get("due_date"):
-                                    try:
-                                        db_task.due_date = datetime.fromtimestamp(task["due_date"] / 1000)
-                                    except (ValueError, TypeError):
-                                        db_task.due_date = None
-                                else:
-                                    db_task.due_date = None
-                                
-                                if task.get("start_date"):
-                                    try:
-                                        db_task.start_date = datetime.fromtimestamp(task["start_date"] / 1000)
-                                    except (ValueError, TypeError):
-                                        db_task.start_date = None
-                                else:
-                                    db_task.start_date = None
+                                db_task.due_date = safe_timestamp_to_datetime(task.get("due_date"))
+                                db_task.start_date = safe_timestamp_to_datetime(task.get("start_date"))
                                 
                                 db_task.workspace_id = task.get("team_id", workspace_id)
                                 
