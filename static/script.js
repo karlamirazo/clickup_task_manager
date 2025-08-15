@@ -3,6 +3,14 @@ let currentTab = 'dashboard';
 let tasks = [];
 let workspaces = [];
 
+// Función para asegurar URLs HTTPS
+function ensureHttpsUrl(path) {
+    if (window.location.protocol === 'https:' && path.startsWith('/')) {
+        return `https://${window.location.host}${path}`;
+    }
+    return path;
+}
+
 // Variables globales para reportes
 let reportCharts = {};
 
@@ -496,7 +504,7 @@ async function showCreateTaskModal() {
 async function loadWorkspacesForTask() {
     try {
         console.log('🔄 Iniciando carga de workspaces para tarea...');
-        const response = await fetch('/api/v1/workspaces');
+        const response = await fetch(ensureHttpsUrl('/api/v1/workspaces'));
         console.log('📡 Respuesta del servidor:', response.status, response.statusText);
         
         if (response.ok) {
@@ -554,7 +562,7 @@ async function loadWorkspacesForTask() {
 async function loadListsForWorkspace(workspaceId) {
     try {
         console.log('📋 Cargando listas para workspace:', workspaceId);
-        const response = await fetch(`/api/v1/workspaces/${workspaceId}/spaces`);
+        const response = await fetch(ensureHttpsUrl(`/api/v1/workspaces/${workspaceId}/spaces`));
         console.log('📡 Respuesta spaces:', response.status, response.statusText);
         
         if (response.ok) {
@@ -571,7 +579,7 @@ async function loadListsForWorkspace(workspaceId) {
             for (const space of data.spaces) {
                 try {
                     console.log('📋 Cargando listas para space:', space.name, space.id);
-                    const listsResponse = await fetch(`/api/v1/spaces/${space.id}/lists`);
+                    const listsResponse = await fetch(ensureHttpsUrl(`/api/v1/spaces/${space.id}/lists`));
                     console.log('📡 Respuesta listas:', listsResponse.status, listsResponse.statusText);
                     
                     if (listsResponse.ok) {
@@ -604,7 +612,7 @@ async function loadListsForWorkspace(workspaceId) {
 async function loadUsersForWorkspace(workspaceId) {
     try {
         console.log('👥 Cargando usuarios para workspace:', workspaceId);
-        const response = await fetch(`/api/v1/users/?workspace_id=${workspaceId}`);
+        const response = await fetch(ensureHttpsUrl(`/api/v1/users/?workspace_id=${workspaceId}`));
         console.log('📡 Respuesta usuarios:', response.status, response.statusText);
         
         if (response.ok) {
