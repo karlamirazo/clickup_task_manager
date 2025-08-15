@@ -8,8 +8,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
 from api.routes import tasks, workspaces, lists, users, automation, reports, integrations, spaces, webhooks, dashboard, search
 from core.config import settings
@@ -39,29 +37,20 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Agregar middleware de seguridad HTTPS en producción
-import os
-if os.getenv("RAILWAY_ENVIRONMENT_NAME"):  # Detectar Railway
-    print("🚂 Detectado Railway - Configurando middleware de seguridad HTTPS")
+# Agregar headers de seguridad HTTPS
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
     
-    # Middleware para hosts confiables
-    app.add_middleware(
-        TrustedHostMiddleware, 
-        allowed_hosts=["clickuptaskmanager-production.up.railway.app", "*.up.railway.app"]
-    )
-    
-    # Middleware para forzar HTTPS (solo en Railway)
-    # app.add_middleware(HTTPSRedirectMiddleware)  # Comentado por ahora para evitar loops
-    
-    # Middleware personalizado para headers de seguridad
-    @app.middleware("http")
-    async def add_security_headers(request: Request, call_next):
-        response = await call_next(request)
+    # Solo agregar headers de seguridad en producción (Railway)
+    if "railway.app" in str(request.url):
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         response.headers["Content-Security-Policy"] = "upgrade-insecure-requests"
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
-        return response
+        print("🔒 Headers de seguridad HTTPS aplicados")
+    
+    return response
 
 # Configurar CORS
 app.add_middleware(
