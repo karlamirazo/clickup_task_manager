@@ -92,8 +92,15 @@ class ClickUpClient:
     # Métodos para Workspaces (Teams en ClickUp)
     async def get_workspaces(self) -> List[Dict]:
         """Obtener todos los workspaces (teams en ClickUp)"""
-        response = await self._make_request("GET", "team", params={"include_archived": "false"})
-        return response.get("teams", [])
+        # Probar primero con el endpoint correcto de ClickUp API v2
+        try:
+            response = await self._make_request("GET", "workspace")
+            return response.get("workspaces", [])
+        except Exception as e:
+            # Fallback al endpoint anterior si falla
+            logger.warning(f"⚠️ Endpoint 'workspace' falló, probando 'team': {e}")
+            response = await self._make_request("GET", "team", params={"include_archived": "false"})
+            return response.get("teams", [])
     
     async def get_teams(self) -> List[Dict]:
         """Obtener todos los teams (alias de get_workspaces)"""
