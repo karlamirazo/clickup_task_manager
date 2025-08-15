@@ -5,9 +5,11 @@ let workspaces = [];
 
 // Función para asegurar URLs HTTPS
 function ensureHttpsUrl(path) {
-    if (window.location.protocol === 'https:' && path.startsWith('/')) {
+    // En producción, forzar HTTPS completo
+    if (window.location.host.includes('railway.app')) {
         return `https://${window.location.host}${path}`;
     }
+    // En desarrollo local, mantener relativo
     return path;
 }
 
@@ -504,7 +506,12 @@ async function showCreateTaskModal() {
 async function loadWorkspacesForTask() {
     try {
         console.log('🔄 Iniciando carga de workspaces para tarea...');
-        const response = await fetch(ensureHttpsUrl('/api/v1/workspaces'));
+        // Forzar HTTPS absoluto para evitar Mixed Content
+        const url = window.location.protocol === 'https:' 
+            ? `https://${window.location.host}/api/v1/workspaces`
+            : '/api/v1/workspaces';
+        console.log('🌐 URL generada:', url);
+        const response = await fetch(url);
         console.log('📡 Respuesta del servidor:', response.status, response.statusText);
         
         if (response.ok) {
@@ -562,7 +569,11 @@ async function loadWorkspacesForTask() {
 async function loadListsForWorkspace(workspaceId) {
     try {
         console.log('📋 Cargando listas para workspace:', workspaceId);
-        const response = await fetch(ensureHttpsUrl(`/api/v1/workspaces/${workspaceId}/spaces`));
+        const url = window.location.protocol === 'https:' 
+            ? `https://${window.location.host}/api/v1/workspaces/${workspaceId}/spaces`
+            : `/api/v1/workspaces/${workspaceId}/spaces`;
+        console.log('🌐 URL spaces generada:', url);
+        const response = await fetch(url);
         console.log('📡 Respuesta spaces:', response.status, response.statusText);
         
         if (response.ok) {
@@ -579,7 +590,10 @@ async function loadListsForWorkspace(workspaceId) {
             for (const space of data.spaces) {
                 try {
                     console.log('📋 Cargando listas para space:', space.name, space.id);
-                    const listsResponse = await fetch(ensureHttpsUrl(`/api/v1/spaces/${space.id}/lists`));
+                    const listsUrl = window.location.protocol === 'https:' 
+                        ? `https://${window.location.host}/api/v1/spaces/${space.id}/lists`
+                        : `/api/v1/spaces/${space.id}/lists`;
+                    const listsResponse = await fetch(listsUrl);
                     console.log('📡 Respuesta listas:', listsResponse.status, listsResponse.statusText);
                     
                     if (listsResponse.ok) {
@@ -612,7 +626,11 @@ async function loadListsForWorkspace(workspaceId) {
 async function loadUsersForWorkspace(workspaceId) {
     try {
         console.log('👥 Cargando usuarios para workspace:', workspaceId);
-        const response = await fetch(ensureHttpsUrl(`/api/v1/users/?workspace_id=${workspaceId}`));
+        const url = window.location.protocol === 'https:' 
+            ? `https://${window.location.host}/api/v1/users/?workspace_id=${workspaceId}`
+            : `/api/v1/users/?workspace_id=${workspaceId}`;
+        console.log('🌐 URL users generada:', url);
+        const response = await fetch(url);
         console.log('📡 Respuesta usuarios:', response.status, response.statusText);
         
         if (response.ok) {
