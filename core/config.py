@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     PORT: int = int(os.getenv("PORT", "3000"))
     
     # Configuración de ClickUp API
-    CLICKUP_API_TOKEN: str = os.getenv("CLICKUP_API_TOKEN", "pk_156221125_XB0BCWQCZ1ML1W7S88M0RCHX6WIZFY7O")
+    CLICKUP_API_TOKEN: str = os.getenv("CLICKUP_API_TOKEN", "")
     CLICKUP_WEBHOOK_SECRET: str = os.getenv("CLICKUP_WEBHOOK_SECRET", "")
     
     # Configuración de autenticación
@@ -39,7 +39,9 @@ class Settings(BaseSettings):
         "http://localhost:3000",
         "http://localhost:8000",
         "http://127.0.0.1:3000",
-        "http://127.0.0.1:8000"
+        "http://127.0.0.1:8000",
+        "https://clickuptaskmanager-production.up.railway.app",
+        "https://*.up.railway.app"
     ]
     
     # Configuración de seguridad
@@ -60,9 +62,6 @@ class Settings(BaseSettings):
     
     # Configuración de integraciones
     INTEGRATIONS_ENABLED: bool = os.getenv("INTEGRATIONS_ENABLED", "True").lower() == "true"
-    
-    # Motor de búsqueda RAG (deshabilitado por defecto en producción)
-    SEARCH_ENGINE_ENABLED: bool = os.getenv("SEARCH_ENGINE_ENABLED", "False").lower() == "true"
 
     # Configuración de Email (SMTP)
     SMTP_HOST: str = os.getenv("SMTP_HOST", "smtp.gmail.com")
@@ -78,14 +77,20 @@ class Settings(BaseSettings):
     TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
     TELEGRAM_CHAT_ID: str = os.getenv("TELEGRAM_CHAT_ID", "")  # Chat ID por defecto (opcional)
 
-    # SMS deshabilitado: Twilio removido
-    SMS_ENABLED: bool = False
+    # Configuración de SMS (Twilio) - ELIMINADO
+    SMS_ENABLED: bool = os.getenv("SMS_ENABLED", "False").lower() == "true"
+    # TWILIO_ACCOUNT_SID: str = os.getenv("TWILIO_ACCOUNT_SID", "") # Eliminado
+    # TWILIO_AUTH_TOKEN: str = os.getenv("TWILIO_AUTH_TOKEN", "") # Eliminado
+    # TWILIO_SMS_FROM: str = os.getenv("TWILIO_SMS_FROM", "") # Eliminado
 
     # Campos personalizados de ClickUp para obtener destinatarios desde tareas
     # Coma-separados; pueden ser nombres de campo o IDs de campo
     TASK_EMAIL_FIELDS: str = os.getenv("TASK_EMAIL_FIELDS", "Email")
     TASK_TELEGRAM_FIELDS: str = os.getenv("TASK_TELEGRAM_FIELDS", "")  # CAMPO ELIMINADO - Telegram deshabilitado
-    TASK_SMS_FIELDS: str = ""  # Sin campos SMS
+    TASK_SMS_FIELDS: str = os.getenv("TASK_SMS_FIELDS", "")  # Campo eliminado - SMS deshabilitado
+    
+    # Configuración del motor de búsqueda RAG
+    SEARCH_ENGINE_ENABLED: bool = os.getenv("SEARCH_ENGINE_ENABLED", "False").lower() == "true"
     
     class Config:
         env_file = ".env"

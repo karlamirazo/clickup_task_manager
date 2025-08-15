@@ -18,7 +18,7 @@ class ClickUpClient:
         self.api_token = api_token or settings.CLICKUP_API_TOKEN
         self.base_url = settings.CLICKUP_API_BASE_URL
         self.headers = {
-            "Authorization": self.api_token,
+            "Authorization": f"Bearer {self.api_token}",  # ClickUp requiere Bearer + token
             "Content-Type": "application/json"
         }
     
@@ -36,6 +36,13 @@ class ClickUpClient:
         """
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
         
+        # Validar que tenemos un token
+        if not self.api_token:
+            logger.error("❌ No se proporcionó token de ClickUp API")
+            raise ValueError("CLICKUP_API_TOKEN no está configurado")
+        
+        logger.info(f"🔗 Haciendo petición a ClickUp API: {method} {url}")
+        
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.request(
@@ -43,9 +50,16 @@ class ClickUpClient:
                     url=url,
                     headers=self.headers,
                     json=data,
-                    params=params
+                    params=params,
+                    timeout=aiohttp.ClientTimeout(total=30)
                 ) as response:
-                    response.raise_for_status()
+                    logger.info(f"📡 Respuesta de ClickUp API: {response.status}")
+                    
+                    if response.status >= 400:
+                        error_text = await response.text()
+                        logger.error(f"❌ Error en ClickUp API ({response.status}): {error_text}")
+                        response.raise_for_status()
+                    
                     # Evitar parsear JSON para respuestas sin contenido o no-JSON
                     method_upper = method.upper()
                     content_type = response.headers.get("Content-Type", "")
@@ -57,16 +71,38 @@ class ClickUpClient:
                     if not content_type.startswith("application/json"):
                         # Algunos endpoints devuelven texto; no necesitamos su cuerpo
                         return {}
-                    return await response.json()
+                    
+                    result = await response.json()
+                    logger.info(f"✅ Petición exitosa a ClickUp API")
+                    return result
+                    
             except aiohttp.ClientError as e:
-                logger.error(f"Error en petición a ClickUp API: {e}")
+                logger.error(f"❌ Error de conexión a ClickUp API: {e}")
+                raise
+            except asyncio.TimeoutError:
+                logger.error(f"❌ Timeout en petición a ClickUp API: {url}")
+                raise
+            except Exception as e:
+                logger.error(f"❌ Error inesperado en petición a ClickUp API: {e}")
                 raise
     
-    # Métodos para Workspaces
+    # Métodos para Workspaces (Teams en ClickUp)
     async def get_workspaces(self) -> List[Dict]:
-        """Obtener todos los workspaces"""
+        """Obtener todos los workspaces (teams en ClickUp)"""
         response = await self._make_request("GET", "team")
         return response.get("teams", [])
+    
+    async def get_teams(self) -> List[Dict]:
+        """Obtener todos los teams (alias de get_workspaces)"""
+        return await self.get_workspaces()
+    
+    # Métodos para Usuario
+    async def get_user(self, user_id: str = None) -> Dict:
+        """Obtener información del usuario actual o un usuario específico"""
+        if user_id is not None:
+            return await self._make_request("GET", f"user/{user_id}")
+        else:
+            return await self._make_request("GET", "user")
     
     async def get_workspace(self, workspace_id: str) -> Dict:
         """Obtener un workspace específico"""
@@ -251,9 +287,7 @@ class ClickUpClient:
             "workspaces": {}
         }]
     
-    async def get_user(self, user_id: str) -> Dict:
-        """Obtener un usuario específico"""
-        return await self._make_request("GET", f"user/{user_id}")
+    # Método get_user ya definido anteriormente con parámetro opcional
     
     # Métodos para Comments
     async def get_task_comments(self, task_id: str) -> List[Dict]:
