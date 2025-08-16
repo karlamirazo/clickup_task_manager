@@ -95,12 +95,48 @@ async def root():
 
 @app.get("/api")
 async def api_root():
-    """Endpoint raíz de la API"""
-    return {
-        "message": "ClickUp Project Manager - Agente Inteligente",
-        "version": "1.0.0",
-        "status": "running"
-    }
+    """Endpoint raíz de la API con información de debug"""
+    import os
+    from core.database import engine
+    
+    try:
+        # Información básica de configuración
+        config_status = {
+            "CLICKUP_API_TOKEN": "✅ Configurado" if os.getenv("CLICKUP_API_TOKEN") else "❌ No configurado",
+            "DATABASE_URL": "✅ Configurado" if os.getenv("DATABASE_URL") else "❌ No configurado",
+            "ENVIRONMENT": os.getenv("ENVIRONMENT", "development")
+        }
+        
+        # Información de la base de datos
+        db_status = "❌ No disponible"
+        db_type = "Desconocido"
+        
+        try:
+            if engine:
+                db_type = "PostgreSQL" if "postgresql" in str(engine.url) else "SQLite"
+                db_status = "✅ Conectado"
+        except Exception as e:
+            db_status = f"❌ Error: {str(e)}"
+        
+        return {
+            "message": "ClickUp Project Manager - Agente Inteligente",
+            "version": "1.0.0",
+            "status": "running",
+            "debug_info": {
+                "configuration": config_status,
+                "database": {
+                    "type": db_type,
+                    "status": db_status
+                }
+            }
+        }
+    except Exception as e:
+        return {
+            "message": "ClickUp Project Manager - Agente Inteligente",
+            "version": "1.0.0",
+            "status": "error",
+            "error": str(e)
+        }
 
 @app.get("/debug")
 async def debug_info():
