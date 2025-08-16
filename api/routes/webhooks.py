@@ -133,8 +133,24 @@ class WebhookProcessor:
             description=task_data.get("description", ""),
             status=task_data.get("status", {}).get("status", "open"),
             priority=_priority_to_int(task_data.get("priority", 3)),
-            due_date=datetime.fromtimestamp(task_data["due_date"] / 1000) if task_data.get("due_date") else None,
-            start_date=datetime.fromtimestamp(task_data["start_date"] / 1000) if task_data.get("start_date") else None,
+            due_date=(
+                (lambda _v: (
+                    datetime.fromtimestamp(_v / 1000)
+                    if isinstance(_v, (int, float))
+                    else (datetime.fromtimestamp(int(_v) / 1000) if isinstance(_v, str) and _v.isdigit() else None)
+                ))(task_data.get("due_date"))
+                if task_data.get("due_date") is not None
+                else None
+            ),
+            start_date=(
+                (lambda _v: (
+                    datetime.fromtimestamp(_v / 1000)
+                    if isinstance(_v, (int, float))
+                    else (datetime.fromtimestamp(int(_v) / 1000) if isinstance(_v, str) and _v.isdigit() else None)
+                ))(task_data.get("start_date"))
+                if task_data.get("start_date") is not None
+                else None
+            ),
             workspace_id=task_data.get("team_id", ""),
             list_id=task_data.get("list", {}).get("id", ""),
             assignee_id=str(task_data["assignees"][0]["id"]) if task_data.get("assignees") else None,
@@ -170,12 +186,18 @@ class WebhookProcessor:
         
         # Dates
         if task_data.get("due_date"):
-            local_task.due_date = datetime.fromtimestamp(task_data["due_date"] / 1000)
+            _dv = task_data.get("due_date")
+            local_task.due_date = (
+                datetime.fromtimestamp(_dv / 1000) if isinstance(_dv, (int, float)) else (datetime.fromtimestamp(int(_dv) / 1000) if isinstance(_dv, str) and _dv.isdigit() else None)
+            )
         elif "due_date" in task_data:  # null/None value
             local_task.due_date = None
             
         if task_data.get("start_date"):
-            local_task.start_date = datetime.fromtimestamp(task_data["start_date"] / 1000)
+            _sv = task_data.get("start_date")
+            local_task.start_date = (
+                datetime.fromtimestamp(_sv / 1000) if isinstance(_sv, (int, float)) else (datetime.fromtimestamp(int(_sv) / 1000) if isinstance(_sv, str) and _sv.isdigit() else None)
+            )
         elif "start_date" in task_data:  # null/None value
             local_task.start_date = None
         

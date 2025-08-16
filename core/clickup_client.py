@@ -18,7 +18,7 @@ class ClickUpClient:
         self.api_token = api_token or settings.CLICKUP_API_TOKEN
         self.base_url = settings.CLICKUP_API_BASE_URL
         self.headers = {
-            "Authorization": self.api_token,  # ClickUp requiere el token directo, no Bearer
+            "Authorization": self.api_token,  # ClickUp usa token directo (sin Bearer)
             "Content-Type": "application/json"
         }
     
@@ -42,6 +42,9 @@ class ClickUpClient:
             raise ValueError("CLICKUP_API_TOKEN no está configurado")
         
         logger.info(f"🔗 Haciendo petición a ClickUp API: {method} {url}")
+        logger.info(f"🔑 Headers: {self.headers}")
+        if params:
+            logger.info(f"📋 Parámetros: {params}")
         
         async with aiohttp.ClientSession() as session:
             try:

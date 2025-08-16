@@ -3,6 +3,50 @@ let currentTab = 'dashboard';
 let tasks = [];
 let workspaces = [];
 
+// Interceptor de fetch para forzar HTTPS en Railway
+if (window.location.hostname.includes('railway.app')) {
+    console.log('🚂 Aplicando interceptor de fetch para Railway...');
+    
+    // Guardar el fetch original
+    const originalFetch = window.fetch;
+    
+    // Crear interceptor personalizado
+    window.fetch = function(url, options = {}) {
+        // Convertir URL a string si es necesario
+        let urlString = url.toString();
+        
+        console.log('🔍 Interceptando fetch para URL:', urlString);
+        
+        // Si la URL es HTTP, convertir a HTTPS
+        if (urlString.startsWith('http://')) {
+            urlString = urlString.replace('http://', 'https://');
+            console.log('🔄 URL convertida a HTTPS:', urlString);
+        }
+        
+        // Si la URL es relativa y estamos en Railway, hacerla absoluta HTTPS
+        if (urlString.startsWith('/')) {
+            urlString = `https://${window.location.host}${urlString}`;
+            console.log('🔄 URL relativa convertida a HTTPS absoluta:', urlString);
+        }
+        
+        console.log('📡 Realizando fetch a:', urlString);
+        
+        // Agregar headers para forzar HTTPS
+        const httpsOptions = {
+            ...options,
+            headers: {
+                ...options.headers,
+                'Upgrade-Insecure-Requests': '1'
+            }
+        };
+        
+        // Llamar al fetch original con la URL modificada
+        return originalFetch(urlString, httpsOptions);
+    };
+    
+    console.log('✅ Interceptor de fetch aplicado exitosamente');
+}
+
 // Variables globales para reportes
 let reportCharts = {};
 
@@ -495,12 +539,25 @@ async function showCreateTaskModal() {
 
 async function loadWorkspacesForTask() {
     try {
-        const response = await fetch('/api/v1/workspaces');
+        console.log('🔄 Iniciando carga de workspaces para tarea...');
+        // Usar URL relativa - el interceptor se encarga de HTTPS en Railway
+        const apiUrl = '/api/v1/workspaces';
+        console.log('🌐 Usando URL relativa (interceptor manejará HTTPS):', apiUrl);
+        const response = await fetch(apiUrl);
+        console.log('📡 Respuesta del servidor:', response.status, response.statusText);
+        
         if (response.ok) {
             const data = await response.json();
+            console.log('📊 Datos recibidos:', data);
+            
             const workspaceSelect = document.getElementById('task-workspace');
             const listSelect = document.getElementById('task-list');
             const assigneeSelect = document.getElementById('task-assignee');
+            
+            if (!workspaceSelect) {
+                console.error('❌ No se encontró el elemento task-workspace');
+                return;
+            }
             
             // Limpiar opciones existentes
             workspaceSelect.innerHTML = '<option value="">Seleccionar workspace...</option>';
@@ -508,16 +565,21 @@ async function loadWorkspacesForTask() {
             assigneeSelect.innerHTML = '<option value="">Sin asignar</option>';
             
             // Agregar workspaces
-            (data.workspaces || data.items || []).forEach(workspace => {
+            const workspaces = data.workspaces || data.items || [];
+            console.log('🏢 Workspaces a agregar:', workspaces.length);
+            
+            workspaces.forEach(workspace => {
                 const option = document.createElement('option');
                 option.value = workspace.clickup_id;
                 option.textContent = workspace.name;
                 workspaceSelect.appendChild(option);
+                console.log('✅ Workspace agregado:', workspace.name, 'ID:', workspace.clickup_id);
             });
             
             // Agregar event listener para cargar listas y usuarios cuando se seleccione un workspace
             workspaceSelect.addEventListener('change', async function() {
                 const workspaceId = this.value;
+                console.log('🔄 Workspace seleccionado:', workspaceId);
                 if (workspaceId) {
                     await loadListsForWorkspace(workspaceId);
                     await loadUsersForWorkspace(workspaceId);
@@ -526,54 +588,86 @@ async function loadWorkspacesForTask() {
                     assigneeSelect.innerHTML = '<option value="">Sin asignar</option>';
                 }
             });
+            
+            console.log('✅ Workspaces cargados exitosamente');
+        } else {
+            console.error('❌ Error en respuesta del servidor:', response.status, response.statusText);
         }
     } catch (error) {
-        console.error('Error cargando workspaces para tarea:', error);
+        console.error('❌ Error cargando workspaces para tarea:', error);
     }
 }
 
 async function loadListsForWorkspace(workspaceId) {
     try {
-        const response = await fetch(`/api/v1/workspaces/${workspaceId}/spaces`);
+        console.log('📋 Cargando listas para workspace:', workspaceId);
+        const apiUrl = `/api/v1/workspaces/${workspaceId}/spaces`;
+        console.log('🌐 URL spaces (interceptor manejará HTTPS):', apiUrl);
+        const response = await fetch(apiUrl);
+        console.log('📡 Respuesta spaces:', response.status, response.statusText);
+        
         if (response.ok) {
             const data = await response.json();
+            console.log('📊 Spaces recibidos:', data);
+            
             const listSelect = document.getElementById('task-list');
             
             // Limpiar opciones existentes
             listSelect.innerHTML = '<option value="">Seleccionar lista...</option>';
             
             // Para cada space, obtener sus listas
+            console.log('🔄 Procesando', data.spaces.length, 'spaces');
             for (const space of data.spaces) {
                 try {
-                    const listsResponse = await fetch(`/api/v1/spaces/${space.id}/lists`);
+                    console.log('📋 Cargando listas para space:', space.name, space.id);
+                    const listsUrl = `/api/v1/spaces/${space.id}/lists`;
+                    const listsResponse = await fetch(listsUrl);
+                    console.log('📡 Respuesta listas:', listsResponse.status, listsResponse.statusText);
+                    
                     if (listsResponse.ok) {
                         const listsData = await listsResponse.json();
+                        console.log('📊 Listas recibidas:', listsData);
+                        
                         listsData.lists.forEach(list => {
                             const option = document.createElement('option');
                             option.value = list.id;
                             option.textContent = `${space.name} - ${list.name}`;
                             listSelect.appendChild(option);
+                            console.log('✅ Lista agregada:', list.name);
                         });
+                    } else {
+                        console.error('❌ Error obteniendo listas del space:', space.id);
                     }
                 } catch (error) {
-                    console.error(`Error cargando listas para space ${space.id}:`, error);
+                    console.error(`❌ Error cargando listas para space ${space.id}:`, error);
                 }
             }
+            console.log('✅ Listas cargadas exitosamente');
+        } else {
+            console.error('❌ Error obteniendo spaces del workspace:', workspaceId);
         }
     } catch (error) {
-        console.error('Error cargando listas para workspace:', error);
+        console.error('❌ Error cargando listas para workspace:', error);
     }
 }
 
 async function loadUsersForWorkspace(workspaceId) {
     try {
-        const response = await fetch(`/api/v1/users/?workspace_id=${workspaceId}`);
+        console.log('👥 Cargando usuarios para workspace:', workspaceId);
+        const apiUrl = `/api/v1/users/?workspace_id=${workspaceId}`;
+        console.log('🌐 URL users (interceptor manejará HTTPS):', apiUrl);
+        const response = await fetch(apiUrl);
+        console.log('📡 Respuesta usuarios:', response.status, response.statusText);
+        
         if (response.ok) {
             const data = await response.json();
+            console.log('📊 Usuarios recibidos:', data);
+            
             const assigneeSelect = document.getElementById('task-assignee');
             assigneeSelect.innerHTML = '<option value="">Sin asignar</option>';
             
             if (data.users && data.users.length > 0) {
+                console.log('👥 Procesando', data.users.length, 'usuarios');
                 data.users.forEach(user => {
                     // Construir nombre completo
                     let displayName = '';
@@ -593,8 +687,11 @@ async function loadUsersForWorkspace(workspaceId) {
                     option.value = user.clickup_id;
                     option.textContent = displayName;
                     assigneeSelect.appendChild(option);
+                    console.log('✅ Usuario agregado:', displayName);
                 });
+                console.log('✅ Usuarios cargados exitosamente');
             } else {
+                console.log('⚠️ No hay usuarios disponibles');
                 // Si no hay usuarios, agregar un mensaje informativo
                 const option = document.createElement('option');
                 option.value = "";
@@ -603,12 +700,12 @@ async function loadUsersForWorkspace(workspaceId) {
                 assigneeSelect.appendChild(option);
             }
         } else {
-            console.error('Error en respuesta del servidor:', response.status);
+            console.error('❌ Error en respuesta del servidor:', response.status);
             const assigneeSelect = document.getElementById('task-assignee');
             assigneeSelect.innerHTML = '<option value="">Error cargando usuarios</option>';
         }
     } catch (error) {
-        console.error('Error cargando usuarios del workspace:', error);
+        console.error('❌ Error cargando usuarios del workspace:', error);
         const assigneeSelect = document.getElementById('task-assignee');
         assigneeSelect.innerHTML = '<option value="">Error de conexión</option>';
     }
@@ -743,6 +840,9 @@ async function handleCreateTask(event) {
         custom_fields: Object.keys(customFields).length > 0 ? customFields : null
     };
     
+    console.log('📝 Datos que se enviarán al servidor:', formData);
+    console.log('📧 Custom fields preparados:', customFields);
+    
     try {
         const response = await fetch('/api/v1/tasks/', {
             method: 'POST',
@@ -753,6 +853,9 @@ async function handleCreateTask(event) {
         });
         
         if (response.ok) {
+            const result = await response.json();
+            console.log('✅ Tarea creada exitosamente:', result);
+            
             closeModal('create-task-modal');
             event.target.reset();
             
@@ -760,9 +863,6 @@ async function handleCreateTask(event) {
             document.getElementById('task-email').value = '';
             document.getElementById('task-phone').value = '';
             document.getElementById('task-due-date').value = '';
-            
-            // Mostrar mensaje de éxito
-            showNotification('✅ Tarea creada exitosamente con notificaciones configuradas!', 'success');
             
             // Recargar tareas
             if (currentTab === 'tasks') {
@@ -772,9 +872,12 @@ async function handleCreateTask(event) {
             // Actualizar dashboard
             await loadDashboardData();
             
-            showNotification('Tarea creada exitosamente', 'success');
+            // Mostrar mensaje de éxito (solo uno)
+            showNotification('✅ Tarea creada exitosamente!', 'success');
         } else {
-            showNotification('Error creando tarea', 'error');
+            const errorData = await response.json().catch(() => ({}));
+            console.error('❌ Error del servidor:', response.status, response.statusText, errorData);
+            showNotification(`Error creando tarea: ${errorData.detail || response.statusText}`, 'error');
         }
     } catch (error) {
         console.error('Error creando tarea:', error);

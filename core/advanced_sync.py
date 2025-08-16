@@ -406,10 +406,16 @@ class AdvancedSyncService:
         
         # Dates
         if clickup_data.get("due_date"):
-            local_task.due_date = datetime.fromtimestamp(clickup_data["due_date"] / 1000)
+            _dv = clickup_data.get("due_date")
+            local_task.due_date = (
+                datetime.fromtimestamp(_dv / 1000) if isinstance(_dv, (int, float)) else (datetime.fromtimestamp(int(_dv) / 1000) if isinstance(_dv, str) and _dv.isdigit() else None)
+            )
         
         if clickup_data.get("start_date"):
-            local_task.start_date = datetime.fromtimestamp(clickup_data["start_date"] / 1000)
+            _sv = clickup_data.get("start_date")
+            local_task.start_date = (
+                datetime.fromtimestamp(_sv / 1000) if isinstance(_sv, (int, float)) else (datetime.fromtimestamp(int(_sv) / 1000) if isinstance(_sv, str) and _sv.isdigit() else None)
+            )
         
         # Assignees
         if clickup_data.get("assignees"):
@@ -434,8 +440,24 @@ class AdvancedSyncService:
             description=clickup_data.get("description", ""),
             status=clickup_data["status"]["status"] if clickup_data.get("status") else "open",
             priority=_priority_to_int(clickup_data.get("priority", 3)),
-            due_date=datetime.fromtimestamp(clickup_data["due_date"] / 1000) if clickup_data.get("due_date") else None,
-            start_date=datetime.fromtimestamp(clickup_data["start_date"] / 1000) if clickup_data.get("start_date") else None,
+            due_date=(
+                (lambda _v: (
+                    datetime.fromtimestamp(_v / 1000)
+                    if isinstance(_v, (int, float))
+                    else (datetime.fromtimestamp(int(_v) / 1000) if isinstance(_v, str) and _v.isdigit() else None)
+                ))(clickup_data.get("due_date"))
+                if clickup_data.get("due_date") is not None
+                else None
+            ),
+            start_date=(
+                (lambda _v: (
+                    datetime.fromtimestamp(_v / 1000)
+                    if isinstance(_v, (int, float))
+                    else (datetime.fromtimestamp(int(_v) / 1000) if isinstance(_v, str) and _v.isdigit() else None)
+                ))(clickup_data.get("start_date"))
+                if clickup_data.get("start_date") is not None
+                else None
+            ),
             workspace_id=clickup_data["team_id"],
             list_id=clickup_data["list"]["id"],
             assignee_id=str(clickup_data["assignees"][0]["id"]) if clickup_data.get("assignees") else None,
