@@ -86,6 +86,7 @@ app.include_router(search.router, prefix="/api/v1", tags=["search"])
 #     print("⚠️ Sistema de autenticación no disponible")
 
 from fastapi.responses import FileResponse
+import datetime
 
 @app.get("/")
 async def root():
@@ -98,10 +99,58 @@ async def api_root():
     return {
         "message": "ClickUp Project Manager - Agente Inteligente",
         "version": "1.0.0",
-        "status": "running",
-        "docs": "/docs",
-        "ui": "/"
+        "status": "running"
     }
+
+@app.get("/debug")
+async def debug_info():
+    """Endpoint de debug independiente para verificar el estado del servidor"""
+    import os
+    from core.database import engine
+    
+    try:
+        # Verificar configuración
+        config_info = {
+            "CLICKUP_API_TOKEN": "✅ Configurado" if os.getenv("CLICKUP_API_TOKEN") else "❌ No configurado",
+            "DATABASE_URL": "✅ Configurado" if os.getenv("DATABASE_URL") else "❌ No configurado",
+            "ENVIRONMENT": os.getenv("ENVIRONMENT", "development")
+        }
+        
+        # Verificar base de datos
+        db_info = {}
+        try:
+            if engine:
+                db_info["database_type"] = "PostgreSQL" if "postgresql" in str(engine.url) else "SQLite"
+                db_info["database_status"] = "✅ Conectado"
+            else:
+                db_info["database_status"] = "❌ No disponible"
+        except Exception as e:
+            db_info["database_status"] = f"❌ Error: {str(e)}"
+        
+        # Verificar ClickUp client
+        clickup_info = {}
+        try:
+            from core.clickup_client import ClickUpClient
+            client = ClickUpClient()
+            clickup_info["client_status"] = "✅ Disponible"
+            clickup_info["token_configured"] = "✅ Sí" if client.api_token else "❌ No"
+        except Exception as e:
+            clickup_info["client_status"] = f"❌ Error: {str(e)}"
+        
+        return {
+            "status": "success",
+            "timestamp": str(datetime.datetime.now()),
+            "configuration": config_info,
+            "database": db_info,
+            "clickup_client": clickup_info
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "timestamp": str(datetime.datetime.now())
+        }
 
 @app.get("/health")
 async def health_check():
