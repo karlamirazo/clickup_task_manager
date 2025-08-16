@@ -192,6 +192,21 @@ async def create_task(
         print(f"📋 List ID: {task_data.list_id}")
         print(f"🏢 Workspace ID: {task_data.workspace_id}")
         
+        # Verificar configuración antes de proceder
+        print(f"🔍 Verificando configuración...")
+        print(f"   📝 CLICKUP_API_TOKEN configurado: {bool(clickup_client.api_token)}")
+        print(f"   📝 Token length: {len(clickup_client.api_token) if clickup_client.api_token else 0}")
+        print(f"   📝 Base URL: {clickup_client.base_url}")
+        
+        if not clickup_client.api_token:
+            print(f"❌ ERROR: No hay token de ClickUp configurado")
+            raise HTTPException(
+                status_code=http_status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="CLICKUP_API_TOKEN no está configurado en el servidor"
+            )
+        
+        print(f"✅ Configuración verificada, procediendo con creación...")
+        
         # Crear tarea en ClickUp - solo campos esenciales
         clickup_task_data = {
             "name": task_data.name,
@@ -677,4 +692,57 @@ async def debug_models():
             "error_type": str(type(e)),
             "traceback": traceback.format_exc(),
             "models_status": "❌ Error"
+        }
+
+# ENDPOINT DE DEBUGGING PARA VERIFICAR CONFIGURACIÓN DEL SERVIDOR
+@router.get("/debug-server")
+async def debug_server_config():
+    """Endpoint de debugging para verificar la configuración del servidor"""
+    try:
+        import os
+        from core.config import settings
+        
+        # Obtener variables de entorno
+        env_vars = {
+            "CLICKUP_API_TOKEN": os.getenv("CLICKUP_API_TOKEN", "NO_CONFIGURADO"),
+            "DATABASE_URL": os.getenv("DATABASE_URL", "NO_CONFIGURADO"),
+            "DEBUG": os.getenv("DEBUG", "NO_CONFIGURADO"),
+            "HOST": os.getenv("HOST", "NO_CONFIGURADO"),
+            "PORT": os.getenv("PORT", "NO_CONFIGURADO")
+        }
+        
+        # Verificar configuración de settings
+        settings_info = {
+            "CLICKUP_API_TOKEN_set": bool(settings.CLICKUP_API_TOKEN),
+            "CLICKUP_API_TOKEN_length": len(settings.CLICKUP_API_TOKEN) if settings.CLICKUP_API_TOKEN else 0,
+            "DATABASE_URL": str(settings.DATABASE_URL),
+            "DEBUG": settings.DEBUG,
+            "HOST": settings.HOST,
+            "PORT": settings.PORT
+        }
+        
+        # Verificar cliente ClickUp
+        client_info = {
+            "client_created": True,
+            "token_set": bool(clickup_client.api_token),
+            "token_length": len(clickup_client.api_token) if clickup_client.api_token else 0,
+            "base_url": clickup_client.base_url
+        }
+        
+        return {
+            "message": "🔍 Debug del servidor",
+            "timestamp": str(datetime.now()),
+            "environment_variables": env_vars,
+            "settings_config": settings_info,
+            "clickup_client": client_info,
+            "server_status": "✅ Servidor funcionando"
+        }
+        
+    except Exception as e:
+        import traceback
+        return {
+            "error": f"Error en debug del servidor: {str(e)}",
+            "error_type": str(type(e)),
+            "traceback": traceback.format_exc(),
+            "server_status": "❌ Error en servidor"
         }
