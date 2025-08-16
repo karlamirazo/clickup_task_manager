@@ -5,7 +5,7 @@ Módulo principal de la aplicación
 
 import uvicorn
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -37,6 +37,21 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Agregar headers de seguridad HTTPS
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    
+    # Solo agregar headers de seguridad en producción (Railway)
+    if "railway.app" in str(request.url):
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Content-Security-Policy"] = "upgrade-insecure-requests"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        print("🔒 Headers de seguridad HTTPS aplicados")
+    
+    return response
+
 # Configurar CORS
 app.add_middleware(
     CORSMiddleware,
@@ -50,6 +65,7 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Incluir rutas
+# Ajuste: exponer rutas de tareas bajo /api/v1/tasks para alinear con el frontend
 app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["tasks"])
 app.include_router(workspaces.router, prefix="/api/v1/workspaces", tags=["workspaces"])
 app.include_router(lists.router, prefix="/api/v1/lists", tags=["lists"])

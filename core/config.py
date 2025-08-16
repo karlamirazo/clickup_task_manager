@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     PORT: int = int(os.getenv("PORT", "3000"))
     
     # Configuración de ClickUp API
-    CLICKUP_API_TOKEN: str = os.getenv("CLICKUP_API_TOKEN", "pk_156221125_F8RNYI1M5XOASGLBUF9SFJW16QVNV2P3")
+    CLICKUP_API_TOKEN: str = os.getenv("CLICKUP_API_TOKEN", "")
     CLICKUP_WEBHOOK_SECRET: str = os.getenv("CLICKUP_WEBHOOK_SECRET", "")
     
     # Configuración de autenticación
@@ -41,7 +41,8 @@ class Settings(BaseSettings):
         "http://127.0.0.1:3000",
         "http://127.0.0.1:8000",
         "https://clickuptaskmanager-production.up.railway.app",
-        "https://*.up.railway.app"
+        "https://*.up.railway.app",
+        "*"  # Temporal para debugging - remover en producción
     ]
     
     # Configuración de seguridad

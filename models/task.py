@@ -29,7 +29,7 @@ class Task(Base):
     workspace_id = Column(String(255), nullable=False)
     list_id = Column(String(255), nullable=False)
     assignee_id = Column(String(255), nullable=True)
-    creator_id = Column(String(255), nullable=False)
+    creator_id = Column(String(255), nullable=True, default="system")
     
     # Metadatos
     tags = Column(JSON, nullable=True)  # Lista de etiquetas
