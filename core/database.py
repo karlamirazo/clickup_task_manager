@@ -7,11 +7,25 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from core.config import settings
+import os
+
+def get_database_url():
+    """Obtener URL de base de datos con fallback inteligente"""
+    
+    # Si Railway proporciona DATABASE_URL (PostgreSQL), usarlo
+    if os.getenv("DATABASE_URL"):
+        return os.getenv("DATABASE_URL")
+    
+    # Si no, usar SQLite local
+    return settings.DATABASE_URL
 
 # Crear engine de base de datos
-if settings.DATABASE_URL.startswith("sqlite"):
+database_url = get_database_url()
+
+if database_url.startswith("sqlite"):
+    # Configuración para SQLite
     engine = create_engine(
-        settings.DATABASE_URL,
+        database_url,
         connect_args={
             "check_same_thread": False,
             "timeout": 30
@@ -19,11 +33,18 @@ if settings.DATABASE_URL.startswith("sqlite"):
         poolclass=StaticPool,
         echo=False,  # Desactivar logs SQL para evitar problemas de codificación
     )
+    print("🗄️ Usando base de datos SQLite local")
 else:
+    # Configuración para PostgreSQL
     engine = create_engine(
-        settings.DATABASE_URL,
+        database_url,
         echo=False,  # Desactivar logs SQL para evitar problemas de codificación
+        pool_pre_ping=True,  # Verificar conexión antes de usar
+        pool_recycle=300,    # Reciclar conexiones cada 5 minutos
     )
+    print("🗄️ Usando base de datos PostgreSQL")
+    print(f"🔗 Host: {os.getenv('PGHOST', 'N/A')}")
+    print(f"📊 Base de datos: {os.getenv('PGDATABASE', 'N/A')}")
 
 # Crear sesión de base de datos
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

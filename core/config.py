@@ -30,6 +30,16 @@ class Settings(BaseSettings):
     
     # Configuración de base de datos
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./clickup_manager.db")
+    # Para PostgreSQL: postgresql://user:password@localhost/clickup_manager
+    # Railway automáticamente proporciona DATABASE_URL para PostgreSQL
+    
+    # Configuración específica de PostgreSQL
+    POSTGRES_ENABLED: bool = os.getenv("POSTGRES_ENABLED", "False").lower() == "true"
+    POSTGRES_HOST: str = os.getenv("POSTGRES_HOST", "localhost")
+    POSTGRES_PORT: int = int(os.getenv("POSTGRES_PORT", "5432"))
+    POSTGRES_DB: str = os.getenv("POSTGRES_DB", "clickup_manager")
+    POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
+    POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "")
     
     # Configuración de Redis
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
