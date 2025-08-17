@@ -5,14 +5,48 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from datetime import datetime
-import http_status
+from fastapi import status
+from pydantic import BaseModel
 
 from core.database import get_db
 from core.clickup_client import ClickUpClient, get_clickup_client
 from models.task import Task
-from schemas.task import TaskCreate, TaskResponse
+
+# ===== MODELOS PYDANTIC SIMPLES =====
+class TaskCreate(BaseModel):
+    """Modelo para crear tareas"""
+    name: str
+    description: Optional[str] = None
+    priority: int = 3
+    status: str = "to_do"
+    assignees: List[str] = []
+    due_date: Optional[datetime] = None
+    workspace_id: str
+    list_id: str
+    custom_fields: Dict[str, Any] = {}
+
+class TaskResponse(BaseModel):
+    """Modelo para respuestas de tareas"""
+    id: int
+    clickup_id: str
+    name: str
+    description: Optional[str]
+    status: str
+    priority: int
+    due_date: Optional[datetime]
+    workspace_id: str
+    list_id: str
+    assignee_id: Optional[str]
+    creator_id: Optional[str]
+    custom_fields: Optional[Dict[str, Any]]
+    is_synced: bool
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
 
 router = APIRouter()
 
@@ -43,7 +77,7 @@ def safe_timestamp_to_datetime(timestamp_value) -> Optional[datetime]:
         return None
 
 # ===== FUNCIÓN COMPLETAMENTE NUEVA =====
-@router.post("/", response_model=TaskResponse, status_code=http_status.HTTP_201_CREATED)
+@router.post("/", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
 async def create_task_FINAL_VERSION(
     task_data: TaskCreate,
     db: Session = Depends(get_db),
@@ -61,7 +95,7 @@ async def create_task_FINAL_VERSION(
     if not clickup_client.api_token:
         print(f"❌ ERROR: No hay token de ClickUp configurado")
         raise HTTPException(
-            status_code=http_status.HTTP_503_SERVICE_UNAVAILABLE,
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="CLICKUP_API_TOKEN no está configurado en el servidor"
         )
     
@@ -154,7 +188,7 @@ async def create_task_FINAL_VERSION(
         import traceback
         print(f"❌ Traceback completo: {traceback.format_exc()}")
         raise HTTPException(
-            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error al crear la tarea: {str(e)}"
         )
 
@@ -257,7 +291,7 @@ async def sync_tasks_from_clickup(
         import traceback
         print(f"❌ Traceback: {traceback.format_exc()}")
         raise HTTPException(
-            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error en sincronización: {str(e)}"
         )
 
@@ -311,7 +345,7 @@ async def get_tasks(
         return tasks
     except Exception as e:
         raise HTTPException(
-            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error al obtener tareas: {str(e)}"
         )
 
@@ -339,14 +373,14 @@ async def get_task(task_id: int, db: Session = Depends(get_db)):
     try:
         task = db.query(Task).filter(Task.id == task_id).first()
         if not task:
-            raise HTTPException(
-                status_code=http_status.HTTP_404_NOT_FOUND,
-                detail="Tarea no encontrada"
-            )
+                    raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Tarea no encontrada"
+        )
         return task
     except Exception as e:
         raise HTTPException(
-            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error al obtener tarea: {str(e)}"
         )
 

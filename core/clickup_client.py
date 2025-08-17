@@ -385,3 +385,8 @@ class ClickUpClient:
             # Fallback al método por update_task
             update_data = {"custom_fields": [{"id": field_id, "value": value}]}
             return await self.update_task(task_id, update_data)
+
+# ===== FUNCIÓN DE DEPENDENCIA PARA FASTAPI =====
+def get_clickup_client() -> ClickUpClient:
+    """Función de dependencia para FastAPI que retorna una instancia de ClickUpClient"""
+    return ClickUpClient()
