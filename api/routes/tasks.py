@@ -186,163 +186,159 @@ async def create_task(
     task_data: TaskCreate,
     db: Session = Depends(get_db)
 ):
-    """Crear una nueva tarea"""
+    """
+    Crear una nueva tarea en ClickUp y en la base de datos local
+    """
+    print("🚀 ===== NUEVO CÓDIGO EJECUTÁNDOSE - VERSIÓN CORREGIDA =====")
+    print(f"📝 Creando tarea: {task_data.name}")
+    print(f"🔍 Timestamp de ejecución: {datetime.now()}")
+    
+    # Verificar configuración
+    if not clickup_client.api_token:
+        print(f"❌ ERROR: No hay token de ClickUp configurado")
+        raise HTTPException(
+            status_code=http_status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="CLICKUP_API_TOKEN no está configurado en el servidor"
+        )
+    
+    print(f"✅ Configuración verificada, procediendo con creación...")
+    
+    # Crear tarea en ClickUp
     try:
-        print(f"🚀 INICIO: Creando tarea con datos: {task_data}")
-        print(f"📋 List ID: {task_data.list_id}")
-        print(f"🏢 Workspace ID: {task_data.workspace_id}")
-        
-        # Verificar configuración antes de proceder
-        print(f"🔍 Verificando configuración...")
-        print(f"   📝 CLICKUP_API_TOKEN configurado: {bool(clickup_client.api_token)}")
-        print(f"   📝 Token length: {len(clickup_client.api_token) if clickup_client.api_token else 0}")
-        print(f"   📝 Base URL: {clickup_client.base_url}")
-        
-        if not clickup_client.api_token:
-            print(f"❌ ERROR: No hay token de ClickUp configurado")
-            raise HTTPException(
-                status_code=http_status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="CLICKUP_API_TOKEN no está configurado en el servidor"
-            )
-        
-        print(f"✅ Configuración verificada, procediendo con creación...")
-        
-        # Crear tarea en ClickUp
-        try:
-            clickup_task_data = {
-                "name": task_data.name,
-                "description": task_data.description,
-                "priority": task_data.priority,
-                "status": task_data.status,
-                "assignees": task_data.assignees,
-                "due_date": task_data.due_date
-            }
-            
-            print(f"🚀 Enviando tarea a ClickUp con datos: {clickup_task_data}")
-            print(f"📅 Due date que se envía: {task_data.due_date}")
-            print(f"📅 Due date original: {task_data.due_date}")
-            print(f"📅 Due date original raw: {task_data.due_date}")
-            print(f"📅 Due date en clickup_task_data: {clickup_task_data['due_date']}")
-            print(f"📅 Tipo de due_date en clickup_task_data: {type(clickup_task_data['due_date'])}")
-            
-            clickup_response = await clickup_client.create_task(
-                list_id=task_data.list_id,
-                task_data=clickup_task_data
-            )
-            
-            print(f"✅ Respuesta de ClickUp: {clickup_response}")
-            
-            # Extraer información esencial de la respuesta de ClickUp
-            clickup_task_id = clickup_response.get("id")
-            clickup_due_date = clickup_response.get("due_date")
-            
-            if clickup_due_date:
-                print(f"✅ ClickUp recibió la fecha límite: {clickup_due_date}")
-            
-            # Extraer workspace_id y list_id de la respuesta de ClickUp
-            workspace_id = None
-            list_id = None
-            
-            # Intentar extraer de diferentes ubicaciones en la respuesta
-            if "team_id" in clickup_response:
-                workspace_id = clickup_response["team_id"]
-            elif "list" in clickup_response and "id" in clickup_response["list"]:
-                list_id = clickup_response["list"]["id"]
-            elif "space" in clickup_response and "id" in clickup_response["space"]:
-                # Si no hay list_id directo, usar el space_id como referencia
-                pass
-            
-            # Si no se pudo extraer, usar los valores del request
-            if not workspace_id:
-                workspace_id = task_data.workspace_id
-            if not list_id:
-                list_id = task_data.list_id
-                
-            print(f"🔍 Valores extraídos para BD local:")
-            print(f"   📁 workspace_id: {workspace_id}")
-            print(f"   📋 list_id: {list_id}")
-            print(f"   🆔 clickup_task_id: {clickup_task_id}")
-            
-        except Exception as e:
-            print(f"❌ Error creando tarea en ClickUp: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"Error creando tarea en ClickUp: {str(e)}")
-        
-        # Guardar en base de datos local
-        try:
-            db_task = Task(
-                id=clickup_task_id,
-                name=task_data.name,
-                description=task_data.description,
-                status=task_data.status,
-                priority=task_data.priority,
-                due_date=task_data.due_date,
-                assignees=task_data.assignees,
-                custom_fields=task_data.custom_fields,
-                workspace_id=workspace_id,  # Usar el valor extraído
-                list_id=list_id,  # Usar el valor extraído
-                creator_id=clickup_response.get("creator", {}).get("id", "system"),
-                is_synced=True
-            )
-            
-            print(f"💾 Guardando tarea en BD local con datos:")
-            print(f"   🆔 id: {db_task.id}")
-            print(f"   📁 workspace_id: {db_task.workspace_id}")
-            print(f"   📋 list_id: {db_task.list_id}")
-            print(f"   👤 creator_id: {db_task.creator_id}")
-            
-            db.add(db_task)
-            await db.commit()
-            await db.refresh(db_task)
-            
-            print(f"✅ Tarea guardada exitosamente en BD local")
-            
-        except Exception as e:
-            print(f"❌ Error guardando en BD local: {str(e)}")
-            print(f"❌ Tipo de error: {type(e)}")
-            import traceback
-            print(f"❌ Traceback completo: {traceback.format_exc()}")
-            raise HTTPException(status_code=500, detail=f"Error guardando en base de datos local: {str(e)}")
-        
-        # HOTFIX: Agregar custom fields de forma NO-BLOQUEANTE
-        if task_data.custom_fields and clickup_response.get("id"):
-            task_id = clickup_response["id"]
-            print(f"📝 HOTFIX: Agregando custom fields a tarea {task_id}")
-            print(f"🔍 Custom fields recibidos: {task_data.custom_fields}")
-            
-            # Ejecutar en background sin bloquear la respuesta
-            import asyncio
-            asyncio.create_task(_update_custom_fields_background(task_id, task_data.custom_fields, task_data.list_id))
-        
-        # Construir respuesta
-        response_data = {
-            "id": db_task.id,
-            "clickup_id": db_task.clickup_id,
-            "name": db_task.name,
-            "description": db_task.description,
-            "status": db_task.status,
-            "priority": db_task.priority,
-            "due_date": db_task.due_date,
-            "start_date": db_task.start_date,
-            "workspace_id": db_task.workspace_id,
-            "list_id": db_task.list_id,
-            "assignee_id": db_task.assignee_id,
-            "custom_fields": db_task.custom_fields,
-            "created_at": db_task.created_at,
-            "updated_at": db_task.updated_at
+        clickup_task_data = {
+            "name": task_data.name,
+            "description": task_data.description,
+            "priority": task_data.priority,
+            "status": task_data.status,
+            "assignees": task_data.assignees,
+            "due_date": task_data.due_date
         }
         
-        print(f"✅ Tarea creada exitosamente en BD local: {response_data}")
-        return response_data
+        print(f"🚀 Enviando tarea a ClickUp con datos: {clickup_task_data}")
+        print(f"📅 Due date que se envía: {task_data.due_date}")
+        print(f"📅 Due date original: {task_data.due_date}")
+        print(f"📅 Due date original raw: {task_data.due_date}")
+        print(f"📅 Due date en clickup_task_data: {clickup_task_data['due_date']}")
+        print(f"📅 Tipo de due_date en clickup_task_data: {type(clickup_task_data['due_date'])}")
+        
+        clickup_response = await clickup_client.create_task(
+            list_id=task_data.list_id,
+            task_data=clickup_task_data
+        )
+        
+        print(f"✅ Respuesta de ClickUp: {clickup_response}")
+        
+        # Extraer información esencial de la respuesta de ClickUp
+        clickup_task_id = clickup_response.get("id")
+        clickup_due_date = clickup_response.get("due_date")
+        
+        if clickup_due_date:
+            print(f"✅ ClickUp recibió la fecha límite: {clickup_due_date}")
+        
+        # Extraer workspace_id y list_id de la respuesta de ClickUp
+        workspace_id = None
+        list_id = None
+        
+        # Intentar extraer de diferentes ubicaciones en la respuesta
+        if "team_id" in clickup_response:
+            workspace_id = clickup_response["team_id"]
+        elif "list" in clickup_response and "id" in clickup_response["list"]:
+            list_id = clickup_response["list"]["id"]
+        elif "space" in clickup_response and "id" in clickup_response["space"]:
+            # Si no hay list_id directo, usar el space_id como referencia
+            pass
+        
+        # Si no se pudo extraer, usar los valores del request
+        if not workspace_id:
+            workspace_id = task_data.workspace_id
+        if not list_id:
+            list_id = task_data.list_id
+            
+        print(f"🔍 Valores extraídos para BD local:")
+        print(f"   📁 workspace_id: {workspace_id}")
+        print(f"   📋 list_id: {list_id}")
+        print(f"   🆔 clickup_task_id: {clickup_task_id}")
         
     except Exception as e:
-        print(f"❌ Error creando tarea: {e}")
+        print(f"❌ Error creando tarea en ClickUp: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error creando tarea en ClickUp: {str(e)}")
+    
+    # Guardar en base de datos local
+    try:
+        db_task = Task(
+            id=clickup_task_id,
+            name=task_data.name,
+            description=task_data.description,
+            status=task_data.status,
+            priority=task_data.priority,
+            due_date=task_data.due_date,
+            assignees=task_data.assignees,
+            custom_fields=task_data.custom_fields,
+            workspace_id=workspace_id,  # Usar el valor extraído
+            list_id=list_id,  # Usar el valor extraído
+            creator_id=clickup_response.get("creator", {}).get("id", "system"),
+            is_synced=True
+        )
+        
+        print(f"💾 Guardando tarea en BD local con datos:")
+        print(f"   🆔 id: {db_task.id}")
+        print(f"   📁 workspace_id: {db_task.workspace_id}")
+        print(f"   📋 list_id: {db_task.list_id}")
+        print(f"   👤 creator_id: {db_task.creator_id}")
+        
+        db.add(db_task)
+        await db.commit()
+        await db.refresh(db_task)
+        
+        print(f"✅ Tarea guardada exitosamente en BD local")
+        
+    except Exception as e:
+        print(f"❌ Error guardando en BD local: {str(e)}")
         print(f"❌ Tipo de error: {type(e)}")
         import traceback
         print(f"❌ Traceback completo: {traceback.format_exc()}")
-        raise HTTPException(
-            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al crear la tarea: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error guardando en base de datos local: {str(e)}")
+    
+    # HOTFIX: Agregar custom fields de forma NO-BLOQUEANTE
+    if task_data.custom_fields and clickup_response.get("id"):
+        task_id = clickup_response["id"]
+        print(f"📝 HOTFIX: Agregando custom fields a tarea {task_id}")
+        print(f"🔍 Custom fields recibidos: {task_data.custom_fields}")
+        
+        # Ejecutar en background sin bloquear la respuesta
+        import asyncio
+        asyncio.create_task(_update_custom_fields_background(task_id, task_data.custom_fields, task_data.list_id))
+    
+    # Construir respuesta
+    response_data = {
+        "id": db_task.id,
+        "clickup_id": db_task.clickup_id,
+        "name": db_task.name,
+        "description": db_task.description,
+        "status": db_task.status,
+        "priority": db_task.priority,
+        "due_date": db_task.due_date,
+        "start_date": db_task.start_date,
+        "workspace_id": db_task.workspace_id,
+        "list_id": db_task.list_id,
+        "assignee_id": db_task.assignee_id,
+        "custom_fields": db_task.custom_fields,
+        "created_at": db_task.created_at,
+        "updated_at": db_task.updated_at
+    }
+    
+    print(f"✅ Tarea creada exitosamente en BD local: {response_data}")
+    return response_data
+    
+except Exception as e:
+    print(f"❌ Error creando tarea: {e}")
+    print(f"❌ Tipo de error: {type(e)}")
+    import traceback
+    print(f"❌ Traceback completo: {traceback.format_exc()}")
+    raise HTTPException(
+        status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail=f"Error al crear la tarea: {str(e)}"
+    )
 
 # HOTFIX: Función auxiliar para actualizar custom fields en background
 async def _update_custom_fields_background(task_id: str, custom_fields: dict, list_id: str):
