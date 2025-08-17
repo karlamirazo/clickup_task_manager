@@ -131,8 +131,9 @@ async def create_task_FINAL_VERSION(
             "description": task_data.description,
             "priority": task_data.priority,
             "status": task_data.status,
-            "assignees": task_data.assignees,
-            "due_date": task_data.due_date
+            "assignees": task_data.assignees if task_data.assignees else [],
+            "due_date": int(datetime.strptime(task_data.due_date, "%Y-%m-%d").timestamp() * 1000) if task_data.due_date else None,
+            "custom_fields": task_data.custom_fields
         }
         
         print(f"🚀 Enviando tarea a ClickUp con datos: {clickup_task_data}")
@@ -163,10 +164,12 @@ async def create_task_FINAL_VERSION(
             description=task_data.description,
             status=task_data.status,
             priority=task_data.priority,
-            due_date=task_data.due_date,
+            due_date=datetime.strptime(task_data.due_date, "%Y-%m-%d") if task_data.due_date else None,
             workspace_id=workspace_id,
             list_id=list_id,
+            assignee_id=task_data.assignees[0] if task_data.assignees else None,
             creator_id=clickup_response.get("creator", {}).get("id", "system"),
+            custom_fields=task_data.custom_fields,
             is_synced=True
         )
         
@@ -194,9 +197,9 @@ async def create_task_FINAL_VERSION(
             "start_date": db_task.start_date,
             "workspace_id": db_task.workspace_id,
             "list_id": db_task.list_id,
-            "assignee_id": db_task.assignee_id,
+            "assignee_id": db_task.assignee_id,  # ✅ AGREGADO: campo faltante
             "creator_id": db_task.creator_id,  # ✅ AGREGADO: campo faltante
-            "custom_fields": db_task.custom_fields,
+            "custom_fields": db_task.custom_fields,  # ✅ AGREGADO: campo faltante
             "is_synced": db_task.is_synced,  # ✅ AGREGADO: campo faltante
             "created_at": db_task.created_at,
             "updated_at": db_task.updated_at
