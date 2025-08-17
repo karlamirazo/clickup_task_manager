@@ -23,7 +23,7 @@ class TaskCreate(BaseModel):
     priority: int = 3
     status: str = "to_do"
     assignees: List[str] = []
-    due_date: Optional[Union[str, datetime]] = None
+    due_date: Optional[str] = None
     workspace_id: str
     list_id: str
     custom_fields: Dict[str, Any] = {}
@@ -31,7 +31,7 @@ class TaskCreate(BaseModel):
     @field_validator('due_date', mode='before')
     @classmethod
     def validate_due_date(cls, v):
-        """Convertir string de fecha a datetime si es necesario"""
+        """Validar y convertir fecha de forma segura"""
         if v is None:
             return None
         if isinstance(v, datetime):
@@ -45,9 +45,9 @@ class TaskCreate(BaseModel):
                     # Intentar parsear como formato común
                     return datetime.strptime(v, "%Y-%m-%d")
                 except ValueError:
-                    # Si no se puede parsear, devolver None en lugar de lanzar error
+                    # Si no se puede parsear, devolver None
                     return None
-        # Si es cualquier otro tipo, devolver None
+        # Para cualquier otro tipo, devolver None
         return None
 
 class TaskResponse(BaseModel):
@@ -132,7 +132,7 @@ async def create_task_FINAL_VERSION(
             "priority": task_data.priority,
             "status": task_data.status,
             "assignees": task_data.assignees,
-            "due_date": task_data.due_date.isoformat() if task_data.due_date else None
+            "due_date": task_data.due_date
         }
         
         print(f"🚀 Enviando tarea a ClickUp con datos: {clickup_task_data}")
