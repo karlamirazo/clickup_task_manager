@@ -193,7 +193,9 @@ async def create_task_FINAL_VERSION(
             "workspace_id": db_task.workspace_id,
             "list_id": db_task.list_id,
             "assignee_id": db_task.assignee_id,
+            "creator_id": db_task.creator_id,  # ✅ AGREGADO: campo faltante
             "custom_fields": db_task.custom_fields,
+            "is_synced": db_task.is_synced,  # ✅ AGREGADO: campo faltante
             "created_at": db_task.created_at,
             "updated_at": db_task.updated_at
         }
