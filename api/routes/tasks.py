@@ -22,7 +22,7 @@ class TaskCreate(BaseModel):
     description: Optional[str] = None
     priority: int = 3
     status: str = "to_do"
-    assignees: List[str] = []
+    assignees: Optional[List[str]] = None
     due_date: Optional[str] = None
     workspace_id: str
     list_id: str
@@ -145,7 +145,7 @@ async def create_task_FINAL_VERSION(
             due_date=datetime.strptime(task_data.due_date, "%Y-%m-%d") if task_data.due_date else None,
             workspace_id=workspace_id,
             list_id=list_id,
-            assignee_id=task_data.assignees[0] if task_data.assignees else None,
+            assignee_id=task_data.assignees[0] if task_data.assignees and len(task_data.assignees) > 0 else None,
             creator_id=clickup_response.get("creator", {}).get("id", "system"),
             custom_fields=task_data.custom_fields,
             is_synced=True
