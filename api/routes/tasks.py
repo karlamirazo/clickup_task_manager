@@ -182,13 +182,13 @@ def _priority_to_int(priority_value) -> int:
     return 3
 
 @router.post("/", response_model=TaskResponse, status_code=http_status.HTTP_201_CREATED)
-async def create_task(
+async def create_task_FINAL_VERSION(
     task_data: TaskCreate,
     db: Session = Depends(get_db),
     clickup_client: ClickUpClient = Depends(get_clickup_client)
 ):
     """
-    Crear una nueva tarea en ClickUp y en la base de datos local
+    Crear una nueva tarea en ClickUp y en la base de datos local - VERSIÓN FINAL
     """
     print("🚀 ===== CÓDIGO COMPLETAMENTE NUEVO - VERSIÓN FINAL =====")
     print(f"📝 Creando tarea: {task_data.name}")
