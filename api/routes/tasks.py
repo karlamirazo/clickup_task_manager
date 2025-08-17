@@ -135,14 +135,12 @@ async def create_task_FINAL_VERSION(
         
         # Guardar en base de datos local
         db_task = Task(
-            id=clickup_task_id,
+            clickup_id=clickup_task_id,  # ✅ CORREGIDO: usar clickup_id, no id
             name=task_data.name,
             description=task_data.description,
             status=task_data.status,
             priority=task_data.priority,
             due_date=task_data.due_date,
-            assignees=task_data.assignees,
-            custom_fields=task_data.custom_fields,
             workspace_id=workspace_id,
             list_id=list_id,
             creator_id=clickup_response.get("creator", {}).get("id", "system"),
@@ -163,8 +161,8 @@ async def create_task_FINAL_VERSION(
         
         # Construir respuesta
         response_data = {
-            "id": db_task.id,
-            "clickup_id": db_task.clickup_id,
+            "id": db_task.id,  # ✅ Este es el ID de la BD local
+            "clickup_id": db_task.clickup_id,  # ✅ Este es el ID de ClickUp
             "name": db_task.name,
             "description": db_task.description,
             "status": db_task.status,
