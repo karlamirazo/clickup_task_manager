@@ -5,10 +5,10 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 from datetime import datetime
 from fastapi import status
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from core.database import get_db
 from core.clickup_client import ClickUpClient, get_clickup_client
@@ -22,10 +22,30 @@ class TaskCreate(BaseModel):
     priority: int = 3
     status: str = "to_do"
     assignees: List[str] = []
-    due_date: Optional[datetime] = None
+    due_date: Optional[Union[str, datetime]] = None
     workspace_id: str
     list_id: str
     custom_fields: Dict[str, Any] = {}
+    
+    @field_validator('due_date', mode='before')
+    @classmethod
+    def validate_due_date(cls, v):
+        """Convertir string de fecha a datetime si es necesario"""
+        if v is None:
+            return None
+        if isinstance(v, datetime):
+            return v
+        if isinstance(v, str):
+            try:
+                # Intentar parsear como ISO format (YYYY-MM-DD)
+                return datetime.fromisoformat(v)
+            except ValueError:
+                try:
+                    # Intentar parsear como formato común
+                    return datetime.strptime(v, "%Y-%m-%d")
+                except ValueError:
+                    raise ValueError(f"Formato de fecha inválido: {v}. Use YYYY-MM-DD")
+        raise ValueError(f"Tipo de fecha inválido: {type(v)}")
 
 class TaskResponse(BaseModel):
     """Modelo para respuestas de tareas"""
