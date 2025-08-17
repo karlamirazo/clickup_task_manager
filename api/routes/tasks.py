@@ -175,8 +175,8 @@ async def create_task_FINAL_VERSION(
         print(f"   👤 creator_id: {db_task.creator_id}")
         
         db.add(db_task)
-        await db.commit()
-        await db.refresh(db_task)
+        db.commit()  # ✅ CORREGIDO: remover await
+        db.refresh(db_task)  # ✅ CORREGIDO: remover await
         
         print(f"✅ Tarea guardada exitosamente en BD local")
         
