@@ -9,6 +9,7 @@ from typing import List, Optional, Dict, Any, Union
 from datetime import datetime
 from fastapi import status
 from pydantic import BaseModel, field_validator
+from sqlalchemy import text
 
 from core.database import get_db
 from core.clickup_client import ClickUpClient, get_clickup_client
@@ -430,4 +431,182 @@ async def get_task(task_id: int, db: Session = Depends(get_db)):
             detail=f"Error al obtener tarea: {str(e)}"
         )
 
-# ===== FIN DEL ARCHIVO COMPLETAMENTE NUEVO =====
+# ===== ENDPOINT PARA VERIFICAR Y CREAR ESTRUCTURA DE BASE DE DATOS =====
+@router.post("/fix-database-structure")
+async def fix_database_structure(
+    db: Session = Depends(get_db)
+):
+    """Verificar y crear la estructura correcta de la tabla tasks en PostgreSQL"""
+    
+    print("🔧 Iniciando verificación y corrección de estructura de base de datos...")
+    
+    try:
+        # Verificar si la tabla tasks existe
+        result = db.execute(text("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name = 'tasks'
+            );
+        """))
+        
+        table_exists = result.scalar()
+        print(f"📋 Tabla 'tasks' existe: {'✅ SÍ' if table_exists else '❌ NO'}")
+        
+        if table_exists:
+            # Obtener estructura actual
+            result = db.execute(text("""
+                SELECT column_name, data_type, is_nullable, column_default
+                FROM information_schema.columns 
+                WHERE table_name = 'tasks' 
+                ORDER BY ordinal_position;
+            """))
+            
+            columns = result.fetchall()
+            print(f"🏗️ Estructura actual de la tabla 'tasks':")
+            print(f"{'Columna':<20} {'Tipo':<15} {'Nullable':<10} {'Default'}")
+            print("-" * 60)
+            
+            for col in columns:
+                col_name, data_type, nullable, default = col
+                print(f"{col_name:<20} {data_type:<15} {nullable:<10} {default or 'N/A'}")
+            
+            # Verificar columnas específicas que necesitamos
+            required_columns = [
+                'id', 'clickup_id', 'name', 'description', 'status', 'priority',
+                'due_date', 'start_date', 'created_at', 'updated_at',
+                'workspace_id', 'list_id', 'assignee_id', 'creator_id',
+                'tags', 'custom_fields', 'attachments', 'comments',
+                'is_synced', 'last_sync'
+            ]
+            
+            existing_columns = [col[0] for col in columns]
+            missing_columns = [col for col in required_columns if col not in existing_columns]
+            
+            print(f"\n🔍 Análisis de columnas:")
+            print(f"✅ Columnas existentes: {len(existing_columns)}")
+            print(f"❌ Columnas faltantes: {len(missing_columns)}")
+            
+            if missing_columns:
+                print(f"📝 Columnas que faltan: {', '.join(missing_columns)}")
+                
+                # Recrear la tabla con estructura correcta
+                print(f"🔨 Recreando tabla con estructura correcta...")
+                
+                # Eliminar tabla existente
+                db.execute(text("DROP TABLE IF EXISTS tasks CASCADE;"))
+                db.commit()
+                print(f"✅ Tabla eliminada")
+                
+                # Crear tabla con estructura correcta
+                create_table_sql = """
+                CREATE TABLE tasks (
+                    id SERIAL PRIMARY KEY,
+                    clickup_id VARCHAR(255) UNIQUE NOT NULL,
+                    name VARCHAR(500) NOT NULL,
+                    description TEXT,
+                    status VARCHAR(100) NOT NULL DEFAULT 'to_do',
+                    priority INTEGER DEFAULT 3,
+                    due_date TIMESTAMP,
+                    start_date TIMESTAMP,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    workspace_id VARCHAR(255) NOT NULL,
+                    list_id VARCHAR(255) NOT NULL,
+                    assignee_id VARCHAR(255),
+                    creator_id VARCHAR(255) DEFAULT 'system',
+                    tags JSONB,
+                    custom_fields JSONB,
+                    attachments JSONB,
+                    comments JSONB,
+                    is_synced BOOLEAN DEFAULT FALSE,
+                    last_sync TIMESTAMP
+                );
+                """
+                
+                db.execute(text(create_table_sql))
+                
+                # Crear índices para mejor rendimiento
+                print(f"📊 Creando índices...")
+                db.execute(text("CREATE INDEX idx_tasks_clickup_id ON tasks(clickup_id);"))
+                db.execute(text("CREATE INDEX idx_tasks_workspace_id ON tasks(workspace_id);"))
+                db.execute(text("CREATE INDEX idx_tasks_list_id ON tasks(list_id);"))
+                db.execute(text("CREATE INDEX idx_tasks_status ON tasks(status);"))
+                db.execute(text("CREATE INDEX idx_tasks_priority ON tasks(priority);"))
+                db.execute(text("CREATE INDEX idx_tasks_is_synced ON tasks(is_synced);"))
+                
+                db.commit()
+                print(f"✅ Tabla 'tasks' recreada exitosamente!")
+                print(f"✅ Índices creados para mejor rendimiento")
+                
+                return {
+                    "message": "✅ Estructura de base de datos corregida exitosamente",
+                    "action": "table_recreated",
+                    "missing_columns": missing_columns,
+                    "status": "fixed"
+                }
+            else:
+                print(f"🎉 Todas las columnas necesarias están presentes!")
+                return {
+                    "message": "✅ Estructura de base de datos ya está correcta",
+                    "action": "no_action_needed",
+                    "status": "ok"
+                }
+        else:
+            # Crear tabla desde cero
+            print(f"🔨 Creando tabla tasks desde cero...")
+            
+            create_table_sql = """
+            CREATE TABLE tasks (
+                id SERIAL PRIMARY KEY,
+                clickup_id VARCHAR(255) UNIQUE NOT NULL,
+                name VARCHAR(500) NOT NULL,
+                description TEXT,
+                status VARCHAR(100) NOT NULL DEFAULT 'to_do',
+                priority INTEGER DEFAULT 3,
+                due_date TIMESTAMP,
+                start_date TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                workspace_id VARCHAR(255) NOT NULL,
+                list_id VARCHAR(255) NOT NULL,
+                assignee_id VARCHAR(255),
+                creator_id VARCHAR(255) DEFAULT 'system',
+                tags JSONB,
+                custom_fields JSONB,
+                attachments JSONB,
+                comments JSONB,
+                is_synced BOOLEAN DEFAULT FALSE,
+                last_sync TIMESTAMP
+            );
+            """
+            
+            db.execute(text(create_table_sql))
+            
+            # Crear índices para mejor rendimiento
+            print(f"📊 Creando índices...")
+            db.execute(text("CREATE INDEX idx_tasks_clickup_id ON tasks(clickup_id);"))
+            db.execute(text("CREATE INDEX idx_tasks_workspace_id ON tasks(workspace_id);"))
+            db.execute(text("CREATE INDEX idx_tasks_list_id ON tasks(list_id);"))
+            db.execute(text("CREATE INDEX idx_tasks_status ON tasks(status);"))
+            db.execute(text("CREATE INDEX idx_tasks_priority ON tasks(priority);"))
+            db.execute(text("CREATE INDEX idx_tasks_is_synced ON tasks(is_synced);"))
+            
+            db.commit()
+            print(f"✅ Tabla 'tasks' creada exitosamente!")
+            print(f"✅ Índices creados para mejor rendimiento")
+            
+            return {
+                "message": "✅ Tabla tasks creada exitosamente",
+                "action": "table_created",
+                "status": "created"
+            }
+        
+    except Exception as e:
+        print(f"❌ Error corrigiendo estructura de base de datos: {e}")
+        import traceback
+        print(f"🔍 Traceback: {traceback.format_exc()}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error corrigiendo estructura de base de datos: {str(e)}"
+        )
