@@ -5,7 +5,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 import http_status
 
@@ -15,6 +15,32 @@ from models.task import Task
 from schemas.task import TaskCreate, TaskResponse
 
 router = APIRouter()
+
+# ===== FUNCIÓN AUXILIAR NECESARIA =====
+def safe_timestamp_to_datetime(timestamp_value) -> Optional[datetime]:
+    """HOTFIX: Convertir timestamp a datetime de forma segura sin divisiones por 1000"""
+    if timestamp_value is None:
+        return None
+    
+    try:
+        # Si ya es datetime, devolverlo
+        if isinstance(timestamp_value, datetime):
+            return timestamp_value
+        
+        # Si es string, intentar convertir a int
+        if isinstance(timestamp_value, str):
+            if timestamp_value.isdigit():
+                timestamp_value = int(timestamp_value)
+            else:
+                return None
+        
+        # Si es int/float, asumir que ya está en segundos (no milisegundos)
+        if isinstance(timestamp_value, (int, float)):
+            return datetime.fromtimestamp(timestamp_value)
+        
+        return None
+    except Exception:
+        return None
 
 # ===== FUNCIÓN COMPLETAMENTE NUEVA =====
 @router.post("/", response_model=TaskResponse, status_code=http_status.HTTP_201_CREATED)
