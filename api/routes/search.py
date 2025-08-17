@@ -7,7 +7,32 @@ from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 from core.database import get_db
 from core.search_engine import search_engine
-from api.schemas.task import TaskResponse
+# Modelo Pydantic local para evitar importaciones incorrectas
+from pydantic import BaseModel
+from typing import Optional, List
+from datetime import datetime
+
+class TaskResponse(BaseModel):
+    """Modelo de respuesta para tareas en búsqueda"""
+    id: int
+    clickup_id: str
+    name: str
+    description: Optional[str]
+    status: str
+    priority: int
+    due_date: Optional[datetime]
+    workspace_id: str
+    list_id: str
+    assignee_id: Optional[str]
+    creator_id: Optional[str]
+    custom_fields: Optional[dict]
+    is_synced: bool
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
 import logging
 
 logger = logging.getLogger(__name__)

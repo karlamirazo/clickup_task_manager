@@ -14,7 +14,35 @@ from pydantic import BaseModel, EmailStr
 from core.database import get_db
 from core.auth import AuthManager, RoleManager, require_auth, require_permission, optional_auth
 from models.user import User
-from api.schemas.user import UserResponse, UserCreate, UserUpdate
+# Modelos Pydantic locales para evitar importaciones incorrectas
+class UserResponse(BaseModel):
+    """Modelo de respuesta para usuarios"""
+    id: int
+    email: str
+    username: Optional[str]
+    full_name: Optional[str]
+    role: str
+    is_active: bool
+    created_at: datetime
+    last_login: Optional[datetime]
+    
+    class Config:
+        from_attributes = True
+
+class UserCreate(BaseModel):
+    """Modelo para crear usuarios"""
+    email: EmailStr
+    username: Optional[str] = None
+    full_name: Optional[str] = None
+    password: str
+    role: str = "user"
+
+class UserUpdate(BaseModel):
+    """Modelo para actualizar usuarios"""
+    username: Optional[str] = None
+    full_name: Optional[str] = None
+    role: Optional[str] = None
+    is_active: Optional[bool] = None
 
 auth_logger = logging.getLogger("auth")
 
