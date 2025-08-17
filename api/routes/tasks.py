@@ -45,8 +45,10 @@ class TaskCreate(BaseModel):
                     # Intentar parsear como formato común
                     return datetime.strptime(v, "%Y-%m-%d")
                 except ValueError:
-                    raise ValueError(f"Formato de fecha inválido: {v}. Use YYYY-MM-DD")
-        raise ValueError(f"Tipo de fecha inválido: {type(v)}")
+                    # Si no se puede parsear, devolver None en lugar de lanzar error
+                    return None
+        # Si es cualquier otro tipo, devolver None
+        return None
 
 class TaskResponse(BaseModel):
     """Modelo para respuestas de tareas"""
