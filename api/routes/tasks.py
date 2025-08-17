@@ -367,6 +367,34 @@ async def show_config():
         "debug": settings.DEBUG
     }
 
+@router.get("/debug-code")
+async def debug_code_version():
+    """Debug: Verificar qué versión del código se está ejecutando"""
+    import inspect
+    
+    # Obtener el código fuente de la función create_task_FINAL_VERSION
+    try:
+        func_source = inspect.getsource(create_task_FINAL_VERSION)
+        has_safe_timestamp = "safe_timestamp_to_datetime" in func_source
+        has_import_status = "from fastapi import status" in func_source
+        
+        return {
+            "message": "🔍 Debug del código ejecutándose",
+            "timestamp": datetime.now().isoformat(),
+            "commit_hash": "80f30be0",  # Último commit
+            "function_exists": True,
+            "has_safe_timestamp": has_safe_timestamp,
+            "has_import_status": has_import_status,
+            "code_length": len(func_source),
+            "first_lines": func_source.split('\n')[:5]
+        }
+    except Exception as e:
+        return {
+            "message": "❌ Error obteniendo código fuente",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+
 @router.get("/{task_id}", response_model=TaskResponse)
 async def get_task(task_id: int, db: Session = Depends(get_db)):
     """Obtener una tarea específica"""
