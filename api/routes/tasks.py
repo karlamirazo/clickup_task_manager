@@ -20,13 +20,13 @@ class TaskCreate(BaseModel):
     """Modelo para crear tareas"""
     name: str
     description: Optional[str] = None
-    priority: int = 3
-    status: str = "to_do"
+    priority: Optional[int] = 3
+    status: Optional[str] = "to_do"
     assignees: Optional[str] = None
     due_date: Optional[str] = None
     workspace_id: str
     list_id: str
-    custom_fields: Dict[str, Any] = {}
+    custom_fields: Optional[Dict[str, Any]] = {}
 
 class TaskResponse(BaseModel):
     """Modelo para respuestas de tareas"""
