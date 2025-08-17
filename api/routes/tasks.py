@@ -27,28 +27,6 @@ class TaskCreate(BaseModel):
     workspace_id: str
     list_id: str
     custom_fields: Dict[str, Any] = {}
-    
-    @field_validator('due_date', mode='before')
-    @classmethod
-    def validate_due_date(cls, v):
-        """Validar y convertir fecha de forma segura"""
-        if v is None:
-            return None
-        if isinstance(v, datetime):
-            return v
-        if isinstance(v, str):
-            try:
-                # Intentar parsear como ISO format (YYYY-MM-DD)
-                return datetime.fromisoformat(v)
-            except ValueError:
-                try:
-                    # Intentar parsear como formato común
-                    return datetime.strptime(v, "%Y-%m-%d")
-                except ValueError:
-                    # Si no se puede parsear, devolver None
-                    return None
-        # Para cualquier otro tipo, devolver None
-        return None
 
 class TaskResponse(BaseModel):
     """Modelo para respuestas de tareas"""
