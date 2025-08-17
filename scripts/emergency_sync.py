@@ -77,7 +77,7 @@ async def emergency_sync_tasks():
             
             try:
                 # Obtener tareas de la lista
-                tasks = await client.get_list_tasks(list_id)
+                tasks = await client.get_tasks(list_id)
                 
                 if not tasks:
                     print(f"   ⚠️ No hay tareas en esta lista")
@@ -143,13 +143,20 @@ async def create_local_task(task_data: dict, workspace_id: str, list_id: str) ->
         from core.database import get_db
         db = next(get_db())
         
+        # Extraer priority como entero
+        priority_data = task_data.get("priority", {})
+        if isinstance(priority_data, dict):
+            priority_value = int(priority_data.get("id", 3))
+        else:
+            priority_value = int(priority_data) if priority_data else 3
+        
         # Crear nueva tarea
         new_task = Task(
             clickup_id=task_data["id"],
             name=task_data.get("name", "Sin nombre"),
             description=task_data.get("description", ""),
             status=task_data.get("status", {}).get("status", "to_do"),
-            priority=task_data.get("priority", 3),
+            priority=priority_value,
             due_date=parse_timestamp(task_data.get("due_date")),
             workspace_id=workspace_id,
             list_id=list_id,
