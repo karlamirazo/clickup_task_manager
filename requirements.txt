@@ -26,3 +26,4 @@ python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 reportlab==4.2.2
 email-validator>=2.1.0  # Requerido para EmailStr de Pydantic
+sentence-transformers>=2.2.0  # Requerido para el motor de búsqueda RAG
