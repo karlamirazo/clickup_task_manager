@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from core.config import settings
 import os
+from urllib.parse import urlparse
 
 def get_database_url():
     """Obtener URL de base de datos con fallback inteligente"""
@@ -43,8 +44,17 @@ else:
         pool_recycle=300,    # Reciclar conexiones cada 5 minutos
     )
     print("🗄️ Usando base de datos PostgreSQL")
-    print(f"🔗 Host: {os.getenv('PGHOST', 'N/A')}")
-    print(f"📊 Base de datos: {os.getenv('PGDATABASE', 'N/A')}")
+    
+    # Parsear la URL de PostgreSQL para mostrar información útil
+    try:
+        parsed_url = urlparse(database_url)
+        print(f"🔗 Host: {parsed_url.hostname}")
+        print(f"📊 Base de datos: {parsed_url.path[1:] if parsed_url.path else 'N/A'}")
+        print(f"👤 Usuario: {parsed_url.username}")
+        print(f"🔌 Puerto: {parsed_url.port or 5432}")
+    except Exception as e:
+        print(f"🔗 URL: {database_url[:50]}...")
+        print(f"⚠️ Error parseando URL: {e}")
 
 # Crear sesión de base de datos
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
