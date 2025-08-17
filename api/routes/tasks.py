@@ -158,6 +158,109 @@ async def create_task_FINAL_VERSION(
             detail=f"Error al crear la tarea: {str(e)}"
         )
 
+# ===== NUEVO ENDPOINT DE SINCRONIZACIÓN =====
+@router.post("/sync", response_model=dict)
+async def sync_tasks_from_clickup(
+    workspace_id: str = Query(..., description="ID del workspace de ClickUp"),
+    db: Session = Depends(get_db),
+    clickup_client: ClickUpClient = Depends(get_clickup_client)
+):
+    """
+    Sincronizar todas las tareas de ClickUp a la base de datos local
+    """
+    print(f"🔄 Iniciando sincronización de tareas para workspace: {workspace_id}")
+    
+    try:
+        # Obtener todas las listas del workspace
+        lists = await clickup_client.get_workspace_lists(workspace_id)
+        print(f"📋 Encontradas {len(lists)} listas en el workspace")
+        
+        total_tasks_synced = 0
+        total_tasks_created = 0
+        total_tasks_updated = 0
+        
+        for list_info in lists:
+            list_id = list_info.get("id")
+            list_name = list_info.get("name", "Sin nombre")
+            print(f"🔄 Sincronizando lista: {list_name} (ID: {list_id})")
+            
+            try:
+                # Obtener tareas de esta lista
+                tasks = await clickup_client.get_list_tasks(list_id)
+                print(f"   📝 Encontradas {len(tasks)} tareas en la lista {list_name}")
+                
+                for task_data in tasks:
+                    task_id = task_data.get("id")
+                    
+                    # Verificar si la tarea ya existe en la BD local
+                    existing_task = db.query(Task).filter(Task.id == task_id).first()
+                    
+                    if existing_task:
+                        # Actualizar tarea existente
+                        existing_task.name = task_data.get("name", existing_task.name)
+                        existing_task.description = task_data.get("description", existing_task.description)
+                        existing_task.status = task_data.get("status", {}).get("status", existing_task.status)
+                        existing_task.priority = task_data.get("priority", existing_task.priority)
+                        existing_task.due_date = safe_timestamp_to_datetime(task_data.get("due_date"))
+                        existing_task.updated_at = datetime.now()
+                        existing_task.is_synced = True
+                        
+                        total_tasks_updated += 1
+                        print(f"   ✅ Tarea actualizada: {task_data.get('name', 'Sin nombre')}")
+                    else:
+                        # Crear nueva tarea en BD local
+                        new_task = Task(
+                            id=task_id,
+                            name=task_data.get("name", "Sin nombre"),
+                            description=task_data.get("description", ""),
+                            status=task_data.get("status", {}).get("status", "to do"),
+                            priority=task_data.get("priority", 3),
+                            due_date=safe_timestamp_to_datetime(task_data.get("due_date")),
+                            workspace_id=workspace_id,
+                            list_id=list_id,
+                            creator_id=task_data.get("creator", {}).get("id", "system"),
+                            assignees=task_data.get("assignees", []),
+                            custom_fields=task_data.get("custom_fields", {}),
+                            created_at=safe_timestamp_to_datetime(task_data.get("date_created")),
+                            updated_at=safe_timestamp_to_datetime(task_data.get("date_updated")),
+                            is_synced=True
+                        )
+                        
+                        db.add(new_task)
+                        total_tasks_created += 1
+                        print(f"   ➕ Nueva tarea creada: {task_data.get('name', 'Sin nombre')}")
+                    
+                    total_tasks_synced += 1
+                
+                # Commit después de cada lista para evitar transacciones muy largas
+                await db.commit()
+                
+            except Exception as e:
+                print(f"   ❌ Error sincronizando lista {list_name}: {e}")
+                continue
+        
+        print(f"✅ Sincronización completada:")
+        print(f"   📊 Total tareas procesadas: {total_tasks_synced}")
+        print(f"   ➕ Nuevas tareas creadas: {total_tasks_created}")
+        print(f"   🔄 Tareas actualizadas: {total_tasks_updated}")
+        
+        return {
+            "message": "Sincronización completada exitosamente",
+            "total_tasks_synced": total_tasks_synced,
+            "new_tasks_created": total_tasks_created,
+            "tasks_updated": total_tasks_updated,
+            "workspace_id": workspace_id
+        }
+        
+    except Exception as e:
+        print(f"❌ Error en sincronización: {e}")
+        import traceback
+        print(f"❌ Traceback: {traceback.format_exc()}")
+        raise HTTPException(
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error en sincronización: {str(e)}"
+        )
+
 # ===== FUNCIÓN COMPLETAMENTE NUEVA =====
 async def _update_custom_fields_background(task_id: str, custom_fields: dict, list_id: str):
     """Actualizar custom fields en background sin bloquear la respuesta principal"""

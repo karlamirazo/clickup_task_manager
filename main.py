@@ -8,8 +8,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
+import os
 
-from api.routes import tasks, workspaces, lists, users, automation, reports, integrations, spaces, webhooks, dashboard, search
+from api.routes import tasks, workspaces, lists, users, automation, reports, integrations, spaces, webhooks, dashboard, search, auth
 from core.config import settings
 from core.database import init_db
 
@@ -77,6 +79,7 @@ app.include_router(spaces.router, prefix="/api/v1/spaces", tags=["spaces"])
 app.include_router(webhooks.router, prefix="/api/v1/webhooks", tags=["webhooks"])
 app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboard"])
 app.include_router(search.router, prefix="/api/v1", tags=["search"])
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 
 # Autenticación opcional (comentada para uso básico)
 # try:
@@ -92,6 +95,18 @@ import datetime
 async def root():
     """Servir la interfaz web"""
     return FileResponse("static/index.html")
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def read_dashboard():
+    """Dashboard de notificaciones"""
+    with open("static/dashboard.html", "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
+
+@app.get("/tasks-dashboard", response_class=HTMLResponse)
+async def read_tasks_dashboard():
+    """Dashboard de tareas"""
+    with open("static/tasks_dashboard.html", "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
 
 @app.get("/api")
 async def api_root():
