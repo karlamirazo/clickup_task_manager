@@ -19,13 +19,13 @@ from models.task import Task
 class TaskCreate(BaseModel):
     """Modelo para crear tareas"""
     name: str
+    workspace_id: str
+    list_id: str
     description: Optional[str] = None
     priority: Optional[int] = 3
     status: Optional[str] = "to_do"
     assignees: Optional[str] = None
     due_date: Optional[str] = None
-    workspace_id: str
-    list_id: str
     custom_fields: Optional[Dict[str, Any]] = {}
 
 class TaskResponse(BaseModel):
