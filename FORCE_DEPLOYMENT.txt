@@ -1,0 +1,19 @@
+# 🚨 FORZAR DEPLOYMENT EN RAILWAY
+# Este archivo se creó para forzar a Railway a detectar cambios
+# y hacer el deployment automático
+
+TIMESTAMP: 2025-08-17 12:55:00
+COMMIT: 9ecf3a94
+STATUS: Esperando deployment automático
+
+# Cambios pendientes:
+# - Corregidos errores de importación en tasks.py
+# - Agregada función get_clickup_client en clickup_client.py
+# - Creados modelos Pydantic TaskCreate y TaskResponse
+# - Agregado endpoint /debug-code para diagnóstico
+# - Script de emergencia funcionando (10 tareas sincronizadas)
+
+# Si Railway no hace deployment automático, usar:
+# 1. Restart manual del servicio
+# 2. Deploy manual desde Railway CLI
+# 3. Verificar webhooks de GitHub
