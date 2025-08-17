@@ -132,7 +132,7 @@ async def create_task_FINAL_VERSION(
             "priority": task_data.priority,
             "status": task_data.status,
             "assignees": task_data.assignees,
-            "due_date": task_data.due_date
+            "due_date": task_data.due_date.isoformat() if task_data.due_date else None
         }
         
         print(f"🚀 Enviando tarea a ClickUp con datos: {clickup_task_data}")
