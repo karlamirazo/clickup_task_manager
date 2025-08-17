@@ -207,98 +207,101 @@ async def create_task(
         
         print(f"✅ Configuración verificada, procediendo con creación...")
         
-        # Crear tarea en ClickUp - solo campos esenciales
-        clickup_task_data = {
-            "name": task_data.name,
-            "description": task_data.description or ""
-        }
-        
-        print(f"📝 Datos básicos preparados: {clickup_task_data}")
-        
-        # Agregar prioridad si existe (normalizada). ClickUp acepta 1-4
-        if task_data.priority is not None:
-            clickup_task_data["priority"] = _priority_to_int(task_data.priority)
-            print(f"🎯 Prioridad agregada: {clickup_task_data['priority']}")
-        
-        # Agregar estado si existe
-        if task_data.status:
-            clickup_task_data["status"] = task_data.status
-            print(f"📊 Estado agregado: {clickup_task_data['status']}")
-        
-        # Agregar asignatario si existe
-        if task_data.assignee_id:
-            # ClickUp espera IDs numéricos; convertir si es posible
-            try:
-                clickup_task_data["assignees"] = [int(str(task_data.assignee_id))]
-                print(f"👤 Asignatario agregado: {clickup_task_data['assignees']}")
-            except ValueError:
-                clickup_task_data["assignees"] = [str(task_data.assignee_id)]
-                print(f"👤 Asignatario agregado (string): {clickup_task_data['assignees']}")
-
-        # Agregar fechas si existen
-        if task_data.due_date:
-            # Debug: verificar formato de fecha antes de enviar
-            print(f"🔍 Debug fecha límite antes de enviar a ClickUp:")
-            print(f"  📅 task_data.due_date: {task_data.due_date} (tipo: {type(task_data.due_date)})")
+        # Crear tarea en ClickUp
+        try:
+            clickup_task_data = {
+                "name": task_data.name,
+                "description": task_data.description,
+                "priority": task_data.priority,
+                "status": task_data.status,
+                "assignees": task_data.assignees,
+                "due_date": task_data.due_date
+            }
             
-            # SOLUCIÓN TEMPORAL: Manejar manualmente la conversión de tipos
-            if isinstance(task_data.due_date, datetime):
-                # Convertir datetime a timestamp en milisegundos
-                timestamp_ms = int(task_data.due_date.timestamp() * 1000)
-                clickup_task_data["due_date"] = timestamp_ms
-                print(f"  📅 DateTime convertido a timestamp: {task_data.due_date} -> {timestamp_ms}")
-            elif isinstance(task_data.due_date, (int, float)):
-                # Ya es timestamp en milisegundos
-                clickup_task_data["due_date"] = int(task_data.due_date)
-                print(f"  📅 Timestamp directo: {task_data.due_date}")
-            elif isinstance(task_data.due_date, str):
-                # Intentar convertir string a timestamp
-                try:
-                    timestamp = int(task_data.due_date)
-                    clickup_task_data["due_date"] = timestamp
-                    print(f"  📅 String convertido a timestamp: {task_data.due_date} -> {timestamp}")
-                except (ValueError, TypeError):
-                    print(f"  ❌ No se pudo convertir string a timestamp: {task_data.due_date}")
-                    # No incluir due_date si no se puede convertir
-            else:
-                print(f"  ⚠️ Tipo de due_date no reconocido: {type(task_data.due_date)}")
-                # No incluir due_date si no se puede convertir
+            print(f"🚀 Enviando tarea a ClickUp con datos: {clickup_task_data}")
+            print(f"📅 Due date que se envía: {task_data.due_date}")
+            print(f"📅 Due date original: {task_data.due_date}")
+            print(f"📅 Due date original raw: {task_data.due_date}")
+            print(f"📅 Due date en clickup_task_data: {clickup_task_data['due_date']}")
+            print(f"📅 Tipo de due_date en clickup_task_data: {type(clickup_task_data['due_date'])}")
             
-            print(f"📅 Fecha límite enviada a ClickUp: {clickup_task_data['due_date']}")
-        
-        if task_data.start_date:
-            if isinstance(task_data.start_date, (int, float)):
-                clickup_task_data["start_date"] = int(task_data.start_date)
-            else:
-                clickup_task_data["start_date"] = int(task_data.start_date.timestamp() * 1000)
+            clickup_response = await clickup_client.create_task(
+                list_id=task_data.list_id,
+                task_data=clickup_task_data
+            )
             
-        # Manejar custom_fields de forma simplificada
-        if task_data.custom_fields:
-            print(f"📝 Custom fields recibidos: {task_data.custom_fields}")
-            print(f"📅 Due date recibido: {task_data.due_date} (tipo: {type(task_data.due_date)})")
-            print(f"📅 Due date raw: {repr(task_data.due_date)}")
-            # Por ahora, crear la tarea sin custom fields para evitar errores 400
-            # Los custom fields se agregarán después de la creación
-            print("⚠️ Custom fields se agregarán después de crear la tarea para evitar errores 400")
+            print(f"✅ Respuesta de ClickUp: {clickup_response}")
+            
+            # Extraer información esencial de la respuesta de ClickUp
+            clickup_task_id = clickup_response.get("id")
+            clickup_due_date = clickup_response.get("due_date")
+            
+            if clickup_due_date:
+                print(f"✅ ClickUp recibió la fecha límite: {clickup_due_date}")
+            
+            # Extraer workspace_id y list_id de la respuesta de ClickUp
+            workspace_id = None
+            list_id = None
+            
+            # Intentar extraer de diferentes ubicaciones en la respuesta
+            if "team_id" in clickup_response:
+                workspace_id = clickup_response["team_id"]
+            elif "list" in clickup_response and "id" in clickup_response["list"]:
+                list_id = clickup_response["list"]["id"]
+            elif "space" in clickup_response and "id" in clickup_response["space"]:
+                # Si no hay list_id directo, usar el space_id como referencia
+                pass
+            
+            # Si no se pudo extraer, usar los valores del request
+            if not workspace_id:
+                workspace_id = task_data.workspace_id
+            if not list_id:
+                list_id = task_data.list_id
+                
+            print(f"🔍 Valores extraídos para BD local:")
+            print(f"   📁 workspace_id: {workspace_id}")
+            print(f"   📋 list_id: {list_id}")
+            print(f"   🆔 clickup_task_id: {clickup_task_id}")
+            
+        except Exception as e:
+            print(f"❌ Error creando tarea en ClickUp: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Error creando tarea en ClickUp: {str(e)}")
         
-        print(f"🚀 Enviando tarea a ClickUp con datos: {clickup_task_data}")
-        print(f"📅 Due date que se envía: {clickup_task_data.get('due_date')}")
-        print(f"📅 Due date original: {task_data.due_date}")
-        print(f"📅 Due date original raw: {repr(task_data.due_date)}")
-        print(f"📅 Due date en clickup_task_data: {clickup_task_data.get('due_date')}")
-        print(f"📅 Tipo de due_date en clickup_task_data: {type(clickup_task_data.get('due_date'))}")
-        
-        print(f"🔗 Llamando a clickup_client.create_task con list_id: {task_data.list_id}")
-        clickup_response = await clickup_client.create_task(
-            task_data.list_id, 
-            clickup_task_data
-        )
-        print(f"✅ Respuesta de ClickUp: {clickup_response}")
-        
-        # HOTFIX: No procesar due_date del response para evitar errores de división
-        # La fecha ya se envió correctamente a ClickUp, no necesitamos leerla de vuelta
-        print(f"✅ Tarea creada en ClickUp con ID: {clickup_response.get('id')}")
-        print(f"📅 Due date enviado: {clickup_response.get('due_date')} (no procesado para evitar errores)")
+        # Guardar en base de datos local
+        try:
+            db_task = Task(
+                id=clickup_task_id,
+                name=task_data.name,
+                description=task_data.description,
+                status=task_data.status,
+                priority=task_data.priority,
+                due_date=task_data.due_date,
+                assignees=task_data.assignees,
+                custom_fields=task_data.custom_fields,
+                workspace_id=workspace_id,  # Usar el valor extraído
+                list_id=list_id,  # Usar el valor extraído
+                creator_id=clickup_response.get("creator", {}).get("id", "system"),
+                is_synced=True
+            )
+            
+            print(f"💾 Guardando tarea en BD local con datos:")
+            print(f"   🆔 id: {db_task.id}")
+            print(f"   📁 workspace_id: {db_task.workspace_id}")
+            print(f"   📋 list_id: {db_task.list_id}")
+            print(f"   👤 creator_id: {db_task.creator_id}")
+            
+            db.add(db_task)
+            await db.commit()
+            await db.refresh(db_task)
+            
+            print(f"✅ Tarea guardada exitosamente en BD local")
+            
+        except Exception as e:
+            print(f"❌ Error guardando en BD local: {str(e)}")
+            print(f"❌ Tipo de error: {type(e)}")
+            import traceback
+            print(f"❌ Traceback completo: {traceback.format_exc()}")
+            raise HTTPException(status_code=500, detail=f"Error guardando en base de datos local: {str(e)}")
         
         # HOTFIX: Agregar custom fields de forma NO-BLOQUEANTE
         if task_data.custom_fields and clickup_response.get("id"):
@@ -309,68 +312,6 @@ async def create_task(
             # Ejecutar en background sin bloquear la respuesta
             import asyncio
             asyncio.create_task(_update_custom_fields_background(task_id, task_data.custom_fields, task_data.list_id))
-        
-        # Guardar en base de datos local; si ClickUp no devolvió priority, usar lo enviado
-        task_priority = clickup_response.get("priority", {}).get("id") if isinstance(clickup_response.get("priority"), dict) else clickup_task_data.get("priority", 3)
-        
-        # HOTFIX: Simplificar manejo de fechas para evitar errores
-        task_due_date = None
-        task_start_date = None
-        
-        # Solo procesar fechas si existen y son válidas
-        if clickup_response.get("due_date"):
-            try:
-                due_date_val = clickup_response.get("due_date")
-                if isinstance(due_date_val, (int, float)):
-                    task_due_date = datetime.fromtimestamp(due_date_val)
-                elif isinstance(due_date_val, str) and due_date_val.isdigit():
-                    task_due_date = datetime.fromtimestamp(int(due_date_val))
-            except Exception as e:
-                print(f"⚠️ Error procesando due_date: {e}")
-                task_due_date = None
-        
-        if clickup_response.get("start_date"):
-            try:
-                start_date_val = clickup_response.get("start_date")
-                if isinstance(start_date_val, (int, float)):
-                    task_start_date = datetime.fromtimestamp(start_date_val)
-                elif isinstance(start_date_val, str) and start_date_val.isdigit():
-                    task_start_date = datetime.fromtimestamp(int(start_date_val))
-            except Exception as e:
-                print(f"⚠️ Error procesando start_date: {e}")
-                task_start_date = None
-        
-        print(f"💾 Preparando para guardar en base de datos...")
-        print(f"  📋 ClickUp ID: {clickup_response['id']}")
-        print(f"  📝 Nombre: {clickup_response['name']}")
-        print(f"  🏢 Workspace ID: {task_data.workspace_id}")
-        print(f"  📋 List ID: {task_data.list_id}")
-        print(f"  👤 Assignee ID: {clickup_response.get('assignees', [{}])[0].get('id') if clickup_response.get('assignees') else None}")
-        
-        # Crear objeto Task para la base de datos (llenar campos obligatorios)
-        db_task = Task(
-            clickup_id=clickup_response["id"],
-            name=clickup_response["name"],
-            description=clickup_response.get("description", ""),
-            status=clickup_response.get("status", {}).get("status", ""),
-            priority=task_priority,
-            due_date=task_due_date,
-            start_date=task_start_date,
-            list_id=task_data.list_id,
-            workspace_id=task_data.workspace_id,
-            assignee_id=clickup_response.get("assignees", [{}])[0].get("id") if clickup_response.get("assignees") else None,
-            creator_id=str(clickup_response.get("creator", {}).get("id") or "system"),
-            custom_fields=task_data.custom_fields or {},
-            is_synced=True
-        )
-        
-        print(f"💾 Objeto Task creado, agregando a sesión...")
-        db.add(db_task)
-        print(f"💾 Commit a base de datos...")
-        db.commit()
-        print(f"💾 Refresh del objeto...")
-        db.refresh(db_task)
-        print(f"✅ Tarea guardada en BD con ID local: {db_task.id}")
         
         # Construir respuesta
         response_data = {
