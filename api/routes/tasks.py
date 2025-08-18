@@ -222,36 +222,43 @@ async def create_task_FINAL_VERSION(
         print(f"   🔍 has_custom_fields({task_data.list_id}): {has_custom_fields(task_data.list_id)}")
         print(f"   🔍 Condición completa: {bool(task_data.custom_fields) and has_custom_fields(task_data.list_id)}")
         
-        if task_data.custom_fields and has_custom_fields(task_data.list_id):
+        # ===== ACTUALIZACIÓN AUTOMÁTICA DE CAMPOS PERSONALIZADOS =====
+        # SIEMPRE intentar actualizar campos personalizados si existen
+        if task_data.custom_fields:
             print(f"🔧 Actualizando campos personalizados automáticamente...")
             print(f"   📧 Campos a procesar: {task_data.custom_fields}")
+            print(f"   📋 Lista: {task_data.list_id}")
             
-            # Usar directamente la función de actualización directa
-            try:
-                print(f"   🔄 Ejecutando actualización directa de campos personalizados...")
-                update_result = await update_custom_fields_direct(clickup_client, clickup_task_id, task_data.list_id, task_data.custom_fields)
+            # Verificar si la lista tiene campos personalizados configurados
+            if has_custom_fields(task_data.list_id):
+                print(f"   ✅ Lista tiene campos personalizados configurados")
                 
-                success_count = update_result.get('success_count', 0)
-                error_count = update_result.get('error_count', 0)
-                
-                print(f"   ✅ Actualización automática completada!")
-                print(f"   📊 Campos actualizados: {success_count}")
-                print(f"   ❌ Errores: {error_count}")
-                
-                if error_count > 0:
-                    print(f"   ⚠️ Algunos campos no se pudieron actualizar")
-                    print(f"   📋 Errores: {update_result.get('errors', [])}")
-                
-            except Exception as update_error:
-                print(f"   ❌ Error en actualización automática: {update_error}")
-                print(f"   📋 Tipo de error: {type(update_error)}")
-                # No fallar la creación por error en campos personalizados
+                # Usar directamente la función de actualización directa
+                try:
+                    print(f"   🔄 Ejecutando actualización directa de campos personalizados...")
+                    update_result = await update_custom_fields_direct(clickup_client, clickup_task_id, task_data.list_id, task_data.custom_fields)
+                    
+                    success_count = update_result.get('success_count', 0)
+                    error_count = update_result.get('error_count', 0)
+                    
+                    print(f"   ✅ Actualización automática completada!")
+                    print(f"   📊 Campos actualizados: {success_count}")
+                    print(f"   ❌ Errores: {error_count}")
+                    
+                    if error_count > 0:
+                        print(f"   ⚠️ Algunos campos no se pudieron actualizar")
+                        print(f"   📋 Errores: {update_result.get('errors', [])}")
+                    
+                except Exception as update_error:
+                    print(f"   ❌ Error en actualización automática: {update_error}")
+                    print(f"   📋 Tipo de error: {type(update_error)}")
+                    # No fallar la creación por error en campos personalizados
+            else:
+                print(f"   ⚠️ La lista {task_data.list_id} no tiene campos personalizados configurados")
+                print(f"   📋 Campos disponibles: {CUSTOM_FIELD_IDS.get(task_data.list_id, {})}")
         else:
             print(f"ℹ️ No hay campos personalizados para actualizar")
-            if not task_data.custom_fields:
-                print(f"   ❌ task_data.custom_fields está vacío")
-            if not has_custom_fields(task_data.list_id):
-                print(f"   ❌ La lista {task_data.list_id} no tiene campos personalizados configurados")
+            print(f"   ❌ task_data.custom_fields está vacío")
         
         # Guardar en BD local
         new_task = Task(
