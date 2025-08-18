@@ -184,16 +184,26 @@ class ClickUpClient:
         try:
             # Asegurar que los campos personalizados se incluyan en la creación inicial
             if "custom_fields" in task_data:
-                # Los campos personalizados deben estar en el formato correcto para ClickUp
+                # Los campos personalizados pueden venir en formato diccionario o lista
                 custom_fields = task_data["custom_fields"]
-                # ClickUp espera que los campos personalizados tengan id y value
-                formatted_custom_fields = []
-                for field in custom_fields:
-                    if isinstance(field, dict) and "id" in field and "value" in field:
-                        formatted_custom_fields.append(field)
                 
-                if formatted_custom_fields:
-                    task_data["custom_fields"] = formatted_custom_fields
+                # Si es un diccionario (formato: {"Email": "valor", "Celular": "valor"})
+                if isinstance(custom_fields, dict):
+                    # ClickUp espera que los campos personalizados se envíen como diccionario
+                    # con los nombres de los campos como claves
+                    task_data["custom_fields"] = custom_fields
+                    print(f"📧 Campos personalizados enviados como diccionario: {custom_fields}")
+                
+                # Si es una lista (formato: [{"id": "field_id", "value": "valor"}])
+                elif isinstance(custom_fields, list):
+                    formatted_custom_fields = []
+                    for field in custom_fields:
+                        if isinstance(field, dict) and "id" in field and "value" in field:
+                            formatted_custom_fields.append(field)
+                    
+                    if formatted_custom_fields:
+                        task_data["custom_fields"] = formatted_custom_fields
+                        print(f"📧 Campos personalizados enviados como lista: {formatted_custom_fields}")
             
             return await self._make_request("POST", f"list/{list_id}/task", data=task_data)
         except aiohttp.ClientResponseError as cre:
