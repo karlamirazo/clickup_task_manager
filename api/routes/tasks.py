@@ -223,68 +223,26 @@ async def create_task_FINAL_VERSION(
             print(f"🔧 Actualizando campos personalizados automáticamente...")
             print(f"   📧 Campos a procesar: {task_data.custom_fields}")
             
-            # Llamar automáticamente al endpoint de actualización manual
+            # Usar directamente la función de actualización directa
             try:
-                print(f"   🔄 Llamando endpoint de actualización manual...")
+                print(f"   🔄 Ejecutando actualización directa de campos personalizados...")
+                update_result = await update_custom_fields_direct(clickup_client, clickup_task_id, task_data.list_id, task_data.custom_fields)
                 
-                # Importar aiohttp para hacer la llamada interna
-                import aiohttp
+                success_count = update_result.get('success_count', 0)
+                error_count = update_result.get('error_count', 0)
                 
-                # URL base para la llamada interna
-                # En Railway, usar URL relativa para llamadas internas
-                base_url = ""  # URL relativa para llamadas internas
+                print(f"   ✅ Actualización automática completada!")
+                print(f"   📊 Campos actualizados: {success_count}")
+                print(f"   ❌ Errores: {error_count}")
                 
-                # Hacer la llamada al endpoint de actualización manual
-                async with aiohttp.ClientSession() as session:
-                    update_url = f"{base_url}/api/v1/tasks/{clickup_task_id}/update-custom-fields"
-                    params = {"list_id": task_data.list_id}
-                    
-                    print(f"   📡 Llamando: POST {update_url}")
-                    print(f"   📋 Parámetros: {params}")
-                    print(f"   📧 Datos: {task_data.custom_fields}")
-                    
-                    async with session.post(
-                        update_url,
-                        json=task_data.custom_fields,
-                        params=params,
-                        headers={"Content-Type": "application/json"}
-                    ) as update_response:
-                        update_status = update_response.status
-                        update_text = await update_response.text()
-                        
-                        print(f"   📡 Status de actualización: {update_status}")
-                        print(f"   📄 Respuesta de actualización: {update_text}")
-                        
-                        if update_status == 200:
-                            update_result = json.loads(update_text)
-                            success_count = update_result.get('success_count', 0)
-                            error_count = update_result.get('error_count', 0)
-                            
-                            print(f"   ✅ Actualización automática completada!")
-                            print(f"   📊 Campos actualizados: {success_count}")
-                            print(f"   ❌ Errores: {error_count}")
-                            
-                            if error_count > 0:
-                                print(f"   ⚠️ Algunos campos no se pudieron actualizar")
-                        else:
-                            print(f"   ❌ Error en actualización automática: {update_status}")
-                            print(f"   📄 Respuesta: {update_text}")
-                            
-                            # Fallback: intentar actualización directa
-                            print(f"   🔄 Intentando actualización directa como fallback...")
-                            await update_custom_fields_direct(clickup_client, clickup_task_id, task_data.list_id, task_data.custom_fields)
+                if error_count > 0:
+                    print(f"   ⚠️ Algunos campos no se pudieron actualizar")
+                    print(f"   📋 Errores: {update_result.get('errors', [])}")
                 
             except Exception as update_error:
                 print(f"   ❌ Error en actualización automática: {update_error}")
                 print(f"   📋 Tipo de error: {type(update_error)}")
-                
-                # Fallback: intentar actualización directa
-                print(f"   🔄 Intentando actualización directa como fallback...")
-                try:
-                    await update_custom_fields_direct(clickup_client, clickup_task_id, task_data.list_id, task_data.custom_fields)
-                except Exception as fallback_error:
-                    print(f"   ❌ Error en fallback: {fallback_error}")
-                    # No fallar la creación por error en campos personalizados
+                # No fallar la creación por error en campos personalizados
         else:
             print(f"ℹ️ No hay campos personalizados para actualizar")
             if not task_data.custom_fields:
