@@ -90,13 +90,9 @@ async def create_task_FINAL_VERSION(
     db: Session = Depends(get_db),
     clickup_client: ClickUpClient = Depends(get_clickup_client)
 ):
-    """
-    Crear una nueva tarea en ClickUp y en la base de datos local - VERSIÓN FINAL
-    """
-    print("🚀 ===== CÓDIGO COMPLETAMENTE NUEVO - VERSIÓN FINAL =====")
-    print(f"📝 Creando tarea: {task_data.name}")
-    print(f"🔍 Timestamp de ejecución: {datetime.now()}")
-    print(f"🔑 Token configurado: {'✅ SÍ' if clickup_client.api_token else '❌ NO'}")
+    """Crear una nueva tarea en ClickUp y sincronizar con BD local"""
+    print(f"🚀 Creando tarea: {task_data.name}")
+    print(f"📋 Datos recibidos: {task_data.dict()}")
     
     # Verificar configuración
     if not clickup_client.api_token:
@@ -109,16 +105,71 @@ async def create_task_FINAL_VERSION(
     print(f"✅ Configuración verificada, procediendo con creación...")
     
     try:
-        # Crear tarea en ClickUp
+        # Obtener campos personalizados de la lista para formatear correctamente
+        try:
+            list_info = await clickup_client.get_list(task_data.list_id)
+            print(f"📋 Información de la lista: {list_info.get('name', 'N/A')}")
+            
+            # Obtener campos personalizados de la lista
+            custom_fields_info = list_info.get("custom_fields", [])
+            print(f"🔧 Campos personalizados disponibles: {len(custom_fields_info)}")
+            
+            # Crear mapeo de nombres de campos a IDs
+            field_mapping = {}
+            for field in custom_fields_info:
+                field_name = field.get("name", "").lower()
+                field_id = field.get("id", "")
+                field_mapping[field_name] = field_id
+                print(f"   📝 Campo: {field_name} -> ID: {field_id}")
+            
+        except Exception as e:
+            print(f"⚠️ Error obteniendo información de la lista: {e}")
+            field_mapping = {}
+        
+        # Formatear campos personalizados para ClickUp
+        formatted_custom_fields = []
+        if task_data.custom_fields:
+            for field_name, field_value in task_data.custom_fields.items():
+                field_id = field_mapping.get(field_name.lower())
+                if field_id:
+                    formatted_custom_fields.append({
+                        "id": field_id,
+                        "value": field_value
+                    })
+                    print(f"✅ Campo personalizado formateado: {field_name} = {field_value}")
+                else:
+                    print(f"⚠️ Campo personalizado no encontrado en la lista: {field_name}")
+        
+        # Crear tarea en ClickUp con todos los campos necesarios
         clickup_task_data = {
             "name": task_data.name,
-            "description": task_data.description,
+            "description": task_data.description or "",
             "priority": task_data.priority,
-            "status": task_data.status,
-            "assignees": [task_data.assignees] if task_data.assignees else [],
-            "due_date": int(datetime.strptime(task_data.due_date, "%Y-%m-%d").timestamp() * 1000) if task_data.due_date else None,
-            "custom_fields": task_data.custom_fields
+            "status": task_data.status or "to do",  # Estado por defecto
         }
+        
+        # Agregar asignatarios si se especifican
+        if task_data.assignee_id:
+            clickup_task_data["assignees"] = [task_data.assignee_id]
+            print(f"👤 Usuario asignado: {task_data.assignee_id}")
+        
+        # Agregar fecha límite si se especifica
+        if task_data.due_date:
+            if isinstance(task_data.due_date, str):
+                try:
+                    # Convertir string a timestamp en milisegundos
+                    due_date_obj = datetime.strptime(task_data.due_date, "%Y-%m-%d")
+                    clickup_task_data["due_date"] = int(due_date_obj.timestamp() * 1000)
+                except ValueError:
+                    print(f"⚠️ Formato de fecha inválido: {task_data.due_date}")
+            elif isinstance(task_data.due_date, int):
+                clickup_task_data["due_date"] = task_data.due_date
+            print(f"📅 Fecha límite: {clickup_task_data.get('due_date')}")
+        
+        # Agregar campos personalizados si existen
+        if formatted_custom_fields:
+            clickup_task_data["custom_fields"] = formatted_custom_fields
+            print(f"📝 Campos personalizados: {formatted_custom_fields}")
         
         print(f"🚀 Enviando tarea a ClickUp con datos: {clickup_task_data}")
         
@@ -146,12 +197,12 @@ async def create_task_FINAL_VERSION(
             clickup_id=clickup_task_id,  # ✅ CORREGIDO: usar clickup_id, no id
             name=task_data.name,
             description=task_data.description,
-            status=task_data.status,
+            status=task_data.status or "to do",
             priority=task_data.priority,
-            due_date=datetime.strptime(task_data.due_date, "%Y-%m-%d") if task_data.due_date else None,
+            due_date=datetime.strptime(task_data.due_date, "%Y-%m-%d") if isinstance(task_data.due_date, str) else None,
             workspace_id=workspace_id,
             list_id=list_id,
-            assignee_id=task_data.assignees if task_data.assignees else None,
+            assignee_id=task_data.assignee_id if task_data.assignee_id else None,
             creator_id=clickup_response.get("creator", {}).get("id", "system"),
             custom_fields=task_data.custom_fields,
             is_synced=True
@@ -194,7 +245,6 @@ async def create_task_FINAL_VERSION(
         
     except Exception as e:
         print(f"❌ Error creando tarea: {e}")
-        print(f"❌ Tipo de error: {type(e)}")
         import traceback
         print(f"❌ Traceback completo: {traceback.format_exc()}")
         
