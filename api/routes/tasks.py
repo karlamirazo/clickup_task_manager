@@ -98,162 +98,73 @@ async def create_task_FINAL_VERSION(
     if not clickup_client.api_token:
         print(f"❌ ERROR: No hay token de ClickUp configurado")
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="CLICKUP_API_TOKEN no está configurado en el servidor"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="No hay token de ClickUp configurado"
         )
     
-    print(f"✅ Configuración verificada, procediendo con creación...")
-    
     try:
-        # Obtener campos personalizados de la lista para formatear correctamente
-        try:
-            list_info = await clickup_client.get_list(task_data.list_id)
-            print(f"📋 Información de la lista: {list_info.get('name', 'N/A')}")
-            
-            # Obtener campos personalizados de la lista
-            custom_fields_info = list_info.get("custom_fields", [])
-            print(f"🔧 Campos personalizados disponibles: {len(custom_fields_info)}")
-            
-            # Crear mapeo de nombres de campos a IDs
-            field_mapping = {}
-            for field in custom_fields_info:
-                field_name = field.get("name", "").lower()
-                field_id = field.get("id", "")
-                field_mapping[field_name] = field_id
-                print(f"   📝 Campo: {field_name} -> ID: {field_id}")
-            
-        except Exception as e:
-            print(f"⚠️ Error obteniendo información de la lista: {e}")
-            field_mapping = {}
-        
-        # Formatear campos personalizados para ClickUp
-        formatted_custom_fields = {}
-        if task_data.custom_fields:
-            # Usar directamente el diccionario de campos personalizados
-            # ClickUp espera un diccionario con nombres de campos como claves
-            formatted_custom_fields = task_data.custom_fields
-            print(f"✅ Campos personalizados formateados: {formatted_custom_fields}")
-        
-        # Crear tarea en ClickUp con todos los campos necesarios
+        # Preparar datos para ClickUp
         clickup_task_data = {
             "name": task_data.name,
             "description": task_data.description or "",
-            "priority": task_data.priority,
-            "status": task_data.status or "to do",  # Estado por defecto
+            "status": task_data.status or "to do",
+            "priority": task_data.priority or 3,
+            "due_date": int(datetime.strptime(task_data.due_date, "%Y-%m-%d").timestamp() * 1000) if task_data.due_date else None,
+            "assignees": [int(task_data.assignees)] if task_data.assignees else [],
+            "custom_fields": task_data.custom_fields or {}
         }
         
-        # Agregar asignatarios si se especifican
-        if task_data.assignee_id:
-            clickup_task_data["assignees"] = [task_data.assignee_id]
-            print(f"👤 Usuario asignado: {task_data.assignee_id}")
+        print(f"📤 Enviando datos a ClickUp: {clickup_task_data}")
         
-        # Agregar fecha límite si se especifica
-        if task_data.due_date:
-            if isinstance(task_data.due_date, str):
-                try:
-                    # Convertir string a timestamp en milisegundos
-                    due_date_obj = datetime.strptime(task_data.due_date, "%Y-%m-%d")
-                    clickup_task_data["due_date"] = int(due_date_obj.timestamp() * 1000)
-                except ValueError:
-                    print(f"⚠️ Formato de fecha inválido: {task_data.due_date}")
-            elif isinstance(task_data.due_date, int):
-                clickup_task_data["due_date"] = task_data.due_date
-            print(f"📅 Fecha límite: {clickup_task_data.get('due_date')}")
+        # Crear tarea en ClickUp
+        clickup_response = await clickup_client.create_task(task_data.list_id, clickup_task_data)
         
-        # Agregar campos personalizados si existen
-        if formatted_custom_fields:
-            clickup_task_data["custom_fields"] = formatted_custom_fields
-            print(f"📝 Campos personalizados: {formatted_custom_fields}")
+        if not clickup_response or "id" not in clickup_response:
+            raise Exception("No se recibió ID de tarea de ClickUp")
         
-        print(f"🚀 Enviando tarea a ClickUp con datos: {clickup_task_data}")
+        clickup_task_id = clickup_response["id"]
+        print(f"✅ Tarea creada en ClickUp con ID: {clickup_task_id}")
         
-        clickup_response = await clickup_client.create_task(
-            list_id=task_data.list_id,
-            task_data=clickup_task_data
-        )
-        
-        print(f"✅ Respuesta de ClickUp: {clickup_response}")
-        
-        # Extraer información esencial de la respuesta de ClickUp
-        clickup_task_id = clickup_response.get("id")
-        
-        # Extraer workspace_id y list_id de la respuesta de ClickUp
-        workspace_id = clickup_response.get("team_id") or task_data.workspace_id
-        list_id = clickup_response.get("list", {}).get("id") or task_data.list_id
-                
-        print(f"🔍 Valores extraídos para BD local:")
-        print(f"   📁 workspace_id: {workspace_id}")
-        print(f"   📋 list_id: {list_id}")
-        print(f"   🆔 clickup_task_id: {clickup_task_id}")
-        
-        # Guardar en base de datos local
-        db_task = Task(
-            clickup_id=clickup_task_id,  # ✅ CORREGIDO: usar clickup_id, no id
+        # Guardar en BD local
+        new_task = Task(
+            clickup_id=clickup_task_id,
             name=task_data.name,
-            description=task_data.description,
+            description=task_data.description or "",
             status=task_data.status or "to do",
-            priority=task_data.priority,
-            due_date=datetime.strptime(task_data.due_date, "%Y-%m-%d") if isinstance(task_data.due_date, str) else None,
-            workspace_id=workspace_id,
-            list_id=list_id,
-            assignee_id=task_data.assignee_id if task_data.assignee_id else None,
-            creator_id=clickup_response.get("creator", {}).get("id", "system"),
-            custom_fields=task_data.custom_fields,
+            priority=task_data.priority or 3,
+            due_date=datetime.strptime(task_data.due_date, "%Y-%m-%d") if task_data.due_date else None,
+            workspace_id=task_data.workspace_id,
+            list_id=task_data.list_id,
+            assignee_id=task_data.assignees,
+            creator_id="system",
+            custom_fields=task_data.custom_fields or {},
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
             is_synced=True
         )
         
-        print(f"💾 Guardando tarea en BD local con datos:")
-        print(f"   🆔 id: {db_task.id}")
-        print(f"   📁 workspace_id: {db_task.workspace_id}")
-        print(f"   📋 list_id: {db_task.list_id}")
-        print(f"   👤 creator_id: {db_task.creator_id}")
+        db.add(new_task)
+        db.commit()
+        db.refresh(new_task)
         
-        db.add(db_task)
-        db.commit()  # ✅ CORREGIDO: remover await
-        db.refresh(db_task)  # ✅ CORREGIDO: remover await
+        print(f"✅ Tarea guardada en BD local con ID: {new_task.id}")
         
-        print(f"✅ Tarea guardada exitosamente en BD local")
-        
-        # Construir respuesta
-        response_data = {
-            "id": db_task.id,  # ✅ Este es el ID de la BD local
-            "clickup_id": db_task.clickup_id,  # ✅ Este es el ID de ClickUp
-            "name": db_task.name,
-            "description": db_task.description,
-            "status": db_task.status,
-            "priority": db_task.priority,
-            "due_date": db_task.due_date,
-            "start_date": db_task.start_date,
-            "workspace_id": db_task.workspace_id,
-            "list_id": db_task.list_id,
-            "assignee_id": db_task.assignee_id,  # ✅ AGREGADO: campo faltante
-            "creator_id": db_task.creator_id,  # ✅ AGREGADO: campo faltante
-            "custom_fields": db_task.custom_fields,  # ✅ AGREGADO: campo faltante
-            "is_synced": db_task.is_synced,  # ✅ AGREGADO: campo faltante
-            "created_at": db_task.created_at,
-            "updated_at": db_task.updated_at
-        }
-        
-        print(f"✅ Tarea creada exitosamente en BD local: {response_data}")
-        return response_data
+        return new_task
         
     except Exception as e:
-        print(f"❌ Error creando tarea: {e}")
-        import traceback
-        print(f"❌ Traceback completo: {traceback.format_exc()}")
+        print(f"❌ Error al crear la tarea: {e}")
         
         # ===== LOGGING AUTOMÁTICO CON LANGGRAPH =====
         try:
             log_error_with_graph({
-                "error_description": f"Error creando tarea en ClickUp: {str(e)}",
-                "solution_description": "Verificar CLICKUP_API_TOKEN, datos de entrada y conexión a ClickUp API",
-                "context_info": f"Endpoint: POST /api/v1/tasks/, Task Data: {task_data.dict()}, Timestamp: {datetime.now()}",
+                "error_description": f"Error al crear tarea: {str(e)}",
+                "solution_description": "Verificar CLICKUP_API_TOKEN y datos de entrada",
+                "context_info": f"Tarea: {task_data.name}, Lista: {task_data.list_id}, Workspace: {task_data.workspace_id}",
                 "deployment_id": "railway-production",
                 "environment": "production",
                 "severity": "high",
                 "status": "pending"
             })
-            print("✅ Error registrado automáticamente en sistema de logging")
         except Exception as logging_error:
             print(f"⚠️ Error en logging automático: {logging_error}")
         
@@ -368,7 +279,7 @@ async def sync_tasks_from_clickup(
                                 "status": "pending"
                             })
                         except Exception as logging_error:
-                            print(f"      ⚠️ Error en logging automático: {logging_error}")
+                            print(f"⚠️ Error en logging automático: {logging_error}")
                         
                         continue
                         
@@ -387,7 +298,7 @@ async def sync_tasks_from_clickup(
                         "status": "pending"
                     })
                 except Exception as logging_error:
-                    print(f"   ⚠️ Error en logging automático: {logging_error}")
+                    print(f"⚠️ Error en logging automático: {logging_error}")
                 
                 continue
         
@@ -427,60 +338,6 @@ async def sync_tasks_from_clickup(
             detail=f"Error en sincronización: {str(e)}"
         )
 
-# ===== FUNCIÓN COMPLETAMENTE NUEVA =====
-async def _update_custom_fields_background(task_id: str, custom_fields: dict, list_id: str):
-    """Actualizar custom fields en background sin bloquear la respuesta principal"""
-    try:
-        print(f"🔄 Background: Actualizando custom fields para tarea {task_id}")
-        
-        # Obtener campos disponibles
-        available_fields = await clickup_client.get_list_custom_fields(list_id)
-        field_name_to_id = {str(f.get("name", "")).strip().lower(): f["id"] for f in available_fields if f.get("name")}
-        
-        # Preparar datos
-        custom_fields_data = []
-        for field_name, field_value in custom_fields.items():
-            if not field_value or str(field_value).strip() == "":
-                continue
-            
-            key = str(field_name).strip().lower()
-            if key in field_name_to_id:
-                custom_fields_data.append({
-                    "id": field_name_to_id[key],
-                    "value": field_value
-                })
-                print(f"✅ Campo '{field_name}' mapeado a ID {field_name_to_id[key]}")
-            else:
-                print(f"⚠️ Campo '{field_name}' no encontrado en la lista")
-        
-        if custom_fields_data:
-            # Actualizar custom fields en ClickUp
-            await clickup_client.update_task_custom_fields(task_id, custom_fields_data)
-            print(f"✅ Custom fields actualizados en background para tarea {task_id}")
-        else:
-            print(f"⚠️ No hay custom fields válidos para actualizar")
-            
-    except Exception as e:
-        print(f"❌ Error en background actualizando custom fields: {e}")
-        # NO lanzar excepción - esto es background
-
-# ===== ENDPOINTS ADICIONALES =====
-@router.get("/", response_model=List[TaskResponse])
-async def get_tasks(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=1000),
-    db: Session = Depends(get_db)
-):
-    """Obtener todas las tareas"""
-    try:
-        tasks = db.query(Task).offset(skip).limit(limit).all()
-        return tasks
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al obtener tareas: {str(e)}"
-        )
-
 # ===== ENDPOINTS ESPECÍFICOS DEBEN IR ANTES DEL ENDPOINT GENÉRICO {task_id} =====
 @router.get("/test")
 async def test_endpoint():
@@ -492,33 +349,91 @@ async def show_config():
     """Mostrar configuración actual para debugging"""
     from core.config import settings
     return {
-        "message": "🔧 Configuración actual",
-        "clickup_token_set": bool(settings.CLICKUP_API_TOKEN),
-        "clickup_token_length": len(settings.CLICKUP_API_TOKEN) if settings.CLICKUP_API_TOKEN else 0,
-        "clickup_base_url": settings.CLICKUP_API_BASE_URL,
-        "debug": settings.DEBUG
+        "clickup_token_configured": bool(settings.CLICKUP_API_TOKEN),
+        "database_url_configured": bool(settings.DATABASE_URL),
+        "environment": settings.ENVIRONMENT,
+        "timestamp": datetime.now().isoformat()
     }
 
-@router.get("/debug-code")
-async def debug_code_version():
-    """Debug: Verificar qué versión del código se está ejecutando"""
-    import inspect
-    
-    # Obtener el código fuente de la función create_task_FINAL_VERSION
+@router.get("/debug")
+async def debug_endpoint():
+    """Endpoint de debugging para verificar estado del sistema"""
     try:
-        func_source = inspect.getsource(create_task_FINAL_VERSION)
-        has_safe_timestamp = "safe_timestamp_to_datetime" in func_source
-        has_import_status = "from fastapi import status" in func_source
+        from core.config import settings
+        from core.database import get_db
+        from sqlalchemy.orm import Session
+        
+        # Verificar configuración
+        config_status = {
+            "clickup_token": bool(settings.CLICKUP_API_TOKEN),
+            "database_url": bool(settings.DATABASE_URL),
+            "environment": settings.ENVIRONMENT
+        }
+        
+        # Verificar base de datos
+        db = next(get_db())
+        try:
+            result = db.execute(text("SELECT COUNT(*) FROM tasks"))
+            task_count = result.scalar()
+            db_status = "✅ Conectado"
+        except Exception as e:
+            db_status = f"❌ Error: {str(e)}"
+            task_count = 0
+        
+        # Verificar ClickUp API
+        try:
+            from core.clickup_client import ClickUpClient
+            client = ClickUpClient(settings.CLICKUP_API_TOKEN)
+            workspaces = await client.get_workspaces()
+            clickup_status = f"✅ Conectado ({len(workspaces)} workspaces)"
+        except Exception as e:
+            clickup_status = f"❌ Error: {str(e)}"
         
         return {
-            "message": "🔍 Debug del código ejecutándose",
-            "timestamp": datetime.now().isoformat(),
-            "commit_hash": "80f30be0",  # Último commit
-            "function_exists": True,
-            "has_safe_timestamp": has_safe_timestamp,
-            "has_import_status": has_import_status,
-            "code_length": len(func_source),
-            "first_lines": func_source.split('\n')[:5]
+            "status": "✅ Sistema funcionando",
+            "config": config_status,
+            "database": db_status,
+            "clickup": clickup_status,
+            "task_count": task_count,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        # ===== LOGGING AUTOMÁTICO CON LANGGRAPH =====
+        try:
+            log_error_with_graph({
+                "error_description": f"Error en endpoint de debug: {str(e)}",
+                "solution_description": "Verificar configuración del sistema",
+                "context_info": f"Endpoint: /debug, Timestamp: {datetime.now()}",
+                "deployment_id": "railway-production",
+                "environment": "production",
+                "severity": "medium",
+                "status": "pending"
+            })
+        except Exception as logging_error:
+            print(f"⚠️ Error en logging automático: {logging_error}")
+        
+        return {
+            "status": "❌ Error en sistema",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+
+@router.get("/source-code")
+async def get_source_code():
+    """Obtener código fuente para debugging"""
+    try:
+        import os
+        current_file = os.path.abspath(__file__)
+        
+        with open(current_file, 'r', encoding='utf-8') as f:
+            source_code = f.read()
+        
+        return {
+            "message": "✅ Código fuente obtenido",
+            "file": current_file,
+            "size": len(source_code),
+            "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
         return {
@@ -527,7 +442,7 @@ async def debug_code_version():
             "timestamp": datetime.now().isoformat()
         }
 
-# ===== ENDPOINT DE SINCRONIZACIÓN SIMPLE (SIN PARÁMETROS) =====
+# ===== ENDPOINT DE SINCRONIZACIÓN SIMPLE (SIN PARÁMETROS) - DEBE IR ANTES DE {task_id} =====
 @router.post("/sync-simple", response_model=dict)
 async def sync_tasks_simple(
     db: Session = Depends(get_db),
@@ -659,215 +574,20 @@ async def sync_tasks_simple(
             detail=f"Error en sincronización simple: {str(e)}"
         )
 
+# ===== ENDPOINT GENÉRICO {task_id} - DEBE IR AL FINAL =====
 @router.get("/{task_id}", response_model=TaskResponse)
 async def get_task(task_id: int, db: Session = Depends(get_db)):
     """Obtener una tarea específica"""
     try:
         task = db.query(Task).filter(Task.id == task_id).first()
         if not task:
-                    raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Tarea no encontrada"
-        )
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Tarea no encontrada"
+            )
         return task
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error al obtener tarea: {str(e)}"
-        )
-
-# ===== ENDPOINT PARA VERIFICAR Y CREAR ESTRUCTURA DE BASE DE DATOS =====
-@router.post("/fix-database-structure")
-async def fix_database_structure(
-    db: Session = Depends(get_db)
-):
-    """Verificar y crear la estructura correcta de la tabla tasks en PostgreSQL"""
-    
-    print("🔧 Iniciando verificación y corrección de estructura de base de datos...")
-    
-    try:
-        # Verificar si la tabla tasks existe
-        result = db.execute(text("""
-            SELECT EXISTS (
-                SELECT FROM information_schema.tables 
-                WHERE table_schema = 'public' 
-                AND table_name = 'tasks'
-            );
-        """))
-        
-        table_exists = result.scalar()
-        print(f"📋 Tabla 'tasks' existe: {'✅ SÍ' if table_exists else '❌ NO'}")
-        
-        if table_exists:
-            # Obtener estructura actual
-            result = db.execute(text("""
-                SELECT column_name, data_type, is_nullable, column_default
-                FROM information_schema.columns 
-                WHERE table_name = 'tasks' 
-                ORDER BY ordinal_position;
-            """))
-            
-            columns = result.fetchall()
-            print(f"🏗️ Estructura actual de la tabla 'tasks':")
-            print(f"{'Columna':<20} {'Tipo':<15} {'Nullable':<10} {'Default'}")
-            print("-" * 60)
-            
-            for col in columns:
-                col_name, data_type, nullable, default = col
-                print(f"{col_name:<20} {data_type:<15} {nullable:<10} {default or 'N/A'}")
-            
-            # Verificar columnas específicas que necesitamos
-            required_columns = [
-                'id', 'clickup_id', 'name', 'description', 'status', 'priority',
-                'due_date', 'start_date', 'created_at', 'updated_at',
-                'workspace_id', 'list_id', 'assignee_id', 'creator_id',
-                'tags', 'custom_fields', 'attachments', 'comments',
-                'is_synced', 'last_sync'
-            ]
-            
-            existing_columns = [col[0] for col in columns]
-            missing_columns = [col for col in required_columns if col not in existing_columns]
-            
-            print(f"\n🔍 Análisis de columnas:")
-            print(f"✅ Columnas existentes: {len(existing_columns)}")
-            print(f"❌ Columnas faltantes: {len(missing_columns)}")
-            
-            if missing_columns:
-                print(f"📝 Columnas que faltan: {', '.join(missing_columns)}")
-                
-                # Recrear la tabla con estructura correcta
-                print(f"🔨 Recreando tabla con estructura correcta...")
-                
-                # Eliminar tabla existente
-                db.execute(text("DROP TABLE IF EXISTS tasks CASCADE;"))
-                db.commit()
-                print(f"✅ Tabla eliminada")
-                
-                # Crear tabla con estructura correcta
-                create_table_sql = """
-                CREATE TABLE tasks (
-                    id SERIAL PRIMARY KEY,
-                    clickup_id VARCHAR(255) UNIQUE NOT NULL,
-                    name VARCHAR(500) NOT NULL,
-                    description TEXT,
-                    status VARCHAR(100) NOT NULL DEFAULT 'to_do',
-                    priority INTEGER DEFAULT 3,
-                    due_date TIMESTAMP,
-                    start_date TIMESTAMP,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    workspace_id VARCHAR(255) NOT NULL,
-                    list_id VARCHAR(255) NOT NULL,
-                    assignee_id VARCHAR(255),
-                    creator_id VARCHAR(255) DEFAULT 'system',
-                    tags JSONB,
-                    custom_fields JSONB,
-                    attachments JSONB,
-                    comments JSONB,
-                    is_synced BOOLEAN DEFAULT FALSE,
-                    last_sync TIMESTAMP
-                );
-                """
-                
-                db.execute(text(create_table_sql))
-                
-                # Crear índices para mejor rendimiento
-                print(f"📊 Creando índices...")
-                db.execute(text("CREATE INDEX idx_tasks_clickup_id ON tasks(clickup_id);"))
-                db.execute(text("CREATE INDEX idx_tasks_workspace_id ON tasks(workspace_id);"))
-                db.execute(text("CREATE INDEX idx_tasks_list_id ON tasks(list_id);"))
-                db.execute(text("CREATE INDEX idx_tasks_status ON tasks(status);"))
-                db.execute(text("CREATE INDEX idx_tasks_priority ON tasks(priority);"))
-                db.execute(text("CREATE INDEX idx_tasks_is_synced ON tasks(is_synced);"))
-                
-                db.commit()
-                print(f"✅ Tabla 'tasks' recreada exitosamente!")
-                print(f"✅ Índices creados para mejor rendimiento")
-                
-                return {
-                    "message": "✅ Estructura de base de datos corregida exitosamente",
-                    "action": "table_recreated",
-                    "missing_columns": missing_columns,
-                    "status": "fixed"
-                }
-            else:
-                print(f"🎉 Todas las columnas necesarias están presentes!")
-                return {
-                    "message": "✅ Estructura de base de datos ya está correcta",
-                    "action": "no_action_needed",
-                    "status": "ok"
-                }
-        else:
-            # Crear tabla desde cero
-            print(f"🔨 Creando tabla tasks desde cero...")
-            
-            create_table_sql = """
-            CREATE TABLE tasks (
-                id SERIAL PRIMARY KEY,
-                clickup_id VARCHAR(255) UNIQUE NOT NULL,
-                name VARCHAR(500) NOT NULL,
-                description TEXT,
-                status VARCHAR(100) NOT NULL DEFAULT 'to_do',
-                priority INTEGER DEFAULT 3,
-                due_date TIMESTAMP,
-                start_date TIMESTAMP,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                workspace_id VARCHAR(255) NOT NULL,
-                list_id VARCHAR(255) NOT NULL,
-                assignee_id VARCHAR(255),
-                creator_id VARCHAR(255) DEFAULT 'system',
-                tags JSONB,
-                custom_fields JSONB,
-                attachments JSONB,
-                comments JSONB,
-                is_synced BOOLEAN DEFAULT FALSE,
-                last_sync TIMESTAMP
-            );
-            """
-            
-            db.execute(text(create_table_sql))
-            
-            # Crear índices para mejor rendimiento
-            print(f"📊 Creando índices...")
-            db.execute(text("CREATE INDEX idx_tasks_clickup_id ON tasks(clickup_id);"))
-            db.execute(text("CREATE INDEX idx_tasks_workspace_id ON tasks(workspace_id);"))
-            db.execute(text("CREATE INDEX idx_tasks_list_id ON tasks(list_id);"))
-            db.execute(text("CREATE INDEX idx_tasks_status ON tasks(status);"))
-            db.execute(text("CREATE INDEX idx_tasks_priority ON tasks(priority);"))
-            db.execute(text("CREATE INDEX idx_tasks_is_synced ON tasks(is_synced);"))
-            
-            db.commit()
-            print(f"✅ Tabla 'tasks' creada exitosamente!")
-            print(f"✅ Índices creados para mejor rendimiento")
-            
-            return {
-                "message": "✅ Tabla tasks creada exitosamente",
-                "action": "table_created",
-                "status": "created"
-            }
-        
-    except Exception as e:
-        print(f"❌ Error corrigiendo estructura de base de datos: {e}")
-        import traceback
-        print(f"🔍 Traceback: {traceback.format_exc()}")
-        
-        # ===== LOGGING AUTOMÁTICO CON LANGGRAPH =====
-        try:
-            log_error_with_graph({
-                "error_description": f"Error corrigiendo estructura de base de datos: {str(e)}",
-                "solution_description": "Verificar permisos de PostgreSQL y estructura de tabla",
-                "context_info": f"Endpoint: POST /api/v1/tasks/fix-database-structure, Acción: Corregir estructura BD",
-                "deployment_id": "railway-production",
-                "environment": "production",
-                "severity": "high",
-                "status": "pending"
-            })
-            print("✅ Error de estructura de BD registrado automáticamente")
-        except Exception as logging_error:
-            print(f"⚠️ Error en logging automático: {logging_error}")
-        
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error corrigiendo estructura de base de datos: {str(e)}"
         )
