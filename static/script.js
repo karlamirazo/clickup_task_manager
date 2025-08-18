@@ -319,7 +319,7 @@ async function syncAllTasks() {
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
         }
         
-        const response = await fetch('/api/v1/tasks/sync-all', {
+        const response = await fetch('/api/v1/tasks/sync?workspace_id=' + document.getElementById('task-workspace').value, {
             method: 'POST'
         });
         
@@ -815,7 +815,7 @@ async function handleCreateTask(event) {
         const day = parseInt(parts[2], 10);
         const localMidnight = new Date(year, month, day, 0, 0, 0, 0);
         // ClickUp interpreta due_date con due_date_time=false en zona del workspace
-        dueDate = localMidnight.getTime();
+        dueDate = dueDateValue;
         console.log('INFO: Fecha límite capturada:', {
             inputValue: dueDateValue,
             timestamp: dueDate,
