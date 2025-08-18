@@ -21,6 +21,9 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from langgraph_tools.simple_error_logging import log_error_with_graph
 
+# ===== CONFIGURACIÓN DE CAMPOS PERSONALIZADOS =====
+from custom_field_config import get_custom_field_id, has_custom_fields
+
 # ===== MODELOS PYDANTIC SIMPLES =====
 class TaskCreate(BaseModel):
     """Modelo para crear tareas"""
@@ -124,6 +127,24 @@ async def create_task_FINAL_VERSION(
         
         clickup_task_id = clickup_response["id"]
         print(f"✅ Tarea creada en ClickUp con ID: {clickup_task_id}")
+        
+        # ===== ACTUALIZACIÓN AUTOMÁTICA DE CAMPOS PERSONALIZADOS =====
+        if task_data.custom_fields and has_custom_fields(task_data.list_id):
+            print(f"🔧 Actualizando campos personalizados...")
+            try:
+                for field_name, field_value in task_data.custom_fields.items():
+                    field_id = get_custom_field_id(task_data.list_id, field_name)
+                    if field_id:
+                        print(f"   📧 Actualizando {field_name} (ID: {field_id}) con valor: {field_value}")
+                        await clickup_client.update_custom_field_value(clickup_task_id, field_id, field_value)
+                        print(f"   ✅ Campo {field_name} actualizado exitosamente")
+                    else:
+                        print(f"   ⚠️ No se encontró ID para el campo: {field_name}")
+            except Exception as cf_error:
+                print(f"   ❌ Error actualizando campos personalizados: {cf_error}")
+                # No fallar la creación por error en campos personalizados
+        else:
+            print(f"ℹ️ No hay campos personalizados para actualizar")
         
         # Guardar en BD local
         new_task = Task(
