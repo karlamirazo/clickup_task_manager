@@ -238,6 +238,76 @@ async def create_task_FINAL_VERSION(
             detail=f"Error al crear la tarea: {str(e)}"
         )
 
+# ===== ENDPOINT PARA ACTUALIZAR CAMPOS PERSONALIZADOS MANUALMENTE =====
+@router.post("/{task_id}/update-custom-fields", response_model=dict)
+async def update_task_custom_fields(
+    task_id: str,
+    custom_fields: Dict[str, Any],
+    list_id: str,
+    clickup_client: ClickUpClient = Depends(get_clickup_client)
+):
+    """Actualizar campos personalizados de una tarea específica"""
+    print(f"🔧 Actualizando campos personalizados para tarea: {task_id}")
+    print(f"📧 Campos: {custom_fields}")
+    print(f"📋 Lista: {list_id}")
+    
+    try:
+        if not has_custom_fields(list_id):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"La lista {list_id} no tiene campos personalizados configurados"
+            )
+        
+        updated_fields = {}
+        errors = []
+        
+        for field_name, field_value in custom_fields.items():
+            field_id = get_custom_field_id(list_id, field_name)
+            if field_id:
+                try:
+                    print(f"   📧 Actualizando {field_name} (ID: {field_id}) con valor: {field_value}")
+                    result = await clickup_client.update_custom_field_value(task_id, field_id, field_value)
+                    updated_fields[field_name] = {
+                        "status": "success",
+                        "field_id": field_id,
+                        "result": result
+                    }
+                    print(f"   ✅ Campo {field_name} actualizado exitosamente")
+                except Exception as e:
+                    error_msg = f"Error actualizando {field_name}: {str(e)}"
+                    errors.append(error_msg)
+                    updated_fields[field_name] = {
+                        "status": "error",
+                        "field_id": field_id,
+                        "error": str(e)
+                    }
+                    print(f"   ❌ {error_msg}")
+            else:
+                error_msg = f"No se encontró ID para el campo: {field_name}"
+                errors.append(error_msg)
+                updated_fields[field_name] = {
+                    "status": "error",
+                    "field_id": None,
+                    "error": error_msg
+                }
+                print(f"   ⚠️ {error_msg}")
+        
+        return {
+            "task_id": task_id,
+            "list_id": list_id,
+            "updated_fields": updated_fields,
+            "success_count": len([f for f in updated_fields.values() if f["status"] == "success"]),
+            "error_count": len([f for f in updated_fields.values() if f["status"] == "error"]),
+            "errors": errors
+        }
+        
+    except Exception as e:
+        print(f"❌ Error actualizando campos personalizados: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error actualizando campos personalizados: {str(e)}"
+        )
+
 # ===== ENDPOINT DE SINCRONIZACIÓN CON PARÁMETROS =====
 @router.post("/sync", response_model=dict)
 async def sync_tasks_from_clickup(
