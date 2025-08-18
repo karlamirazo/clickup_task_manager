@@ -218,6 +218,9 @@ async def create_task_FINAL_VERSION(
         print(f"   📧 task_data.custom_fields: {task_data.custom_fields}")
         print(f"   📋 task_data.list_id: {task_data.list_id}")
         print(f"   🔍 has_custom_fields({task_data.list_id}): {has_custom_fields(task_data.list_id)}")
+        print(f"   🔍 bool(task_data.custom_fields): {bool(task_data.custom_fields)}")
+        print(f"   🔍 has_custom_fields({task_data.list_id}): {has_custom_fields(task_data.list_id)}")
+        print(f"   🔍 Condición completa: {bool(task_data.custom_fields) and has_custom_fields(task_data.list_id)}")
         
         if task_data.custom_fields and has_custom_fields(task_data.list_id):
             print(f"🔧 Actualizando campos personalizados automáticamente...")
