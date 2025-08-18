@@ -127,18 +127,12 @@ async def create_task_FINAL_VERSION(
             field_mapping = {}
         
         # Formatear campos personalizados para ClickUp
-        formatted_custom_fields = []
+        formatted_custom_fields = {}
         if task_data.custom_fields:
-            for field_name, field_value in task_data.custom_fields.items():
-                field_id = field_mapping.get(field_name.lower())
-                if field_id:
-                    formatted_custom_fields.append({
-                        "id": field_id,
-                        "value": field_value
-                    })
-                    print(f"✅ Campo personalizado formateado: {field_name} = {field_value}")
-                else:
-                    print(f"⚠️ Campo personalizado no encontrado en la lista: {field_name}")
+            # Usar directamente el diccionario de campos personalizados
+            # ClickUp espera un diccionario con nombres de campos como claves
+            formatted_custom_fields = task_data.custom_fields
+            print(f"✅ Campos personalizados formateados: {formatted_custom_fields}")
         
         # Crear tarea en ClickUp con todos los campos necesarios
         clickup_task_data = {
@@ -271,13 +265,17 @@ async def create_task_FINAL_VERSION(
 # ===== NUEVO ENDPOINT DE SINCRONIZACIÓN =====
 @router.post("/sync", response_model=dict)
 async def sync_tasks_from_clickup(
-    workspace_id: str = Query(..., description="ID del workspace de ClickUp"),
+    workspace_id: Optional[str] = Query(None, description="ID del workspace de ClickUp (opcional)"),
     db: Session = Depends(get_db),
     clickup_client: ClickUpClient = Depends(get_clickup_client)
 ):
     """
     Sincronizar todas las tareas de ClickUp a la base de datos local
     """
+    if not workspace_id:
+        # Si no se proporciona workspace_id, usar el workspace por defecto
+        workspace_id = "9014943317"  # Workspace por defecto
+    
     print(f"🔄 Iniciando sincronización de tareas para workspace: {workspace_id}")
     
     try:
@@ -355,73 +353,72 @@ async def sync_tasks_from_clickup(
                         # Commit después de cada lista para evitar transacciones muy largas
                         db.commit()
                         
-                            except Exception as e:
-            print(f"      ❌ Error sincronizando lista {list_name}: {e}")
-            
-            # ===== LOGGING AUTOMÁTICO CON LANGGRAPH =====
-            try:
-                log_error_with_graph({
-                    "error_description": f"Error sincronizando lista {list_name}: {str(e)}",
-                    "solution_description": "Verificar permisos de lista y conexión a ClickUp API",
-                    "context_info": f"Lista: {list_name} (ID: {list_id}), Espacio: {space_name} (ID: {space_id}), Workspace: {workspace_id}",
-                    "deployment_id": "railway-production",
-                    "environment": "production",
-                    "severity": "medium",
-                    "status": "pending"
-                })
-            except Exception as logging_error:
-                print(f"      ⚠️ Error en logging automático: {logging_error}")
-            
-            continue
-                        
                     except Exception as e:
-            print(f"   ❌ Error sincronizando espacio {space_name}: {e}")
-            
-            # ===== LOGGING AUTOMÁTICO CON LANGGRAPH =====
-            try:
-                log_error_with_graph({
-                    "error_description": f"Error sincronizando espacio {space_name}: {str(e)}",
-                    "solution_description": "Verificar permisos de espacio y conexión a ClickUp API",
-                    "context_info": f"Espacio: {space_name} (ID: {space_id}), Workspace: {workspace_id}",
-                    "deployment_id": "railway-production",
-                    "environment": "production",
-                    "severity": "medium",
-                    "status": "pending"
-                })
-            except Exception as logging_error:
-                print(f"   ⚠️ Error en logging automático: {logging_error}")
-            
-            continue
+                        print(f"      ❌ Error sincronizando lista {list_name}: {e}")
+                        
+                        # ===== LOGGING AUTOMÁTICO CON LANGGRAPH =====
+                        try:
+                            log_error_with_graph({
+                                "error_description": f"Error sincronizando lista {list_name}: {str(e)}",
+                                "solution_description": "Verificar permisos de lista y conexión a ClickUp API",
+                                "context_info": f"Lista: {list_name} (ID: {list_id}), Espacio: {space_name} (ID: {space_id}), Workspace: {workspace_id}",
+                                "deployment_id": "railway-production",
+                                "environment": "production",
+                                "severity": "medium",
+                                "status": "pending"
+                            })
+                        except Exception as logging_error:
+                            print(f"      ⚠️ Error en logging automático: {logging_error}")
+                        
+                        continue
+                        
+            except Exception as e:
+                print(f"   ❌ Error sincronizando espacio {space_name}: {e}")
+                
+                # ===== LOGGING AUTOMÁTICO CON LANGGRAPH =====
+                try:
+                    log_error_with_graph({
+                        "error_description": f"Error sincronizando espacio {space_name}: {str(e)}",
+                        "solution_description": "Verificar permisos de espacio y conexión a ClickUp API",
+                        "context_info": f"Espacio: {space_name} (ID: {space_id}), Workspace: {workspace_id}",
+                        "deployment_id": "railway-production",
+                        "environment": "production",
+                        "severity": "medium",
+                        "status": "pending"
+                    })
+                except Exception as logging_error:
+                    print(f"   ⚠️ Error en logging automático: {logging_error}")
+                
+                continue
         
-        print(f"✅ Sincronización completada:")
-        print(f"   📊 Total tareas procesadas: {total_tasks_synced}")
-        print(f"   ➕ Tareas creadas: {total_tasks_created}")
-        print(f"   🔄 Tareas actualizadas: {total_tasks_updated}")
+        # Commit final
+        db.commit()
         
-        return {
-            "message": "Sincronización completada exitosamente",
+        result = {
+            "message": "Sincronización completada",
             "total_tasks_synced": total_tasks_synced,
             "total_tasks_created": total_tasks_created,
-            "total_tasks_updated": total_tasks_updated
+            "total_tasks_updated": total_tasks_updated,
+            "workspace_id": workspace_id
         }
+        
+        print(f"✅ Sincronización completada: {result}")
+        return result
         
     except Exception as e:
         print(f"❌ Error en sincronización: {e}")
-        import traceback
-        print(f"🔍 Traceback: {traceback.format_exc()}")
         
         # ===== LOGGING AUTOMÁTICO CON LANGGRAPH =====
         try:
             log_error_with_graph({
                 "error_description": f"Error en sincronización de tareas: {str(e)}",
-                "solution_description": "Verificar CLICKUP_API_TOKEN y permisos de workspace",
-                "context_info": f"Workspace ID: {workspace_id}, Endpoint: POST /api/v1/tasks/sync",
+                "solution_description": "Verificar CLICKUP_API_TOKEN y conexión a ClickUp API",
+                "context_info": f"Workspace: {workspace_id}, Timestamp: {datetime.now()}",
                 "deployment_id": "railway-production",
                 "environment": "production",
                 "severity": "high",
                 "status": "pending"
             })
-            print("✅ Error de sincronización registrado automáticamente")
         except Exception as logging_error:
             print(f"⚠️ Error en logging automático: {logging_error}")
         

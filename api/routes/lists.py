@@ -14,13 +14,30 @@ clickup_client = ClickUpClient()
 
 @router.get("/")
 async def get_lists(
-    space_id: str = Query(..., description="ID del space"),
+    space_id: Optional[str] = Query(None, description="ID del space (opcional)"),
+    workspace_id: Optional[str] = Query(None, description="ID del workspace (opcional)"),
     db: Session = Depends(get_db)
 ):
-    """Obtener todas las listas de un space"""
+    """Obtener todas las listas"""
     try:
-        lists = await clickup_client.get_lists(space_id)
-        return {"lists": lists, "total": len(lists)}
+        if space_id:
+            # Si se proporciona space_id, obtener listas de ese space
+            lists = await clickup_client.get_lists(space_id)
+            return {"lists": lists, "total": len(lists)}
+        elif workspace_id:
+            # Si se proporciona workspace_id, obtener todas las listas del workspace
+            spaces = await clickup_client.get_spaces(workspace_id)
+            all_lists = []
+            for space in spaces:
+                try:
+                    space_lists = await clickup_client.get_lists(space.get("id"))
+                    all_lists.extend(space_lists)
+                except Exception as e:
+                    print(f"Error obteniendo listas del space {space.get('id')}: {e}")
+            return {"lists": all_lists, "total": len(all_lists)}
+        else:
+            # Si no se proporciona ningún ID, devolver lista vacía
+            return {"lists": [], "total": 0, "message": "Se requiere space_id o workspace_id"}
         
     except Exception as e:
         raise HTTPException(
