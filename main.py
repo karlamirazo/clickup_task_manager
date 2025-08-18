@@ -250,27 +250,56 @@ async def health_check():
 async def test_logging_system():
     """Endpoint para probar el sistema de logging de LangGraph"""
     try:
-        import sys
-        sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-        from langgraph_tools.simple_error_logging import log_error_with_graph
+        # Verificar si LangGraph está disponible
+        try:
+            import langgraph
+            langgraph_available = True
+            langgraph_version = langgraph.__version__
+        except ImportError:
+            langgraph_available = False
+            langgraph_version = "No disponible"
         
-        # Probar logging
-        test_result = log_error_with_graph({
-            "error_description": "Prueba del sistema de logging desde endpoint /test-logging",
-            "solution_description": "Verificar que el logging funciona correctamente en Railway con PostgreSQL",
-            "context_info": "Endpoint: GET /test-logging, Timestamp: " + str(datetime.datetime.now()),
-            "deployment_id": "railway-production",
-            "environment": "production",
-            "severity": "info",
-            "status": "resolved"
-        })
+        # Verificar si el módulo de logging está disponible
+        try:
+            import sys
+            sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+            from langgraph_tools.simple_error_logging import log_error_with_graph
+            logging_module_available = True
+        except Exception as e:
+            logging_module_available = False
+            logging_error = str(e)
         
-        return {
-            "status": "success",
-            "message": "Sistema de logging probado exitosamente",
-            "logging_result": test_result,
-            "timestamp": str(datetime.datetime.now())
-        }
+        # Si todo está disponible, probar logging
+        if langgraph_available and logging_module_available:
+            test_result = log_error_with_graph({
+                "error_description": "Prueba del sistema de logging desde endpoint /test-logging",
+                "solution_description": "Verificar que el logging funciona correctamente en Railway con PostgreSQL",
+                "context_info": "Endpoint: GET /test-logging, Timestamp: " + str(datetime.datetime.now()),
+                "deployment_id": "railway-production",
+                "environment": "production",
+                "severity": "info",
+                "status": "resolved"
+            })
+            
+            return {
+                "status": "success",
+                "message": "Sistema de logging probado exitosamente",
+                "langgraph_available": langgraph_available,
+                "langgraph_version": langgraph_version,
+                "logging_module_available": logging_module_available,
+                "logging_result": test_result,
+                "timestamp": str(datetime.datetime.now())
+            }
+        else:
+            return {
+                "status": "error",
+                "message": "Dependencias no disponibles",
+                "langgraph_available": langgraph_available,
+                "langgraph_version": langgraph_version,
+                "logging_module_available": logging_module_available,
+                "logging_error": logging_error if not logging_module_available else None,
+                "timestamp": str(datetime.datetime.now())
+            }
         
     except Exception as e:
         return {
