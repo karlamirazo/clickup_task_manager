@@ -229,11 +229,25 @@ async def create_task_FINAL_VERSION(
         # 1. ACTUALIZAR ESTADO DE LA TAREA
         if task_data.status and task_data.status != "to do":
             try:
-                print(f"   📊 Actualizando estado a: {task_data.status}")
-                await clickup_client.update_task(clickup_task_id, {"status": task_data.status})
+                # Mapear estados a los que ClickUp reconoce
+                status_mapping = {
+                    "in progress": "en curso",
+                    "complete": "completado",
+                    "done": "completado",
+                    "working": "en curso",
+                    "active": "en curso",
+                    "review": "en curso",
+                    "testing": "en curso"
+                }
+                
+                clickup_status = status_mapping.get(task_data.status, task_data.status)
+                print(f"   📊 Actualizando estado a: {task_data.status} -> {clickup_status}")
+                
+                await clickup_client.update_task(clickup_task_id, {"status": clickup_status})
                 print(f"   ✅ Estado actualizado exitosamente")
             except Exception as e:
                 print(f"   ❌ Error actualizando estado: {e}")
+                print(f"   📋 Detalles del error: {type(e).__name__}: {str(e)}")
         
         # 2. ACTUALIZAR PRIORIDAD
         if task_data.priority and task_data.priority != 3:
