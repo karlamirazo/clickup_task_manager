@@ -21,7 +21,7 @@ async def test_custom_field_update():
     print("=" * 60)
     
     # ID de la tarea que acabamos de crear
-    task_id = "86b6af7ne"
+    task_id = "86b6af922"
     list_id = "901411770471"  # PROYECTO 1
     
     try:

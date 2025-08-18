@@ -161,22 +161,34 @@ async def create_task_FINAL_VERSION(
         print(f"✅ Tarea creada en ClickUp con ID: {clickup_task_id}")
         
         # ===== ACTUALIZACIÓN AUTOMÁTICA DE CAMPOS PERSONALIZADOS =====
+        print(f"🔍 DEBUG: Verificando actualización automática...")
+        print(f"   📧 task_data.custom_fields: {task_data.custom_fields}")
+        print(f"   📋 task_data.list_id: {task_data.list_id}")
+        print(f"   🔍 has_custom_fields({task_data.list_id}): {has_custom_fields(task_data.list_id)}")
+        
         if task_data.custom_fields and has_custom_fields(task_data.list_id):
             print(f"🔧 Actualizando campos personalizados...")
+            print(f"   📧 Campos a procesar: {task_data.custom_fields}")
             try:
                 for field_name, field_value in task_data.custom_fields.items():
                     field_id = get_custom_field_id(task_data.list_id, field_name)
+                    print(f"   🔍 Campo: {field_name}, ID encontrado: {field_id}")
                     if field_id:
                         print(f"   📧 Actualizando {field_name} (ID: {field_id}) con valor: {field_value}")
-                        await clickup_client.update_custom_field_value(clickup_task_id, field_id, field_value)
-                        print(f"   ✅ Campo {field_name} actualizado exitosamente")
+                        result = await clickup_client.update_custom_field_value(clickup_task_id, field_id, field_value)
+                        print(f"   ✅ Campo {field_name} actualizado exitosamente. Resultado: {result}")
                     else:
                         print(f"   ⚠️ No se encontró ID para el campo: {field_name}")
             except Exception as cf_error:
                 print(f"   ❌ Error actualizando campos personalizados: {cf_error}")
+                print(f"   📋 Tipo de error: {type(cf_error)}")
                 # No fallar la creación por error en campos personalizados
         else:
             print(f"ℹ️ No hay campos personalizados para actualizar")
+            if not task_data.custom_fields:
+                print(f"   ❌ task_data.custom_fields está vacío")
+            if not has_custom_fields(task_data.list_id):
+                print(f"   ❌ La lista {task_data.list_id} no tiene campos personalizados configurados")
         
         # Guardar en BD local
         new_task = Task(
