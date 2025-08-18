@@ -10,6 +10,7 @@ from datetime import datetime
 from fastapi import status
 from pydantic import BaseModel, field_validator
 from sqlalchemy import text
+import json
 
 from core.database import get_db
 from core.clickup_client import ClickUpClient, get_clickup_client
@@ -55,6 +56,58 @@ def get_custom_field_id(list_id: str, field_name: str) -> str:
 def has_custom_fields(list_id: str) -> bool:
     """Verificar si una lista tiene campos personalizados"""
     return bool(CUSTOM_FIELD_IDS.get(list_id, {}))
+
+async def update_custom_fields_direct(clickup_client: ClickUpClient, task_id: str, list_id: str, custom_fields: Dict[str, Any]):
+    """Función de fallback para actualizar campos personalizados directamente"""
+    print(f"   🔧 Actualización directa de campos personalizados...")
+    
+    updated_fields = {}
+    errors = []
+    
+    for field_name, field_value in custom_fields.items():
+        field_id = get_custom_field_id(list_id, field_name)
+        if field_id:
+            try:
+                print(f"      📧 Actualizando {field_name} (ID: {field_id}) con valor: {field_value}")
+                result = await clickup_client.update_custom_field_value(task_id, field_id, field_value)
+                updated_fields[field_name] = {
+                    "status": "success",
+                    "field_id": field_id,
+                    "result": result
+                }
+                print(f"      ✅ Campo {field_name} actualizado exitosamente")
+            except Exception as e:
+                error_msg = f"Error actualizando {field_name}: {str(e)}"
+                errors.append(error_msg)
+                updated_fields[field_name] = {
+                    "status": "error",
+                    "field_id": field_id,
+                    "error": str(e)
+                }
+                print(f"      ❌ {error_msg}")
+        else:
+            error_msg = f"No se encontró ID para el campo: {field_name}"
+            errors.append(error_msg)
+            updated_fields[field_name] = {
+                "status": "error",
+                "field_id": None,
+                "error": error_msg
+            }
+            print(f"      ⚠️ {error_msg}")
+    
+    success_count = len([f for f in updated_fields.values() if f["status"] == "success"])
+    error_count = len([f for f in updated_fields.values() if f["status"] == "error"])
+    
+    print(f"   📊 Resumen de actualización directa:")
+    print(f"      ✅ Campos actualizados: {success_count}")
+    print(f"      ❌ Errores: {error_count}")
+    
+    return {
+        "updated_fields": updated_fields,
+        "success_count": success_count,
+        "error_count": error_count,
+        "errors": errors
+    }
 
 # ===== MODELOS PYDANTIC SIMPLES =====
 class TaskCreate(BaseModel):
@@ -167,22 +220,71 @@ async def create_task_FINAL_VERSION(
         print(f"   🔍 has_custom_fields({task_data.list_id}): {has_custom_fields(task_data.list_id)}")
         
         if task_data.custom_fields and has_custom_fields(task_data.list_id):
-            print(f"🔧 Actualizando campos personalizados...")
+            print(f"🔧 Actualizando campos personalizados automáticamente...")
             print(f"   📧 Campos a procesar: {task_data.custom_fields}")
+            
+            # Llamar automáticamente al endpoint de actualización manual
             try:
-                for field_name, field_value in task_data.custom_fields.items():
-                    field_id = get_custom_field_id(task_data.list_id, field_name)
-                    print(f"   🔍 Campo: {field_name}, ID encontrado: {field_id}")
-                    if field_id:
-                        print(f"   📧 Actualizando {field_name} (ID: {field_id}) con valor: {field_value}")
-                        result = await clickup_client.update_custom_field_value(clickup_task_id, field_id, field_value)
-                        print(f"   ✅ Campo {field_name} actualizado exitosamente. Resultado: {result}")
-                    else:
-                        print(f"   ⚠️ No se encontró ID para el campo: {field_name}")
-            except Exception as cf_error:
-                print(f"   ❌ Error actualizando campos personalizados: {cf_error}")
-                print(f"   📋 Tipo de error: {type(cf_error)}")
-                # No fallar la creación por error en campos personalizados
+                print(f"   🔄 Llamando endpoint de actualización manual...")
+                
+                # Importar aiohttp para hacer la llamada interna
+                import aiohttp
+                
+                # URL base para la llamada interna
+                # En Railway, usar URL relativa para llamadas internas
+                base_url = ""  # URL relativa para llamadas internas
+                
+                # Hacer la llamada al endpoint de actualización manual
+                async with aiohttp.ClientSession() as session:
+                    update_url = f"{base_url}/api/v1/tasks/{clickup_task_id}/update-custom-fields"
+                    params = {"list_id": task_data.list_id}
+                    
+                    print(f"   📡 Llamando: POST {update_url}")
+                    print(f"   📋 Parámetros: {params}")
+                    print(f"   📧 Datos: {task_data.custom_fields}")
+                    
+                    async with session.post(
+                        update_url,
+                        json=task_data.custom_fields,
+                        params=params,
+                        headers={"Content-Type": "application/json"}
+                    ) as update_response:
+                        update_status = update_response.status
+                        update_text = await update_response.text()
+                        
+                        print(f"   📡 Status de actualización: {update_status}")
+                        print(f"   📄 Respuesta de actualización: {update_text}")
+                        
+                        if update_status == 200:
+                            update_result = json.loads(update_text)
+                            success_count = update_result.get('success_count', 0)
+                            error_count = update_result.get('error_count', 0)
+                            
+                            print(f"   ✅ Actualización automática completada!")
+                            print(f"   📊 Campos actualizados: {success_count}")
+                            print(f"   ❌ Errores: {error_count}")
+                            
+                            if error_count > 0:
+                                print(f"   ⚠️ Algunos campos no se pudieron actualizar")
+                        else:
+                            print(f"   ❌ Error en actualización automática: {update_status}")
+                            print(f"   📄 Respuesta: {update_text}")
+                            
+                            # Fallback: intentar actualización directa
+                            print(f"   🔄 Intentando actualización directa como fallback...")
+                            await update_custom_fields_direct(clickup_client, clickup_task_id, task_data.list_id, task_data.custom_fields)
+                
+            except Exception as update_error:
+                print(f"   ❌ Error en actualización automática: {update_error}")
+                print(f"   📋 Tipo de error: {type(update_error)}")
+                
+                # Fallback: intentar actualización directa
+                print(f"   🔄 Intentando actualización directa como fallback...")
+                try:
+                    await update_custom_fields_direct(clickup_client, clickup_task_id, task_data.list_id, task_data.custom_fields)
+                except Exception as fallback_error:
+                    print(f"   ❌ Error en fallback: {fallback_error}")
+                    # No fallar la creación por error en campos personalizados
         else:
             print(f"ℹ️ No hay campos personalizados para actualizar")
             if not task_data.custom_fields:
