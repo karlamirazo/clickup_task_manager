@@ -20,7 +20,7 @@ async def verify_clickup_task():
     print("=" * 50)
     
     # ID de la tarea que acabamos de crear
-    task_id = "86b6afk1z"  # ID de la nueva tarea de prueba
+    task_id = "86b6aftcy"  # ID de la tarea con estado "complete"
     
     try:
         # Inicializar cliente ClickUp

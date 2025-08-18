@@ -222,10 +222,31 @@ async def create_task_FINAL_VERSION(
         print(f"   🔍 has_custom_fields({task_data.list_id}): {has_custom_fields(task_data.list_id)}")
         print(f"   🔍 Condición completa: {bool(task_data.custom_fields) and has_custom_fields(task_data.list_id)}")
         
-        # ===== ACTUALIZACIÓN AUTOMÁTICA DE CAMPOS PERSONALIZADOS =====
-        # SIEMPRE intentar actualizar campos personalizados si existen
+        # ===== ACTUALIZACIÓN POST-CREACIÓN COMPLETA =====
+        # Actualizar TODOS los campos después de crear la tarea
+        print(f"🔧 Iniciando actualización post-creación completa...")
+        
+        # 1. ACTUALIZAR ESTADO DE LA TAREA
+        if task_data.status and task_data.status != "to do":
+            try:
+                print(f"   📊 Actualizando estado a: {task_data.status}")
+                await clickup_client.update_task(clickup_task_id, {"status": task_data.status})
+                print(f"   ✅ Estado actualizado exitosamente")
+            except Exception as e:
+                print(f"   ❌ Error actualizando estado: {e}")
+        
+        # 2. ACTUALIZAR PRIORIDAD
+        if task_data.priority and task_data.priority != 3:
+            try:
+                print(f"   ⚡ Actualizando prioridad a: {task_data.priority}")
+                await clickup_client.update_task(clickup_task_id, {"priority": task_data.priority})
+                print(f"   ✅ Prioridad actualizada exitosamente")
+            except Exception as e:
+                print(f"   ❌ Error actualizando prioridad: {e}")
+        
+        # 3. ACTUALIZAR CAMPOS PERSONALIZADOS
         if task_data.custom_fields:
-            print(f"🔧 Actualizando campos personalizados automáticamente...")
+            print(f"   📧 Actualizando campos personalizados...")
             print(f"   📧 Campos a procesar: {task_data.custom_fields}")
             print(f"   📋 Lista: {task_data.list_id}")
             
@@ -241,7 +262,7 @@ async def create_task_FINAL_VERSION(
                     success_count = update_result.get('success_count', 0)
                     error_count = update_result.get('error_count', 0)
                     
-                    print(f"   ✅ Actualización automática completada!")
+                    print(f"   ✅ Actualización de campos personalizados completada!")
                     print(f"   📊 Campos actualizados: {success_count}")
                     print(f"   ❌ Errores: {error_count}")
                     
@@ -250,7 +271,7 @@ async def create_task_FINAL_VERSION(
                         print(f"   📋 Errores: {update_result.get('errors', [])}")
                     
                 except Exception as update_error:
-                    print(f"   ❌ Error en actualización automática: {update_error}")
+                    print(f"   ❌ Error en actualización de campos personalizados: {update_error}")
                     print(f"   📋 Tipo de error: {type(update_error)}")
                     # No fallar la creación por error en campos personalizados
             else:
@@ -259,6 +280,8 @@ async def create_task_FINAL_VERSION(
         else:
             print(f"ℹ️ No hay campos personalizados para actualizar")
             print(f"   ❌ task_data.custom_fields está vacío")
+        
+        print(f"✅ Actualización post-creación completada!")
         
         # Guardar en BD local
         new_task = Task(

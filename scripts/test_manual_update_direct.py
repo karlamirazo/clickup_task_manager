@@ -21,7 +21,7 @@ async def test_manual_update_direct():
     print("=" * 60)
     
     # ID de la tarea que acabamos de crear (la última)
-    task_id = "86b6afbct"
+    task_id = "86b6afn4r"
     list_id = "901411770471"  # PROYECTO 1
     
     # Datos para actualizar
