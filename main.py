@@ -308,6 +308,16 @@ async def test_logging_system():
             "timestamp": str(datetime.datetime.now())
         }
 
+@app.get("/test-simple")
+async def test_simple_endpoint():
+    """Endpoint simple para verificar que el deployment funciona"""
+    return {
+        "status": "success",
+        "message": "Endpoint simple funcionando correctamente",
+        "timestamp": str(datetime.datetime.now()),
+        "deployment_version": "2025-08-18-13:10"
+    }
+
 
 
 if __name__ == "__main__":
