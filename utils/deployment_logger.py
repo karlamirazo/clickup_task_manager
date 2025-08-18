@@ -31,9 +31,11 @@ class DeploymentLogger:
                 # Convertir URL de PostgreSQL a formato asyncio
                 async_database_url = self.database_url.replace("postgresql://", "postgresql+asyncpg://")
                 self.engine = create_async_engine(async_database_url, echo=False)
+                print(f"🔗 Conectando a PostgreSQL: {self.database_url}")
             else:
-                # SQLite para desarrollo local
+                # SQLite para desarrollo local (fallback)
                 self.engine = create_async_engine("sqlite+aiosqlite:///./clickup_tasks.db", echo=False)
+                print(f"🔗 Conectando a SQLite (fallback)")
         return self.engine
     
     async def log_error(self, inputs: Dict[str, Any]) -> Dict[str, str]:
@@ -142,6 +144,7 @@ class DeploymentLogger:
             """
             
             await conn.execute(text(create_table_sql))
+            print(f"   ✅ Tabla deployment_logs verificada/creada")
             
             # Crear índices si no existen
             indexes = [
@@ -153,9 +156,11 @@ class DeploymentLogger:
             
             for index_sql in indexes:
                 await conn.execute(text(index_sql))
+            
+            print(f"   ✅ Índices de deployment_logs verificados/creados")
                 
         except Exception as e:
-            print(f"   ⚠️ Error creando tabla: {e}")
+            print(f"   ⚠️ Error creando tabla deployment_logs: {e}")
             # Continuar, la tabla podría ya existir
     
     async def _log_to_summary(self, error: str, solution: str, context: str, timestamp: datetime):

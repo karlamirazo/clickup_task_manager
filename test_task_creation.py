@@ -127,7 +127,7 @@ async def test_task_creation():
                         print("   ⚠️ No hay listas disponibles para probar")
                 else:
                     print("   ⚠️ No hay spaces disponibles para probar")
-            else:
+    else:
                 print("   ⚠️ No hay workspaces disponibles para probar")
                 
         except Exception as e:
@@ -137,8 +137,8 @@ async def test_task_creation():
         
         print("\n" + "=" * 50)
         print("🏁 PRUEBAS COMPLETADAS")
-        
-    except Exception as e:
+                
+except Exception as e:
         print(f"❌ Error general en las pruebas: {e}")
         import traceback
         print(f"📋 Traceback: {traceback.format_exc()}")

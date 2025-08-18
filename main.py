@@ -188,15 +188,53 @@ async def debug_info():
         except Exception as e:
             clickup_info["client_status"] = f"❌ Error: {str(e)}"
         
+        # ===== LOGGING AUTOMÁTICO CON LANGGRAPH =====
+        try:
+            import sys
+            sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+            from langgraph_tools.simple_error_logging import log_error_with_graph
+            
+            log_error_with_graph({
+                "error_description": "Endpoint de debug accedido - Verificación del sistema",
+                "solution_description": "Verificación manual del estado del servidor",
+                "context_info": f"Endpoint: GET /debug, Config: {config_info}, DB: {db_info}, ClickUp: {clickup_info}",
+                "deployment_id": "railway-production",
+                "environment": "production",
+                "severity": "info",
+                "status": "resolved"
+            })
+            logging_status = "✅ Sistema de logging activo"
+        except Exception as logging_error:
+            logging_status = f"❌ Error en logging: {str(logging_error)}"
+        
         return {
             "status": "success",
             "timestamp": str(datetime.datetime.now()),
             "configuration": config_info,
             "database": db_info,
-            "clickup_client": clickup_info
+            "clickup_client": clickup_info,
+            "logging_system": logging_status
         }
         
     except Exception as e:
+        # ===== LOGGING AUTOMÁTICO CON LANGGRAPH PARA ERRORES =====
+        try:
+            import sys
+            sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+            from langgraph_tools.simple_error_logging import log_error_with_graph
+            
+            log_error_with_graph({
+                "error_description": f"Error en endpoint de debug: {str(e)}",
+                "solution_description": "Verificar configuración del servidor y dependencias",
+                "context_info": f"Endpoint: GET /debug, Error: {str(e)}",
+                "deployment_id": "railway-production",
+                "environment": "production",
+                "severity": "high",
+                "status": "pending"
+            })
+        except Exception as logging_error:
+            print(f"⚠️ Error en logging automático: {logging_error}")
+        
         return {
             "status": "error",
             "error": str(e),
@@ -207,6 +245,39 @@ async def debug_info():
 async def health_check():
     """Verificar el estado de la aplicación"""
     return {"status": "healthy"}
+
+@app.get("/test-logging")
+async def test_logging_system():
+    """Endpoint para probar el sistema de logging de LangGraph"""
+    try:
+        import sys
+        sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+        from langgraph_tools.simple_error_logging import log_error_with_graph
+        
+        # Probar logging
+        test_result = log_error_with_graph({
+            "error_description": "Prueba del sistema de logging desde endpoint /test-logging",
+            "solution_description": "Verificar que el logging funciona correctamente en Railway con PostgreSQL",
+            "context_info": "Endpoint: GET /test-logging, Timestamp: " + str(datetime.datetime.now()),
+            "deployment_id": "railway-production",
+            "environment": "production",
+            "severity": "info",
+            "status": "resolved"
+        })
+        
+        return {
+            "status": "success",
+            "message": "Sistema de logging probado exitosamente",
+            "logging_result": test_result,
+            "timestamp": str(datetime.datetime.now())
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Error probando sistema de logging: {str(e)}",
+            "timestamp": str(datetime.datetime.now())
+        }
 
 
 

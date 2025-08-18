@@ -15,6 +15,12 @@ from core.database import get_db
 from core.clickup_client import ClickUpClient, get_clickup_client
 from models.task import Task
 
+# ===== SISTEMA DE LOGGING AUTOMÁTICO CON LANGGRAPH =====
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from langgraph_tools.simple_error_logging import log_error_with_graph
+
 # ===== MODELOS PYDANTIC SIMPLES =====
 class TaskCreate(BaseModel):
     """Modelo para crear tareas"""
@@ -191,6 +197,22 @@ async def create_task_FINAL_VERSION(
         print(f"❌ Tipo de error: {type(e)}")
         import traceback
         print(f"❌ Traceback completo: {traceback.format_exc()}")
+        
+        # ===== LOGGING AUTOMÁTICO CON LANGGRAPH =====
+        try:
+            log_error_with_graph({
+                "error_description": f"Error creando tarea en ClickUp: {str(e)}",
+                "solution_description": "Verificar CLICKUP_API_TOKEN, datos de entrada y conexión a ClickUp API",
+                "context_info": f"Endpoint: POST /api/v1/tasks/, Task Data: {task_data.dict()}, Timestamp: {datetime.now()}",
+                "deployment_id": "railway-production",
+                "environment": "production",
+                "severity": "high",
+                "status": "pending"
+            })
+            print("✅ Error registrado automáticamente en sistema de logging")
+        except Exception as logging_error:
+            print(f"⚠️ Error en logging automático: {logging_error}")
+        
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error al crear la tarea: {str(e)}"
@@ -283,13 +305,43 @@ async def sync_tasks_from_clickup(
                         # Commit después de cada lista para evitar transacciones muy largas
                         db.commit()
                         
-                    except Exception as e:
-                        print(f"      ❌ Error sincronizando lista {list_name}: {e}")
-                        continue
+                            except Exception as e:
+            print(f"      ❌ Error sincronizando lista {list_name}: {e}")
+            
+            # ===== LOGGING AUTOMÁTICO CON LANGGRAPH =====
+            try:
+                log_error_with_graph({
+                    "error_description": f"Error sincronizando lista {list_name}: {str(e)}",
+                    "solution_description": "Verificar permisos de lista y conexión a ClickUp API",
+                    "context_info": f"Lista: {list_name} (ID: {list_id}), Espacio: {space_name} (ID: {space_id}), Workspace: {workspace_id}",
+                    "deployment_id": "railway-production",
+                    "environment": "production",
+                    "severity": "medium",
+                    "status": "pending"
+                })
+            except Exception as logging_error:
+                print(f"      ⚠️ Error en logging automático: {logging_error}")
+            
+            continue
                         
-            except Exception as e:
-                print(f"   ❌ Error sincronizando espacio {space_name}: {e}")
-                continue
+                    except Exception as e:
+            print(f"   ❌ Error sincronizando espacio {space_name}: {e}")
+            
+            # ===== LOGGING AUTOMÁTICO CON LANGGRAPH =====
+            try:
+                log_error_with_graph({
+                    "error_description": f"Error sincronizando espacio {space_name}: {str(e)}",
+                    "solution_description": "Verificar permisos de espacio y conexión a ClickUp API",
+                    "context_info": f"Espacio: {space_name} (ID: {space_id}), Workspace: {workspace_id}",
+                    "deployment_id": "railway-production",
+                    "environment": "production",
+                    "severity": "medium",
+                    "status": "pending"
+                })
+            except Exception as logging_error:
+                print(f"   ⚠️ Error en logging automático: {logging_error}")
+            
+            continue
         
         print(f"✅ Sincronización completada:")
         print(f"   📊 Total tareas procesadas: {total_tasks_synced}")
@@ -307,6 +359,22 @@ async def sync_tasks_from_clickup(
         print(f"❌ Error en sincronización: {e}")
         import traceback
         print(f"🔍 Traceback: {traceback.format_exc()}")
+        
+        # ===== LOGGING AUTOMÁTICO CON LANGGRAPH =====
+        try:
+            log_error_with_graph({
+                "error_description": f"Error en sincronización de tareas: {str(e)}",
+                "solution_description": "Verificar CLICKUP_API_TOKEN y permisos de workspace",
+                "context_info": f"Workspace ID: {workspace_id}, Endpoint: POST /api/v1/tasks/sync",
+                "deployment_id": "railway-production",
+                "environment": "production",
+                "severity": "high",
+                "status": "pending"
+            })
+            print("✅ Error de sincronización registrado automáticamente")
+        except Exception as logging_error:
+            print(f"⚠️ Error en logging automático: {logging_error}")
+        
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error en sincronización: {str(e)}"
@@ -604,6 +672,22 @@ async def fix_database_structure(
         print(f"❌ Error corrigiendo estructura de base de datos: {e}")
         import traceback
         print(f"🔍 Traceback: {traceback.format_exc()}")
+        
+        # ===== LOGGING AUTOMÁTICO CON LANGGRAPH =====
+        try:
+            log_error_with_graph({
+                "error_description": f"Error corrigiendo estructura de base de datos: {str(e)}",
+                "solution_description": "Verificar permisos de PostgreSQL y estructura de tabla",
+                "context_info": f"Endpoint: POST /api/v1/tasks/fix-database-structure, Acción: Corregir estructura BD",
+                "deployment_id": "railway-production",
+                "environment": "production",
+                "severity": "high",
+                "status": "pending"
+            })
+            print("✅ Error de estructura de BD registrado automáticamente")
+        except Exception as logging_error:
+            print(f"⚠️ Error en logging automático: {logging_error}")
+        
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error corrigiendo estructura de base de datos: {str(e)}"
