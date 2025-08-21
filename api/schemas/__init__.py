@@ -1,5 +1,5 @@
 """
-Esquemas Pydantic para validación de datos
+Pydantic schemas for data validation
 """
 
 from .task import TaskCreate, TaskUpdate, TaskResponse, TaskList

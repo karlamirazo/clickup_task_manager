@@ -1,5 +1,5 @@
 """
-Rutas de autenticación y gestión de usuarios
+Authentication and user management routes
 """
 
 from datetime import datetime, timedelta
@@ -49,7 +49,7 @@ auth_logger = logging.getLogger("auth")
 router = APIRouter()
 
 
-# Schemas específicos para autenticación
+        # Authentication-specific schemas
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -87,7 +87,7 @@ async def login(
     db: Session = Depends(get_db)
 ):
     """
-    Iniciar sesión con email y contraseña
+    Login with email and password
     """
     try:
         # Buscar usuario por email
@@ -97,18 +97,18 @@ async def login(
             auth_logger.warning(f"Intento de login con email inexistente: {login_data.email}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Email o contraseña incorrectos",
+                detail="Email o contrasena incorrectos",
             )
         
-        # Verificar contraseña
+        # Verificar contrasena
         if not AuthManager.verify_password(login_data.password, user.password_hash):
-            auth_logger.warning(f"Contraseña incorrecta para usuario: {login_data.email}")
+            auth_logger.warning(f"Contrasena incorrecta para usuario: {login_data.email}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Email o contraseña incorrectos",
+                detail="Email o contrasena incorrectos",
             )
         
-        # Verificar que el usuario esté activo
+        # Verificar que el usuario este activo
         if not user.is_active:
             auth_logger.warning(f"Intento de login con usuario inactivo: {login_data.email}")
             raise HTTPException(
@@ -116,14 +116,14 @@ async def login(
                 detail="Usuario inactivo",
             )
         
-        # Crear token JWT
+        # Create token JWT
         access_token_expires = timedelta(minutes=1440)  # 24 horas
         access_token = AuthManager.create_access_token(
             data={"sub": str(user.id), "email": user.email, "role": user.role},
             expires_delta=access_token_expires
         )
         
-        # Actualizar último login
+        # Update ultimo login
         user.last_login = datetime.now()
         db.commit()
         
@@ -163,12 +163,12 @@ async def register(
                 detail="Email ya registrado"
             )
         
-        # Solo admins pueden crear otros usuarios con roles específicos
+        # Solo admins pueden crear otros usuarios con roles especificos
         role = "user"  # Rol por defecto
         if current_user and RoleManager.has_permission(current_user.role, "write_users"):
             role = getattr(user_data, 'role', 'user')
         
-        # Crear usuario
+        # Create usuario
         password_hash = AuthManager.get_password_hash(user_data.password)
         
         new_user = User(
@@ -206,7 +206,7 @@ async def get_current_user_info(
     current_user: User = Depends(require_auth)
 ):
     """
-    Obtener información del usuario actual
+    Get current user information
     """
     return UserResponse.model_validate(current_user)
 
@@ -218,10 +218,10 @@ async def update_current_user(
     db: Session = Depends(get_db)
 ):
     """
-    Actualizar información del usuario actual
+    Update current user information
     """
     try:
-        # Actualizar campos permitidos
+        # Update campos permitidos
         update_data = user_update.dict(exclude_unset=True)
         
         # No permitir cambiar rol o estado activo por esta ruta
@@ -240,7 +240,7 @@ async def update_current_user(
         return UserResponse.model_validate(current_user)
         
     except Exception as e:
-        auth_logger.error(f"Error actualizando usuario: {e}")
+        auth_logger.error(f"Error updating usuario: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error interno del servidor"
@@ -254,29 +254,29 @@ async def change_password(
     db: Session = Depends(get_db)
 ):
     """
-    Cambiar contraseña del usuario actual
+    Cambiar contrasena del usuario actual
     """
     try:
-        # Verificar contraseña actual
+        # Verificar contrasena actual
         if not AuthManager.verify_password(password_data.current_password, current_user.password_hash):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Contraseña actual incorrecta"
+                detail="Contrasena actual incorrecta"
             )
         
-        # Actualizar contraseña
+        # Update contrasena
         current_user.password_hash = AuthManager.get_password_hash(password_data.new_password)
         current_user.updated_at = datetime.now()
         db.commit()
         
-        auth_logger.info(f"Contraseña cambiada para usuario: {current_user.email}")
+        auth_logger.info(f"Contrasena cambiada para usuario: {current_user.email}")
         
-        return {"message": "Contraseña actualizada exitosamente"}
+        return {"message": "Contrasena actualizada exitosamente"}
         
     except HTTPException:
         raise
     except Exception as e:
-        auth_logger.error(f"Error cambiando contraseña: {e}")
+        auth_logger.error(f"Error cambiando contrasena: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error interno del servidor"
@@ -290,7 +290,7 @@ async def create_api_key(
     db: Session = Depends(get_db)
 ):
     """
-    Crear API key para el usuario actual
+    Create API key para el usuario actual
     """
     try:
         # Generar API key
@@ -311,11 +311,11 @@ async def create_api_key(
             api_key=api_key,
             description=description,
             created_at=current_user.api_key_created_at,
-            expires_at=None  # Sin expiración por ahora
+            expires_at=None  # No expiration for now
         )
         
     except Exception as e:
-        auth_logger.error(f"Error creando API key: {e}")
+        auth_logger.error(f"Error creating API key: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error interno del servidor"
@@ -376,7 +376,7 @@ async def get_user(
     db: Session = Depends(get_db)
 ):
     """
-    Obtener usuario específico (solo para admins/managers)
+    Get usuario especifico (solo para admins/managers)
     """
     try:
         user = db.query(User).filter(User.id == user_id).first()
@@ -391,7 +391,7 @@ async def get_user(
     except HTTPException:
         raise
     except Exception as e:
-        auth_logger.error(f"Error obteniendo usuario: {e}")
+        auth_logger.error(f"Error getting usuario: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error interno del servidor"
@@ -406,7 +406,7 @@ async def update_user(
     db: Session = Depends(get_db)
 ):
     """
-    Actualizar usuario específico (solo para admins)
+    Update usuario especifico (solo para admins)
     """
     try:
         user = db.query(User).filter(User.id == user_id).first()
@@ -416,7 +416,7 @@ async def update_user(
                 detail="Usuario no encontrado"
             )
         
-        # Actualizar campos
+        # Update campos
         update_data = user_update.dict(exclude_unset=True)
         for field, value in update_data.items():
             setattr(user, field, value)
@@ -432,7 +432,7 @@ async def update_user(
     except HTTPException:
         raise
     except Exception as e:
-        auth_logger.error(f"Error actualizando usuario: {e}")
+        auth_logger.error(f"Error updating usuario: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error interno del servidor"
@@ -446,7 +446,7 @@ async def delete_user(
     db: Session = Depends(get_db)
 ):
     """
-    Eliminar usuario (solo para admins)
+    Delete usuario (solo para admins)
     """
     try:
         user = db.query(User).filter(User.id == user_id).first()
@@ -456,7 +456,7 @@ async def delete_user(
                 detail="Usuario no encontrado"
             )
         
-        # No permitir auto-eliminación
+        # Don't allow self-deletion
         if user.id == current_user.id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -473,7 +473,7 @@ async def delete_user(
     except HTTPException:
         raise
     except Exception as e:
-        auth_logger.error(f"Error eliminando usuario: {e}")
+        auth_logger.error(f"Error deleting usuario: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error interno del servidor"
@@ -485,7 +485,7 @@ async def get_available_roles(
     current_user: User = Depends(require_permission("read_users"))
 ):
     """
-    Obtener roles disponibles (solo para admins/managers)
+    Get roles disponibles (solo para admins/managers)
     """
     return {
         "roles": RoleManager.get_available_roles(),

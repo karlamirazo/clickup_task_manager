@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Utilidad para logging automático de problemas de deployment
+Utilidad para logging automatico de problemas de deployment
 Registra errores tanto en PostgreSQL como en DEPLOYMENT_SUMMARY.txt
 """
 
@@ -12,30 +12,30 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
 class DeploymentLogger:
-    """Clase para logging automático de problemas de deployment"""
+    """Clase para logging automatico de problemas de deployment"""
     
     def __init__(self, database_url: Optional[str] = None):
         """
         Inicializar el logger
         
         Args:
-            database_url: URL de la base de datos (opcional, se detecta automáticamente)
+            database_url: URL de la base de datos (opcional, se detecta automaticamente)
         """
         self.database_url = database_url or os.getenv("DATABASE_URL", "sqlite:///./clickup_tasks.db")
         self.engine = None
         
     async def _get_engine(self):
-        """Obtener engine de base de datos"""
+        """Get engine de base de datos"""
         if not self.engine:
             if self.database_url.startswith("postgresql"):
                 # Convertir URL de PostgreSQL a formato asyncio
                 async_database_url = self.database_url.replace("postgresql://", "postgresql+asyncpg://")
                 self.engine = create_async_engine(async_database_url, echo=False)
-                print(f"🔗 Conectando a PostgreSQL: {self.database_url}")
+                print(f"üîó Conectando a PostgreSQL: {self.database_url}")
             else:
                 # SQLite para desarrollo local (fallback)
                 self.engine = create_async_engine("sqlite+aiosqlite:///./clickup_tasks.db", echo=False)
-                print(f"🔗 Conectando a SQLite (fallback)")
+                print(f"üîó Conectando a SQLite (fallback)")
         return self.engine
     
     async def log_error(self, inputs: Dict[str, Any]) -> Dict[str, str]:
@@ -43,21 +43,21 @@ class DeploymentLogger:
         Registrar un error en la base de datos y en DEPLOYMENT_SUMMARY.txt
         
         Args:
-            inputs: Diccionario con información del error
-                - error_description: Descripción del problema
-                - solution_description: Solución implementada
-                - context_info: Información adicional del contexto
+            inputs: Diccionario con informacion del error
+                - error_description: Descripcion del problema
+                - solution_description: Solucion implementada
+                - context_info: Informacion adicional del contexto
                 - deployment_id: ID del deployment (opcional)
                 - environment: Entorno (opcional, default: 'production')
                 - severity: Severidad (opcional, default: 'medium')
                 - status: Estado (opcional, default: 'resolved')
         
         Returns:
-            Dict con status de la operación
+            Dict con status de la operacion
         """
         # Valores por defecto
         error = inputs.get("error_description", "Error no especificado")
-        solution = inputs.get("solution_description", "Solución no documentada")
+        solution = inputs.get("solution_description", "Solucion no documentada")
         context = inputs.get("context_info", "Sin contexto")
         deployment_id = inputs.get("deployment_id")
         environment = inputs.get("environment", "production")
@@ -65,7 +65,7 @@ class DeploymentLogger:
         status = inputs.get("status", "resolved")
         timestamp = datetime.now()
         
-        print(f"🚨 Registrando error de deployment: {error[:50]}...")
+        print(f"üö® Registrando error de deployment: {error[:50]}...")
         
         try:
             # 1. Registrar en la base de datos
@@ -79,11 +79,11 @@ class DeploymentLogger:
                 error, solution, context, timestamp
             )
             
-            print(f"✅ Error registrado exitosamente en ambos sistemas")
+            print(f"‚úÖ Error registrado exitosamente en ambos sistemas")
             return {"status": "documentado", "timestamp": timestamp.isoformat()}
             
         except Exception as e:
-            print(f"❌ Error registrando log: {e}")
+            print(f"‚ùå Error registrando log: {e}")
             return {"status": "error", "message": str(e)}
     
     async def _log_to_database(self, error: str, solution: str, context: str, 
@@ -119,10 +119,10 @@ class DeploymentLogger:
                     "status": status
                 })
                 
-                print(f"   ✅ Registrado en base de datos")
+                print(f"   ‚úÖ Registrado en base de datos")
                 
         except Exception as e:
-            print(f"   ❌ Error registrando en BD: {e}")
+            print(f"   ‚ùå Error registrando en BD: {e}")
             raise
     
     async def _ensure_table_exists(self, conn):
@@ -144,9 +144,9 @@ class DeploymentLogger:
             """
             
             await conn.execute(text(create_table_sql))
-            print(f"   ✅ Tabla deployment_logs verificada/creada")
+            print(f"   ‚úÖ Tabla deployment_logs verificada/creada")
             
-            # Crear índices si no existen
+            # Create indices si no existen
             indexes = [
                 "CREATE INDEX IF NOT EXISTS idx_deployment_logs_timestamp ON deployment_logs(timestamp);",
                 "CREATE INDEX IF NOT EXISTS idx_deployment_logs_severity ON deployment_logs(severity);",
@@ -157,11 +157,11 @@ class DeploymentLogger:
             for index_sql in indexes:
                 await conn.execute(text(index_sql))
             
-            print(f"   ✅ Índices de deployment_logs verificados/creados")
+            print(f"   ‚úÖ Indices de deployment_logs verificados/creados")
                 
         except Exception as e:
-            print(f"   ⚠️ Error creando tabla deployment_logs: {e}")
-            # Continuar, la tabla podría ya existir
+            print(f"   ‚ö†Ô∏è Error creating tabla deployment_logs: {e}")
+            # Continuar, la tabla podria ya existir
     
     async def _log_to_summary(self, error: str, solution: str, context: str, timestamp: datetime):
         """Registrar error en DEPLOYMENT_SUMMARY.txt"""
@@ -169,8 +169,8 @@ class DeploymentLogger:
             # Formatear entrada para el archivo
             entry = f"""
 ## [{timestamp.strftime('%Y-%m-%d %H:%M:%S')}] Error detectado
-**Descripción del problema**: {error}
-**Solución implementada**: {solution}
+**Descripcion del problema**: {error}
+**Solucion implementada**: {solution}
 **Contexto**: {context}
 **Timestamp**: {timestamp.isoformat()}
 ---
@@ -180,14 +180,14 @@ class DeploymentLogger:
             with open("DEPLOYMENT_SUMMARY.txt", "a", encoding="utf-8") as f:
                 f.write(entry)
             
-            print(f"   ✅ Registrado en DEPLOYMENT_SUMMARY.txt")
+            print(f"   ‚úÖ Registrado en DEPLOYMENT_SUMMARY.txt")
             
         except Exception as e:
-            print(f"   ❌ Error registrando en archivo: {e}")
+            print(f"   ‚ùå Error registrando en archivo: {e}")
             raise
     
     async def get_recent_logs(self, limit: int = 10) -> list:
-        """Obtener logs recientes de la base de datos"""
+        """Get logs recientes de la base de datos"""
         try:
             engine = await self._get_engine()
             
@@ -211,7 +211,7 @@ class DeploymentLogger:
                 ]
                 
         except Exception as e:
-            print(f"❌ Error obteniendo logs: {e}")
+            print(f"‚ùå Error getting logs: {e}")
             return []
     
     async def close(self):
@@ -219,16 +219,16 @@ class DeploymentLogger:
         if self.engine:
             await self.engine.dispose()
 
-# Función de conveniencia para uso directo
+# Funcion de conveniencia para uso directo
 async def log_error_to_postgres_and_summary(inputs: Dict[str, Any]) -> Dict[str, str]:
     """
-    Función de conveniencia para logging rápido
+    Funcion de conveniencia para logging rapido
     
     Args:
-        inputs: Diccionario con información del error
+        inputs: Diccionario con informacion del error
         
     Returns:
-        Dict con status de la operación
+        Dict con status de la operacion
     """
     logger = DeploymentLogger()
     try:
@@ -237,28 +237,28 @@ async def log_error_to_postgres_and_summary(inputs: Dict[str, Any]) -> Dict[str,
     finally:
         await logger.close()
 
-# Función síncrona para uso en scripts no-async
+# Funcion sincrona para uso en scripts no-async
 def log_error_sync(inputs: Dict[str, Any]) -> Dict[str, str]:
     """
-    Versión síncrona para uso en scripts que no soportan async
+    Version sincrona para uso en scripts que no soportan async
     
     Args:
-        inputs: Diccionario con información del error
+        inputs: Diccionario con informacion del error
         
     Returns:
-        Dict con status de la operación
+        Dict con status de la operacion
     """
     try:
         return asyncio.run(log_error_to_postgres_and_summary(inputs))
     except Exception as e:
-        print(f"❌ Error en logging síncrono: {e}")
+        print(f"‚ùå Error en logging sincrono: {e}")
         return {"status": "error", "message": str(e)}
 
 # Ejemplo de uso
 if __name__ == "__main__":
     # Ejemplo de uso
     sample_error = {
-        "error_description": "Error de conexión a base de datos",
+        "error_description": "Error de conexion a base de datos",
         "solution_description": "Reiniciar servicio de base de datos",
         "context_info": "Problema durante deployment en Railway",
         "deployment_id": "test-123",
@@ -267,6 +267,6 @@ if __name__ == "__main__":
         "status": "resolved"
     }
     
-    print("🧪 Probando sistema de logging...")
+    print("üß™ Probando sistema de logging...")
     result = log_error_sync(sample_error)
     print(f"Resultado: {result}")

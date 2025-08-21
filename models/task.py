@@ -37,7 +37,7 @@ class Task(Base):
     attachments = Column(JSON, nullable=True)  # Archivos adjuntos
     comments = Column(JSON, nullable=True)  # Comentarios
     
-    # Estado de sincronización
+    # Estado de sincronizacion
     is_synced = Column(Boolean, default=False)
     last_sync = Column(DateTime, nullable=True)
     

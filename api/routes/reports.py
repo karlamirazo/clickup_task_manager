@@ -1,5 +1,5 @@
 """
-Rutas para gestión de reportes
+Routes for gestion de reportes
 """
 
 from typing import List, Optional
@@ -30,7 +30,7 @@ async def create_report(
     report_data: ReportCreate,
     db: Session = Depends(get_db)
 ):
-    """Crear un nuevo reporte"""
+    """Create un nuevo reporte"""
     try:
         db_report = Report(
             name=report_data.name,
@@ -40,7 +40,7 @@ async def create_report(
             filters=report_data.filters,
             date_range=report_data.date_range,
             workspace_id=report_data.workspace_id,
-            created_by="system"  # En un sistema real, esto vendría del usuario autenticado
+            created_by="system"  # En un sistema real, esto vendria del usuario autenticado
         )
         
         db.add(db_report)
@@ -52,7 +52,7 @@ async def create_report(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al crear el reporte: {str(e)}"
+            detail=f"Error crear el reporte: {str(e)}"
         )
 
 @router.get("/", response_model=ReportList)
@@ -60,11 +60,11 @@ async def get_reports(
     workspace_id: Optional[str] = Query(None, description="ID del workspace"),
     report_type: Optional[str] = Query(None, description="Tipo de reporte"),
     status: Optional[str] = Query(None, description="Estado del reporte"),
-    page: int = Query(0, ge=0, description="Número de página"),
-    limit: int = Query(20, ge=1, le=100, description="Límite de resultados"),
+    page: int = Query(0, ge=0, description="Numero de pagina"),
+    limit: int = Query(20, ge=1, le=100, description="Limite de resultados"),
     db: Session = Depends(get_db)
 ):
-    """Obtener lista de reportes"""
+    """Get lista de reportes"""
     try:
         query = db.query(Report)
         
@@ -93,7 +93,7 @@ async def get_reports(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al obtener los reportes: {str(e)}"
+            detail=f"Error obtener los reportes: {str(e)}"
         )
 
 @router.get("/{report_id}", response_model=ReportResponse)
@@ -101,7 +101,7 @@ async def get_report(
     report_id: int,
     db: Session = Depends(get_db)
 ):
-    """Obtener un reporte específico"""
+    """Get un reporte especifico"""
     try:
         db_report = db.query(Report).filter(Report.id == report_id).first()
         
@@ -118,7 +118,7 @@ async def get_report(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al obtener el reporte: {str(e)}"
+            detail=f"Error obtener el reporte: {str(e)}"
         )
 
 @router.get("/{report_id}/download")
@@ -129,8 +129,8 @@ async def download_report(
 ):
     """Descargar el reporte en JSON (archivo generado) o como CSV.
 
-    - json: devuelve el archivo físico generado en `settings.REPORTS_STORAGE_PATH`.
-    - csv: construye un CSV a partir de `db_report.data` para fácil lectura en Excel.
+    - json: devuelve el archivo fisico generado en `settings.REPORTS_STORAGE_PATH`.
+    - csv: construye un CSV a partir de `db_report.data` para facil lectura en Excel.
     """
     db_report = db.query(Report).filter(Report.id == report_id).first()
     if not db_report:
@@ -146,7 +146,7 @@ async def download_report(
         filename = f"{safe_name}_{report_id}.json"
         return FileResponse(db_report.file_path, media_type="application/json", filename=filename)
 
-    # CSV dinámico
+    # CSV dinamico
     try:
         data = db_report.data or {}
         csv_lines: List[str] = []
@@ -183,7 +183,7 @@ async def download_report(
             for k, v in (data.get('priority_distribution') or {}).items():
                 csv_lines.append(f"priority_distribution,{k},{v}")
         else:
-            # Fallback genérico
+            # Fallback generico
             for k, v in (data or {}).items():
                 csv_lines.append(f"general,{k},{v}")
 
@@ -196,7 +196,7 @@ async def download_report(
         if format == "csv":
             return Response(content=csv_content, headers=headers, media_type="text/csv")
 
-        # PDF dinámico con ReportLab
+        # PDF dinamico con ReportLab
         if format == "pdf":
             try:
                 from reportlab.lib.pagesizes import letter
@@ -219,16 +219,16 @@ async def download_report(
             table_data: List[List[str]] = []
 
             if rt == "task_summary":
-                table_data = [["Métrica", "Valor"]]
+                table_data = [["Metrica", "Valor"]]
                 table_data.append(["Total tareas", str(data.get('total_tasks', 0))])
                 table_data.append(["Completadas", str(data.get('completed_tasks', 0))])
                 table_data.append(["Pendientes", str(data.get('pending_tasks', 0))])
                 table_data.append(["", ""])  # separador visual
-                table_data.append(["Distribución por estado", "Cantidad"])
+                table_data.append(["Distribution by estado", "Quantity"])
                 for k, v in (data.get('status_distribution') or {}).items():
                     table_data.append([str(k), str(v)])
                 table_data.append(["", ""])  # separador
-                table_data.append(["Distribución por prioridad", "Cantidad"])
+                table_data.append(["Distribution by prioridad", "Quantity"])
                 for k, v in (data.get('priority_distribution') or {}).items():
                     table_data.append([str(k), str(v)])
             elif rt == "user_performance":
@@ -253,15 +253,15 @@ async def download_report(
                         str(item.get('priority', '')),
                     ])
             elif rt == "workspace_overview":
-                table_data = [["Métrica", "Valor"]]
+                table_data = [["Metrica", "Valor"]]
                 table_data.append(["Total tareas", str(data.get('total_tasks', 0))])
                 table_data.append(["Total usuarios", str(data.get('total_users', 0))])
                 table_data.append(["", ""])  # separador
-                table_data.append(["Distribución por estado", "Cantidad"])
+                table_data.append(["Distribution by estado", "Quantity"])
                 for k, v in (data.get('status_distribution') or {}).items():
                     table_data.append([str(k), str(v)])
                 table_data.append(["", ""])  # separador
-                table_data.append(["Distribución por prioridad", "Cantidad"])
+                table_data.append(["Distribution by prioridad", "Quantity"])
                 for k, v in (data.get('priority_distribution') or {}).items():
                     table_data.append([str(k), str(v)])
             else:
@@ -289,7 +289,7 @@ async def download_report(
             }
             return Response(content=pdf_bytes, headers=headers, media_type="application/pdf")
 
-        # Si el formato no coincide (por validación regex no debería pasar)
+        # If format does not match (by regex validation no deberia pasar)
         raise HTTPException(status_code=400, detail="Formato no soportado")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"No se pudo generar CSV: {e}")
@@ -309,16 +309,16 @@ async def generate_report(
                 detail="Reporte no encontrado"
             )
         
-        # Actualizar estado
+        # Update estado
         db_report.status = "processing"
         db_report.updated_at = datetime.utcnow()
         db.commit()
         
         try:
-            # Generar datos del reporte según el tipo
+            # Generar datos del reporte segun el tipo
             report_data = await _generate_report_data(db_report, db)
             
-            # Crear directorio si no existe
+            # Create directorio si no existe
             os.makedirs(settings.REPORTS_STORAGE_PATH, exist_ok=True)
             
             # Guardar archivo
@@ -326,7 +326,7 @@ async def generate_report(
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump(report_data, f, ensure_ascii=False, indent=2, default=str)
             
-            # Actualizar reporte
+            # Update reporte
             db_report.data = report_data
             db_report.summary = _generate_summary(report_data, db_report.report_type)
             db_report.status = "completed"
@@ -352,7 +352,7 @@ async def generate_report(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al generar el reporte: {str(e)}"
+            detail=f"Error generar el reporte: {str(e)}"
         )
 
 @router.delete("/{report_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -360,7 +360,7 @@ async def delete_report(
     report_id: int,
     db: Session = Depends(get_db)
 ):
-    """Eliminar un reporte"""
+    """Delete un reporte"""
     try:
         db_report = db.query(Report).filter(Report.id == report_id).first()
         
@@ -370,7 +370,7 @@ async def delete_report(
                 detail="Reporte no encontrado"
             )
         
-        # Eliminar archivo si existe
+        # Delete archivo si existe
         if db_report.file_path and os.path.exists(db_report.file_path):
             os.remove(db_report.file_path)
         
@@ -382,44 +382,44 @@ async def delete_report(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al eliminar el reporte: {str(e)}"
+            detail=f"Error eliminar el reporte: {str(e)}"
         )
 
 @router.get("/types/available")
 async def get_available_report_types():
-    """Obtener tipos de reportes disponibles"""
+    """Get tipos de reportes disponibles"""
     return {
         "report_types": [
             {
                 "id": "task_summary",
                 "name": "Resumen de Tareas",
-                "description": "Resumen general de tareas por estado, prioridad y asignación"
+                "description": "General summary de tareas by status, priority and assignment"
             },
             {
                 "id": "user_performance",
                 "name": "Rendimiento de Usuarios",
-                "description": "Análisis de productividad y carga de trabajo por usuario"
+                "description": "Analisis de productividad y carga de trabajo por usuario"
             },
             {
                 "id": "task_timeline",
-                "name": "Línea de Tiempo",
-                "description": "Análisis temporal de creación y completado de tareas"
+                "name": "Linea de Tiempo",
+                "description": "Analisis temporal de creacion y completado de tareas"
             },
             {
                 "id": "workspace_overview",
                 "name": "Vista General del Workspace",
-                "description": "Resumen completo del workspace con métricas clave"
+                "description": "Resumen completo del workspace con metricas clave"
             },
             {
                 "id": "custom_analysis",
-                "name": "Análisis Personalizado",
-                "description": "Reporte personalizable con filtros específicos"
+                "name": "Analisis Personalizado",
+                "description": "Reporte personalizable con filtros especificos"
             }
         ]
     }
 
 async def _generate_report_data(report: Report, db: Session) -> dict:
-    """Generar datos del reporte según el tipo"""
+    """Generar datos del reporte segun el tipo"""
     if report.report_type == "task_summary":
         return await _generate_task_summary(report, db)
     elif report.report_type == "user_performance":
@@ -435,7 +435,7 @@ async def _generate_report_data(report: Report, db: Session) -> dict:
 
 async def _generate_task_summary(report: Report, db: Session) -> dict:
     """Generar resumen de tareas"""
-    # Obtener todas las tareas si no hay workspace_id específico
+    # Get todas las tareas si no hay workspace_id especifico
     if report.workspace_id:
         query = db.query(Task).filter(Task.workspace_id == report.workspace_id)
     else:
@@ -454,7 +454,7 @@ async def _generate_task_summary(report: Report, db: Session) -> dict:
     
     print(f"Generando reporte para {len(tasks)} tareas")
     
-    # Estadísticas por estado
+    # Estadisticas por estado
     status_stats = {}
     priority_stats = {}
     assignee_stats = {}
@@ -484,12 +484,12 @@ async def _generate_task_summary(report: Report, db: Session) -> dict:
 
 async def _generate_user_performance(report: Report, db: Session) -> dict:
     """Generar reporte de rendimiento de usuarios"""
-    # Obtener usuarios del workspace
+    # Get usuarios del workspace
     users = db.query(User).filter(User.workspace_id == report.workspace_id).all()
     
     user_performance = []
     for user in users:
-        # Obtener tareas del usuario
+        # Get tareas del usuario
         user_tasks = db.query(Task).filter(
             Task.workspace_id == report.workspace_id,
             Task.assignee_id == user.clickup_id
@@ -513,7 +513,7 @@ async def _generate_user_performance(report: Report, db: Session) -> dict:
     }
 
 async def _generate_task_timeline(report: Report, db: Session) -> dict:
-    """Generar línea de tiempo de tareas"""
+    """Generar linea de tiempo de tareas"""
     query = db.query(Task).filter(Task.workspace_id == report.workspace_id)
     
     # Aplicar filtros de fecha
@@ -546,7 +546,7 @@ async def _generate_task_timeline(report: Report, db: Session) -> dict:
 
 async def _generate_workspace_overview(report: Report, db: Session) -> dict:
     """Generar vista general del workspace"""
-    # Estadísticas generales
+    # Estadisticas generales
     total_tasks = db.query(Task).filter(Task.workspace_id == report.workspace_id).count()
     total_users = db.query(User).filter(User.workspace_id == report.workspace_id).count()
     
@@ -570,7 +570,7 @@ async def _generate_workspace_overview(report: Report, db: Session) -> dict:
     }
 
 async def _generate_custom_analysis(report: Report, db: Session) -> dict:
-    """Generar análisis personalizado"""
+    """Generar analisis personalizado"""
     query = db.query(Task).filter(Task.workspace_id == report.workspace_id)
     
     # Aplicar filtros personalizados
@@ -615,4 +615,4 @@ def _generate_summary(data: dict, report_type: str) -> dict:
             "statuses_count": len(data.get("status_distribution", {}))
         }
     
-    return {"summary": "Resumen generado automáticamente"}
+    return {"summary": "Resumen generado automaticamente"}

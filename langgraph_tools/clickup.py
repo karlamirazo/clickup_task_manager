@@ -20,7 +20,7 @@ class ClickUpTools:
     def __init__(self, api_token: Optional[str] = None, base_url: str = "https://api.clickup.com/api/v2") -> None:
         token = api_token or os.getenv("CLICKUP_API_TOKEN")
         if not token:
-            raise RuntimeError("CLICKUP_API_TOKEN no configurado")
+            raise RuntimeError("CLICKUP_API_TOKEN no configured")
         self.base_url = base_url.rstrip("/")
         self.headers = {
             "Authorization": token,
@@ -37,12 +37,12 @@ class ClickUpTools:
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
         async with aiohttp.ClientSession() as session:
             async with session.request(method, url, headers=self.headers, json=json, params=params) as resp:
-                # Manejo de 204 o cuerpo vacío
+                # Manejo de 204 o cuerpo vacio
                 if resp.status == 204:
                     return {}
                 ct = resp.headers.get("Content-Type", "")
                 if not ct.startswith("application/json"):
-                    # Si no es JSON, devolver vacío
+                    # Si no es JSON, devolver vacio
                     if resp.status < 400:
                         return {}
                 resp.raise_for_status()
@@ -137,7 +137,7 @@ def get_langgraph_tools(client: Optional[ClickUpTools] = None) -> Dict[str, Any]
 
 
 async def _quick_smoke_test() -> None:
-    """Pequeña prueba: lista primer workspace/space/lista y crea/borra una tarea temporal."""
+    """Pequena prueba: lista primer workspace/space/lista y crea/borra una tarea temporal."""
     client = ClickUpTools()
     teams = await client.list_workspaces()
     assert teams, "No hay workspaces disponibles"

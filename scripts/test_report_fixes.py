@@ -9,12 +9,12 @@ import json
 import os
 from datetime import datetime
 
-# Configuración
+# Configuracion
 BASE_URL = "http://localhost:8000"
 API_BASE = f"{BASE_URL}/api/v1"
 
 async def test_api_endpoint(session, endpoint, method="GET", data=None):
-    """Probar un endpoint de la API"""
+    """Test un endpoint de la API"""
     url = f"{API_BASE}{endpoint}"
     try:
         if method == "GET":
@@ -27,11 +27,11 @@ async def test_api_endpoint(session, endpoint, method="GET", data=None):
         return 0, {"error": str(e)}
 
 async def test_users_endpoint():
-    """Probar el endpoint de usuarios"""
-    print("🔍 Probando endpoint de usuarios...")
+    """Test el endpoint de usuarios"""
+    print("üîç Probando endpoint de usuarios...")
     
     async with aiohttp.ClientSession() as session:
-        # Probar obtener usuarios de un workspace específico
+        # Test obtener usuarios de un workspace especifico
         status, data = await test_api_endpoint(session, "/users/?workspace_id=9014943317")
         
         print(f"   Status: {status}")
@@ -47,11 +47,11 @@ async def test_users_endpoint():
             print(f"   Error: {data}")
 
 async def test_tasks_with_assignees():
-    """Probar que las tareas incluyan información de asignados"""
-    print("\n🔍 Probando tareas con información de asignados...")
+    """Test que las tareas incluyan informacion de asignados"""
+    print("\nüîç Probando tareas con informacion de asignados...")
     
     async with aiohttp.ClientSession() as session:
-        # Obtener todas las tareas
+        # Get todas las tareas
         status, data = await test_api_endpoint(session, "/tasks/?include_closed=true&limit=10")
         
         print(f"   Status: {status}")
@@ -73,8 +73,8 @@ async def test_tasks_with_assignees():
             print(f"   Error: {data}")
 
 async def test_priority_formatting():
-    """Probar que las prioridades se formateen correctamente"""
-    print("\n🔍 Probando formateo de prioridades...")
+    """Test que las prioridades se formateen correctamente"""
+    print("\nüîç Probando formateo de prioridades...")
     
     # Simular diferentes tipos de prioridad
     test_priorities = [1, 2, 3, 4, "1", "2", "3", "4", None, "urgent", "high", "normal", "low"]
@@ -84,11 +84,11 @@ async def test_priority_formatting():
         print(f"   Prioridad: {priority_str} -> {format_priority(priority)}")
 
 def format_priority(priority):
-    """Función de formateo de prioridad (copiada del frontend)"""
+    """Funcion de formateo de prioridad (copiada del frontend)"""
     if priority is None:
         return "Sin prioridad"
     
-    # Convertir a string si es número
+    # Convertir a string si es numero
     priority_str = str(priority)
     if priority_str == '1':
         return 'Urgente'
@@ -102,11 +102,11 @@ def format_priority(priority):
         return 'Sin prioridad'
 
 async def test_report_generation():
-    """Probar la generación de reportes"""
-    print("\n🔍 Probando generación de reportes...")
+    """Test la generacion de reportes"""
+    print("\nüîç Probando generacion de reportes...")
     
     async with aiohttp.ClientSession() as session:
-        # Crear un reporte
+        # Create un reporte
         report_data = {
             "name": "Reporte de Prueba",
             "report_type": "task_summary",
@@ -116,17 +116,17 @@ async def test_report_generation():
         
         status, data = await test_api_endpoint(session, "/reports/", method="POST", data=report_data)
         
-        print(f"   Status creación: {status}")
+        print(f"   Status creacion: {status}")
         if status == 201:
             report_id = data.get("id")
             print(f"   Reporte creado con ID: {report_id}")
             
             # Generar el reporte
             status2, data2 = await test_api_endpoint(session, f"/reports/{report_id}/generate", method="POST")
-            print(f"   Status generación: {status2}")
+            print(f"   Status generacion: {status2}")
             
             if status2 == 200:
-                print("   ✅ Reporte generado exitosamente")
+                print("   ‚úÖ Reporte generado exitosamente")
                 print(f"   Total tareas: {data2.get('total_tasks', 0)}")
                 print(f"   Completadas: {data2.get('completed_tasks', 0)}")
                 print(f"   Pendientes: {data2.get('pending_tasks', 0)}")
@@ -141,33 +141,33 @@ async def test_report_generation():
             else:
                 print(f"   Error generando reporte: {data2}")
         else:
-            print(f"   Error creando reporte: {data}")
+            print(f"   Error creating reporte: {data}")
 
 async def main():
-    """Función principal"""
-    print("🚀 Iniciando pruebas de fixes del reporte visual")
+    """Funcion principal"""
+    print("üöÄ Iniciando pruebas de fixes del reporte visual")
     print("=" * 50)
     
-    # Verificar que el servidor esté corriendo
+    # Verificar que el servidor este corriendo
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(f"{BASE_URL}/health") as response:
                 if response.status != 200:
-                    print("❌ El servidor no está respondiendo correctamente")
+                    print("‚ùå El servidor no esta respondiendo correctamente")
                     return
     except Exception as e:
-        print(f"❌ No se puede conectar al servidor: {e}")
+        print(f"‚ùå No se puede conectar al servidor: {e}")
         return
     
-    print("✅ Servidor respondiendo correctamente")
+    print("‚úÖ Servidor respondiendo correctamente")
     
-    # Ejecutar pruebas
+    # Execute pruebas
     await test_users_endpoint()
     await test_tasks_with_assignees()
     await test_report_generation()
     
     print("\n" + "=" * 50)
-    print("🏁 Pruebas completadas")
+    print("üèÅ Pruebas completadas")
 
 if __name__ == "__main__":
     asyncio.run(main())

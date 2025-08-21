@@ -9,7 +9,7 @@ cursor = conn.cursor()
 cursor.execute("SELECT clickup_id, name, workspace_id, priority, assignee_id, status FROM tasks")
 tasks = cursor.fetchall()
 
-print(f"📋 Tareas en la base de datos ({len(tasks)}):")
+print(f"üìã Tareas en la base de datos ({len(tasks)}):")
 for task in tasks:
     clickup_id, name, workspace_id, priority, assignee_id, status = task
     print(f"  - {name}")
@@ -24,7 +24,7 @@ for task in tasks:
 cursor.execute("SELECT clickup_id, name FROM workspaces")
 workspaces = cursor.fetchall()
 
-print(f"🏢 Workspaces en la base de datos ({len(workspaces)}):")
+print(f"üè¢ Workspaces en la base de datos ({len(workspaces)}):")
 for workspace in workspaces:
     clickup_id, name = workspace
     print(f"  - {name} (ID: {clickup_id})")

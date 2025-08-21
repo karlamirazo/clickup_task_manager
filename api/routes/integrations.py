@@ -1,5 +1,5 @@
 """
-Rutas para gestión de integraciones
+Routes for gestion de integraciones
 """
 
 from typing import List, Optional
@@ -24,7 +24,7 @@ async def create_integration(
     integration_data: IntegrationCreate,
     db: Session = Depends(get_db)
 ):
-    """Crear una nueva integración"""
+    """Create una nueva integracion"""
     try:
         db_integration = Integration(
             name=integration_data.name,
@@ -34,7 +34,7 @@ async def create_integration(
             config=integration_data.config,
             credentials=integration_data.credentials,
             workspace_id=integration_data.workspace_id,
-            created_by="system"  # En un sistema real, esto vendría del usuario autenticado
+            created_by="system"  # En un sistema real, esto vendria del usuario autenticado
         )
         
         db.add(db_integration)
@@ -46,19 +46,19 @@ async def create_integration(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al crear la integración: {str(e)}"
+            detail=f"Error crear la integracion: {str(e)}"
         )
 
 @router.get("/", response_model=IntegrationList)
 async def get_integrations(
     workspace_id: Optional[str] = Query(None, description="ID del workspace"),
-    integration_type: Optional[str] = Query(None, description="Tipo de integración"),
-    active: Optional[bool] = Query(None, description="Filtrar por estado activo"),
-    page: int = Query(0, ge=0, description="Número de página"),
-    limit: int = Query(20, ge=1, le=100, description="Límite de resultados"),
+    integration_type: Optional[str] = Query(None, description="Tipo de integracion"),
+    active: Optional[bool] = Query(None, description="Filter by status activo"),
+    page: int = Query(0, ge=0, description="Numero de pagina"),
+    limit: int = Query(20, ge=1, le=100, description="Limite de resultados"),
     db: Session = Depends(get_db)
 ):
-    """Obtener lista de integraciones"""
+    """Get lista de integraciones"""
     try:
         query = db.query(Integration)
         
@@ -87,7 +87,7 @@ async def get_integrations(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al obtener las integraciones: {str(e)}"
+            detail=f"Error obtener las integraciones: {str(e)}"
         )
 
 @router.get("/{integration_id}", response_model=IntegrationResponse)
@@ -95,14 +95,14 @@ async def get_integration(
     integration_id: int,
     db: Session = Depends(get_db)
 ):
-    """Obtener una integración específica"""
+    """Get una integracion especifica"""
     try:
         db_integration = db.query(Integration).filter(Integration.id == integration_id).first()
         
         if not db_integration:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Integración no encontrada"
+                detail="Integracion not found"
             )
         
         return IntegrationResponse.from_orm(db_integration)
@@ -112,7 +112,7 @@ async def get_integration(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al obtener la integración: {str(e)}"
+            detail=f"Error obtener la integracion: {str(e)}"
         )
 
 @router.put("/{integration_id}", response_model=IntegrationResponse)
@@ -121,17 +121,17 @@ async def update_integration(
     integration_data: IntegrationUpdate,
     db: Session = Depends(get_db)
 ):
-    """Actualizar una integración existente"""
+    """Update una integracion existente"""
     try:
         db_integration = db.query(Integration).filter(Integration.id == integration_id).first()
         
         if not db_integration:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Integración no encontrada"
+                detail="Integracion not found"
             )
         
-        # Actualizar campos
+        # Update campos
         for field, value in integration_data.dict(exclude_unset=True).items():
             setattr(db_integration, field, value)
         
@@ -147,7 +147,7 @@ async def update_integration(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al actualizar la integración: {str(e)}"
+            detail=f"Error actualizar la integracion: {str(e)}"
         )
 
 @router.delete("/{integration_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -155,14 +155,14 @@ async def delete_integration(
     integration_id: int,
     db: Session = Depends(get_db)
 ):
-    """Eliminar una integración"""
+    """Delete una integracion"""
     try:
         db_integration = db.query(Integration).filter(Integration.id == integration_id).first()
         
         if not db_integration:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Integración no encontrada"
+                detail="Integracion not found"
             )
         
         db.delete(db_integration)
@@ -173,7 +173,7 @@ async def delete_integration(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al eliminar la integración: {str(e)}"
+            detail=f"Error eliminar la integracion: {str(e)}"
         )
 
 @router.post("/{integration_id}/test", response_model=dict)
@@ -182,26 +182,26 @@ async def test_integration(
     test_data: IntegrationTest,
     db: Session = Depends(get_db)
 ):
-    """Probar una integración"""
+    """Test una integracion"""
     try:
         db_integration = db.query(Integration).filter(Integration.id == integration_id).first()
         
         if not db_integration:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Integración no encontrada"
+                detail="Integracion not found"
             )
         
         if not db_integration.active:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="La integración no está activa"
+                detail="La integracion is not active"
             )
         
-        # Aquí se ejecutaría la prueba de conexión según el tipo de integración
+        # Aqui se ejecutaria la prueba de conexion segun el tipo de integracion
         test_result = await _test_integration_connection(db_integration, test_data.test_type)
         
-        # Actualizar estadísticas
+        # Update estadisticas
         if test_result["success"]:
             db_integration.connected = True
             db_integration.last_sync = datetime.utcnow()
@@ -218,7 +218,7 @@ async def test_integration(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al probar la integración: {str(e)}"
+            detail=f"Error probar la integracion: {str(e)}"
         )
 
 @router.post("/{integration_id}/sync", response_model=dict)
@@ -226,26 +226,26 @@ async def sync_integration(
     integration_id: int,
     db: Session = Depends(get_db)
 ):
-    """Sincronizar datos con una integración"""
+    """Sync datos con una integracion"""
     try:
         db_integration = db.query(Integration).filter(Integration.id == integration_id).first()
         
         if not db_integration:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Integración no encontrada"
+                detail="Integracion not found"
             )
         
         if not db_integration.active or not db_integration.enabled:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="La integración no está activa o habilitada"
+                detail="La integracion is not active o habilitada"
             )
         
-        # Aquí se ejecutaría la sincronización según el tipo de integración
+        # Aqui se ejecutaria la sincronizacion segun el tipo de integracion
         sync_result = await _sync_integration_data(db_integration)
         
-        # Actualizar estadísticas
+        # Update estadisticas
         if sync_result["success"]:
             db_integration.sync_count += 1
             db_integration.last_sync = datetime.utcnow()
@@ -263,7 +263,7 @@ async def sync_integration(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al sincronizar la integración: {str(e)}"
+            detail=f"Error sincronizar la integracion: {str(e)}"
         )
 
 @router.post("/{integration_id}/toggle", response_model=IntegrationResponse)
@@ -271,14 +271,14 @@ async def toggle_integration(
     integration_id: int,
     db: Session = Depends(get_db)
 ):
-    """Activar/desactivar una integración"""
+    """Activate/desactivar una integracion"""
     try:
         db_integration = db.query(Integration).filter(Integration.id == integration_id).first()
         
         if not db_integration:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Integración no encontrada"
+                detail="Integracion not found"
             )
         
         db_integration.active = not db_integration.active
@@ -294,16 +294,16 @@ async def toggle_integration(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al cambiar el estado de la integración: {str(e)}"
+            detail=f"Error cambiar el estado de la integracion: {str(e)}"
         )
 
 @router.get("/providers/available")
 async def get_available_providers():
-    """Obtener proveedores de integración disponibles"""
+    """Get proveedores de integracion disponibles"""
     return {
         "providers": {
             "crm": [
-                {"id": "salesforce", "name": "Salesforce", "description": "CRM líder en el mercado"},
+                {"id": "salesforce", "name": "Salesforce", "description": "CRM lider en el mercado"},
                 {"id": "hubspot", "name": "HubSpot", "description": "CRM y marketing automation"},
                 {"id": "pipedrive", "name": "Pipedrive", "description": "CRM enfocado en ventas"}
             ],
@@ -313,22 +313,22 @@ async def get_available_providers():
                 {"id": "mongodb", "name": "MongoDB", "description": "Base de datos NoSQL"}
             ],
             "productivity": [
-                {"id": "slack", "name": "Slack", "description": "Comunicación en equipo"},
-                {"id": "microsoft_teams", "name": "Microsoft Teams", "description": "Colaboración empresarial"},
+                {"id": "slack", "name": "Slack", "description": "Comunicacion en equipo"},
+                {"id": "microsoft_teams", "name": "Microsoft Teams", "description": "Colaboracion empresarial"},
                 {"id": "google_workspace", "name": "Google Workspace", "description": "Suite de productividad"}
             ],
             "project_management": [
-                {"id": "jira", "name": "Jira", "description": "Gestión de proyectos ágiles"},
-                {"id": "asana", "name": "Asana", "description": "Gestión de proyectos y tareas"},
-                {"id": "trello", "name": "Trello", "description": "Gestión visual de proyectos"}
+                {"id": "jira", "name": "Jira", "description": "Gestion de proyectos agiles"},
+                {"id": "asana", "name": "Asana", "description": "Gestion de proyectos y tareas"},
+                {"id": "trello", "name": "Trello", "description": "Gestion visual de proyectos"}
             ]
         }
     }
 
 async def _test_integration_connection(integration: Integration, test_type: str) -> dict:
-    """Probar conexión con una integración"""
+    """Test conexion con una integracion"""
     try:
-        # Aquí se implementaría la lógica específica para cada tipo de integración
+        # Aqui se implementaria la logica especifica para cada tipo de integracion
         if integration.integration_type == "crm":
             return await _test_crm_connection(integration, test_type)
         elif integration.integration_type == "database":
@@ -338,7 +338,7 @@ async def _test_integration_connection(integration: Integration, test_type: str)
         else:
             return {
                 "success": False,
-                "error": f"Tipo de integración no soportado: {integration.integration_type}"
+                "error": f"Tipo de integracion no soportado: {integration.integration_type}"
             }
     except Exception as e:
         return {
@@ -347,9 +347,9 @@ async def _test_integration_connection(integration: Integration, test_type: str)
         }
 
 async def _sync_integration_data(integration: Integration) -> dict:
-    """Sincronizar datos con una integración"""
+    """Sync datos con una integracion"""
     try:
-        # Aquí se implementaría la lógica específica para cada tipo de integración
+        # Aqui se implementaria la logica especifica para cada tipo de integracion
         if integration.integration_type == "crm":
             return await _sync_crm_data(integration)
         elif integration.integration_type == "database":
@@ -359,7 +359,7 @@ async def _sync_integration_data(integration: Integration) -> dict:
         else:
             return {
                 "success": False,
-                "error": f"Tipo de integración no soportado: {integration.integration_type}"
+                "error": f"Tipo de integracion no soportado: {integration.integration_type}"
             }
     except Exception as e:
         return {
@@ -367,37 +367,37 @@ async def _sync_integration_data(integration: Integration) -> dict:
             "error": str(e)
         }
 
-# Funciones específicas para cada tipo de integración
+# Funciones especificas para cada tipo de integracion
 async def _test_crm_connection(integration: Integration, test_type: str) -> dict:
-    """Probar conexión con CRM"""
-    # Implementación específica para CRM
+    """Test conexion con CRM"""
+    # Implementacion especifica para CRM
     return {
         "success": True,
-        "message": f"Conexión exitosa con {integration.provider}",
+        "message": f"Connection successful con {integration.provider}",
         "test_type": test_type
     }
 
 async def _test_database_connection(integration: Integration, test_type: str) -> dict:
-    """Probar conexión con base de datos"""
-    # Implementación específica para bases de datos
+    """Test conexion con base de datos"""
+    # Implementacion especifica para bases de datos
     return {
         "success": True,
-        "message": f"Conexión exitosa con {integration.provider}",
+        "message": f"Connection successful con {integration.provider}",
         "test_type": test_type
     }
 
 async def _test_productivity_connection(integration: Integration, test_type: str) -> dict:
-    """Probar conexión con herramientas de productividad"""
-    # Implementación específica para herramientas de productividad
+    """Test conexion con herramientas de productividad"""
+    # Implementacion especifica para herramientas de productividad
     return {
         "success": True,
-        "message": f"Conexión exitosa con {integration.provider}",
+        "message": f"Connection successful con {integration.provider}",
         "test_type": test_type
     }
 
 async def _sync_crm_data(integration: Integration) -> dict:
-    """Sincronizar datos con CRM"""
-    # Implementación específica para CRM
+    """Sync datos con CRM"""
+    # Implementacion especifica para CRM
     return {
         "success": True,
         "message": f"Datos sincronizados exitosamente con {integration.provider}",
@@ -405,8 +405,8 @@ async def _sync_crm_data(integration: Integration) -> dict:
     }
 
 async def _sync_database_data(integration: Integration) -> dict:
-    """Sincronizar datos con base de datos"""
-    # Implementación específica para bases de datos
+    """Sync datos con base de datos"""
+    # Implementacion especifica para bases de datos
     return {
         "success": True,
         "message": f"Datos sincronizados exitosamente con {integration.provider}",
@@ -414,8 +414,8 @@ async def _sync_database_data(integration: Integration) -> dict:
     }
 
 async def _sync_productivity_data(integration: Integration) -> dict:
-    """Sincronizar datos con herramientas de productividad"""
-    # Implementación específica para herramientas de productividad
+    """Sync datos con herramientas de productividad"""
+    # Implementacion especifica para herramientas de productividad
     return {
         "success": True,
         "message": f"Datos sincronizados exitosamente con {integration.provider}",

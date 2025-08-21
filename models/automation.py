@@ -8,7 +8,7 @@ from sqlalchemy.orm import relationship
 from core.database import Base
 
 class Automation(Base):
-    """Modelo de automatización"""
+    """Modelo de automatizacion"""
     
     __tablename__ = "automations"
     
@@ -16,7 +16,7 @@ class Automation(Base):
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     
-    # Configuración de la automatización
+    # Configuracion de la automatizacion
     trigger_type = Column(String(100), nullable=False)  # task_created, task_updated, due_date, etc.
     trigger_conditions = Column(JSON, nullable=True)  # Condiciones del trigger
     

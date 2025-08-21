@@ -10,7 +10,7 @@ import json
 async def check_deployment_status():
     """Verificar el estado del deployment"""
     
-    print("🔍 VERIFICANDO ESTADO DEL DEPLOYMENT")
+    print("ğŸ”� VERIFICANDO ESTADO DEL DEPLOYMENT")
     print("=" * 50)
     
     # URL de la API
@@ -18,56 +18,56 @@ async def check_deployment_status():
     
     try:
         async with aiohttp.ClientSession() as session:
-            # Probar endpoint básico
-            print("📡 Probando endpoint básico...")
+            # Test endpoint basico
+            print("ğŸ“¡ Probando endpoint basico...")
             async with session.get(f"{base_url}/") as response:
-                print(f"📡 Status: {response.status}")
+                print(f"ğŸ“¡ Status: {response.status}")
                 response_text = await response.text()
-                print(f"📄 Respuesta: {response_text[:200]}...")
+                print(f"ğŸ“„ Respuesta: {response_text[:200]}...")
                 
                 if response.status == 200:
-                    print("✅ Endpoint básico funciona")
+                    print("âœ… Endpoint basico funciona")
                 else:
-                    print("❌ Endpoint básico no funciona")
+                    print("â�Œ Endpoint basico no funciona")
             
-            # Probar endpoint de health check
-            print(f"\n📡 Probando health check...")
+            # Test endpoint de health check
+            print(f"\nğŸ“¡ Probando health check...")
             async with session.get(f"{base_url}/health") as response:
-                print(f"📡 Status: {response.status}")
+                print(f"ğŸ“¡ Status: {response.status}")
                 response_text = await response.text()
-                print(f"📄 Respuesta: {response_text}")
+                print(f"ğŸ“„ Respuesta: {response_text}")
                 
                 if response.status == 200:
-                    print("✅ Health check funciona")
+                    print("âœ… Health check funciona")
                 else:
-                    print("❌ Health check no funciona")
+                    print("â�Œ Health check no funciona")
             
-            # Probar endpoint de debug
-            print(f"\n📡 Probando endpoint de debug...")
+            # Test endpoint de debug
+            print(f"\nğŸ“¡ Probando endpoint de debug...")
             async with session.get(f"{base_url}/debug") as response:
-                print(f"📡 Status: {response.status}")
+                print(f"ğŸ“¡ Status: {response.status}")
                 response_text = await response.text()
-                print(f"📄 Respuesta: {response_text[:200]}...")
+                print(f"ğŸ“„ Respuesta: {response_text[:200]}...")
                 
                 if response.status == 200:
-                    print("✅ Endpoint de debug funciona")
+                    print("âœ… Endpoint de debug funciona")
                 else:
-                    print("❌ Endpoint de debug no funciona")
+                    print("â�Œ Endpoint de debug no funciona")
             
-            # Probar endpoint de tareas
-            print(f"\n📡 Probando endpoint de tareas...")
+            # Test endpoint de tareas
+            print(f"\nğŸ“¡ Probando endpoint de tareas...")
             async with session.get(f"{base_url}/api/v1/tasks") as response:
-                print(f"📡 Status: {response.status}")
+                print(f"ğŸ“¡ Status: {response.status}")
                 response_text = await response.text()
-                print(f"📄 Respuesta: {response_text[:200]}...")
+                print(f"ğŸ“„ Respuesta: {response_text[:200]}...")
                 
                 if response.status == 200:
-                    print("✅ Endpoint de tareas funciona")
+                    print("âœ… Endpoint de tareas funciona")
                 else:
-                    print("❌ Endpoint de tareas no funciona")
+                    print("â�Œ Endpoint de tareas no funciona")
     
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"â�Œ Error: {e}")
 
 if __name__ == "__main__":
     asyncio.run(check_deployment_status())

@@ -16,8 +16,8 @@ class Workspace(Base):
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     
-    # Configuración
-    color = Column(String(7), nullable=True)  # Código de color hex
+    # Configuracion
+    color = Column(String(7), nullable=True)  # Codigo de color hex
     private = Column(Boolean, default=False)
     multiple_assignees = Column(Boolean, default=True)
     
@@ -27,9 +27,9 @@ class Workspace(Base):
     
     # Metadatos
     settings = Column(JSON, nullable=True)  # Configuraciones del workspace
-    features = Column(JSON, nullable=True)  # Características habilitadas
+    features = Column(JSON, nullable=True)  # Caracteristicas habilitadas
     
-    # Estado de sincronización
+    # Estado de sincronizacion
     is_synced = Column(Boolean, default=False)
     last_sync = Column(DateTime, nullable=True)
     

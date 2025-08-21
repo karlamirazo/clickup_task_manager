@@ -10,7 +10,7 @@ from core.config import settings
 async def test_simple():
     """Test ClickUp client step by step"""
     
-    print("🔍 Testing ClickUp configuration step by step...")
+    print("üîç Testing ClickUp configuration step by step...")
     print("=" * 50)
     
     # 1. Check configuration
@@ -37,13 +37,13 @@ async def test_simple():
                 
                 if response.status == 200:
                     data = await response.json()
-                    print(f"   ✅ Success! Found {len(data.get('teams', []))} teams")
+                    print(f"   ‚úÖ Success! Found {len(data.get('teams', []))} teams")
                 else:
                     text = await response.text()
-                    print(f"   ❌ Error: {text}")
+                    print(f"   ‚ùå Error: {text}")
                     
         except Exception as e:
-            print(f"   ❌ Exception: {e}")
+            print(f"   ‚ùå Exception: {e}")
     
     # 3. Test with ClickUp client
     print(f"\n4. Testing with ClickUp client...")
@@ -54,10 +54,10 @@ async def test_simple():
         
         # Test a simple method
         workspaces = await client.get_workspaces()
-        print(f"   ✅ Client works! Found {len(workspaces)} workspaces")
+        print(f"   ‚úÖ Client works! Found {len(workspaces)} workspaces")
         
     except Exception as e:
-        print(f"   ❌ Client error: {e}")
+        print(f"   ‚ùå Client error: {e}")
 
 if __name__ == "__main__":
     asyncio.run(test_simple())

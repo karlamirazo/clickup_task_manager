@@ -1,5 +1,5 @@
 """
-Configuración de la base de datos
+Database configuration for ClickUp Project Manager
 """
 
 from sqlalchemy import create_engine
@@ -11,20 +11,24 @@ import os
 from urllib.parse import urlparse
 
 def get_database_url():
-    """Obtener URL de base de datos con fallback inteligente"""
+    """Get database URL with intelligent fallback"""
     
-    # Si Railway proporciona DATABASE_URL (PostgreSQL), usarlo
+    # Use PostgreSQL with psycopg2 driver (synchronous)
     if os.getenv("DATABASE_URL"):
-        return os.getenv("DATABASE_URL")
+        # Ensure we're using psycopg2 driver
+        db_url = os.getenv("DATABASE_URL")
+        if db_url.startswith("postgresql://") and "psycopg2" not in db_url:
+            db_url = db_url.replace("postgresql://", "postgresql+psycopg2://")
+        return db_url
     
-    # Si no, usar SQLite local
-    return settings.DATABASE_URL
+    # Default PostgreSQL connection with psycopg2
+    return "postgresql+psycopg2://postgres:admin123@localhost:5432/clickup_project_manager"
 
-# Crear engine de base de datos
+# Create database engine
 database_url = get_database_url()
 
 if database_url.startswith("sqlite"):
-    # Configuración para SQLite
+    # SQLite configuration
     engine = create_engine(
         database_url,
         connect_args={
@@ -32,53 +36,58 @@ if database_url.startswith("sqlite"):
             "timeout": 30
         },
         poolclass=StaticPool,
-        echo=False,  # Desactivar logs SQL para evitar problemas de codificación
+        echo=False,  # Disable SQL logs to avoid encoding issues
     )
-    print("🗄️ Usando base de datos SQLite local")
+    print("🗄️ Using local SQLite database")
 else:
-    # Configuración para PostgreSQL
+    # PostgreSQL configuration with psycopg2 driver (synchronous)
     engine = create_engine(
         database_url,
-        echo=False,  # Desactivar logs SQL para evitar problemas de codificación
-        pool_pre_ping=True,  # Verificar conexión antes de usar
-        pool_recycle=300,    # Reciclar conexiones cada 5 minutos
+        echo=False,  # Disable SQL logs to avoid encoding issues
+        pool_pre_ping=True,  # Verify connection before using
+        pool_recycle=300,    # Recycle connections every 5 minutes
+        future=True,  # Enable SQLAlchemy 2.0 features
+        connect_args={
+            "client_encoding": "utf8",
+            "options": "-c timezone=UTC -c client_min_messages=warning"
+        }
     )
-    print("🗄️ Usando base de datos PostgreSQL")
+    print("🗄️ Using PostgreSQL database with psycopg2 driver")
     
-    # Parsear la URL de PostgreSQL para mostrar información útil
+    # Parse PostgreSQL URL to show useful information
     try:
         parsed_url = urlparse(database_url)
         print(f"🔗 Host: {parsed_url.hostname}")
-        print(f"📊 Base de datos: {parsed_url.path[1:] if parsed_url.path else 'N/A'}")
-        print(f"👤 Usuario: {parsed_url.username}")
-        print(f"🔌 Puerto: {parsed_url.port or 5432}")
+        print(f"📊 Database: {parsed_url.path[1:] if parsed_url.path else 'N/A'}")
+        print(f"👤 User: {parsed_url.username}")
+        print(f"🔌 Port: {parsed_url.port or 5432}")
     except Exception as e:
         print(f"🔗 URL: {database_url[:50]}...")
-        print(f"⚠️ Error parseando URL: {e}")
+        print(f"⚠️ Error parsing URL: {e}")
 
-# Crear sesión de base de datos
+# Create database session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Base para modelos
-Base = declarative_base()
-
 def get_db():
-    """Obtener sesión de base de datos"""
+    """Get database session (synchronous)"""
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
 
-async def init_db():
-    """Inicializar base de datos"""
+# Base for models
+Base = declarative_base()
+
+def init_db():
+    """Initialize database"""
     try:
         from models import task, workspace, user, automation, report, integration
         
-        # Crear todas las tablas
+        # Create all tables (synchronous for both SQLite and PostgreSQL)
         Base.metadata.create_all(bind=engine)
-        print("✅ Base de datos inicializada correctamente")
+        print("✅ Database initialized successfully")
     except Exception as e:
-        print(f"⚠️  Error inicializando base de datos: {e}")
-        # No lanzar excepción para evitar que el servidor falle
+        print(f"⚠️  Error initializing database: {e}")
+        # Don't raise exception to avoid server failure
         pass

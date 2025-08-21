@@ -1,5 +1,5 @@
 """
-Rutas de la API para ClickUp Project Manager
+API routes for ClickUp Project Manager
 """
 
 from . import tasks, workspaces, lists, users, automation, reports, integrations, spaces, webhooks, dashboard, search

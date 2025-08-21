@@ -8,16 +8,16 @@ import psycopg2
 from datetime import datetime
 
 def create_postgres_tasks_table():
-    """Crear la tabla tasks con la estructura correcta en PostgreSQL"""
+    """Create la tabla tasks con la estructura correcta en PostgreSQL"""
     
-    # Obtener DATABASE_URL de Railway
+    # Get DATABASE_URL de Railway
     database_url = os.getenv("DATABASE_URL")
     if not database_url:
-        print("❌ DATABASE_URL no está configurado")
+        print("‚ùå DATABASE_URL no esta configured")
         return
     
-    print(f"🔨 Creando tabla tasks en PostgreSQL...")
-    print(f"📊 URL de base de datos: {database_url[:50]}...")
+    print(f"üî® Creando tabla tasks en PostgreSQL...")
+    print(f"üìä URL de base de datos: {database_url[:50]}...")
     
     try:
         # Conectar a PostgreSQL
@@ -36,20 +36,20 @@ def create_postgres_tasks_table():
         table_exists = cursor.fetchone()[0]
         
         if table_exists:
-            print(f"⚠️ La tabla 'tasks' ya existe. ¿Deseas recrearla? (y/N): ", end="")
+            print(f"‚ö†Ô∏è La tabla 'tasks' ya existe. ¬øDeseas recrearla? (y/N): ", end="")
             response = input().strip().lower()
             if response != 'y':
-                print("❌ Operación cancelada")
+                print("‚ùå Operacion cancelada")
                 return
             
-            # Eliminar tabla existente
-            print(f"🗑️ Eliminando tabla existente...")
+            # Delete tabla existente
+            print(f"üóëÔ∏è Eliminando tabla existente...")
             cursor.execute("DROP TABLE IF EXISTS tasks CASCADE;")
             conn.commit()
-            print(f"✅ Tabla eliminada")
+            print(f"‚úÖ Tabla eliminada")
         
-        # Crear tabla con estructura correcta
-        print(f"🏗️ Creando tabla tasks...")
+        # Create tabla con estructura correcta
+        print(f"üèóÔ∏è Creando tabla tasks...")
         
         create_table_sql = """
         CREATE TABLE tasks (
@@ -78,8 +78,8 @@ def create_postgres_tasks_table():
         
         cursor.execute(create_table_sql)
         
-        # Crear índices para mejor rendimiento
-        print(f"📊 Creando índices...")
+        # Create indices para mejor rendimiento
+        print(f"üìä Creando indices...")
         cursor.execute("CREATE INDEX idx_tasks_clickup_id ON tasks(clickup_id);")
         cursor.execute("CREATE INDEX idx_tasks_workspace_id ON tasks(workspace_id);")
         cursor.execute("CREATE INDEX idx_tasks_list_id ON tasks(list_id);")
@@ -87,11 +87,11 @@ def create_postgres_tasks_table():
         cursor.execute("CREATE INDEX idx_tasks_priority ON tasks(priority);")
         cursor.execute("CREATE INDEX idx_tasks_is_synced ON tasks(is_synced);")
         
-        # Commit de la transacción
+        # Commit de la transaccion
         conn.commit()
         
-        print(f"✅ Tabla 'tasks' creada exitosamente!")
-        print(f"✅ Índices creados para mejor rendimiento")
+        print(f"‚úÖ Tabla 'tasks' creada exitosamente!")
+        print(f"‚úÖ Indices creados para mejor rendimiento")
         
         # Verificar la estructura creada
         cursor.execute("""
@@ -102,7 +102,7 @@ def create_postgres_tasks_table():
         """)
         
         columns = cursor.fetchall()
-        print(f"\n🏗️ Estructura de la tabla 'tasks' creada:")
+        print(f"\nüèóÔ∏è Estructura de la tabla 'tasks' creada:")
         print(f"{'Columna':<20} {'Tipo':<15} {'Nullable':<10} {'Default'}")
         print("-" * 60)
         
@@ -113,12 +113,12 @@ def create_postgres_tasks_table():
         cursor.close()
         conn.close()
         
-        print(f"\n🎉 ¡Tabla 'tasks' creada exitosamente en PostgreSQL!")
+        print(f"\nüéâ ¬°Tabla 'tasks' creada exitosamente en PostgreSQL!")
         
     except Exception as e:
-        print(f"❌ Error creando tabla: {e}")
+        print(f"‚ùå Error creating tabla: {e}")
         import traceback
-        print(f"🔍 Traceback: {traceback.format_exc()}")
+        print(f"üîç Traceback: {traceback.format_exc()}")
 
 if __name__ == "__main__":
     create_postgres_tasks_table()

@@ -10,8 +10,8 @@ from typing import Dict, List, Any, Optional
 from pathlib import Path
 
 def setup_logging(log_level: str = "INFO", log_file: str = "logs/app.log"):
-    """Configurar logging de la aplicación"""
-    # Crear directorio de logs si no existe
+    """Configurar logging de la aplicacion"""
+    # Create directorio de logs si no existe
     log_dir = os.path.dirname(log_file)
     if log_dir and not os.path.exists(log_dir):
         os.makedirs(log_dir)
@@ -58,7 +58,7 @@ def parse_datetime(date_str: str, format_str: str = "%Y-%m-%d %H:%M:%S") -> Opti
         return None
 
 def get_date_range(days: int = 30, end_date: Optional[datetime] = None) -> Dict[str, datetime]:
-    """Obtener rango de fechas"""
+    """Get rango de fechas"""
     if end_date is None:
         end_date = datetime.utcnow()
     
@@ -74,7 +74,7 @@ def chunk_list(lst: List[Any], chunk_size: int) -> List[List[Any]]:
     return [lst[i:i + chunk_size] for i in range(0, len(lst), chunk_size)]
 
 def safe_get(dictionary: Dict[str, Any], key: str, default: Any = None) -> Any:
-    """Obtener valor de diccionario de forma segura"""
+    """Get valor de diccionario de forma segura"""
     return dictionary.get(key, default)
 
 def flatten_dict(d: Dict[str, Any], parent_key: str = '', sep: str = '_') -> Dict[str, Any]:
@@ -105,7 +105,7 @@ def sanitize_filename(filename: str) -> str:
     return filename
 
 def get_file_size_mb(file_path: str) -> float:
-    """Obtener tamaño de archivo en MB"""
+    """Get tamano de archivo en MB"""
     try:
         size_bytes = os.path.getsize(file_path)
         return size_bytes / (1024 * 1024)
@@ -113,7 +113,7 @@ def get_file_size_mb(file_path: str) -> float:
         return 0.0
 
 def format_file_size(size_bytes: int) -> str:
-    """Formatear tamaño de archivo"""
+    """Formatear tamano de archivo"""
     for unit in ['B', 'KB', 'MB', 'GB']:
         if size_bytes < 1024.0:
             return f"{size_bytes:.1f} {unit}"
@@ -121,12 +121,12 @@ def format_file_size(size_bytes: int) -> str:
     return f"{size_bytes:.1f} TB"
 
 def generate_unique_id() -> str:
-    """Generar ID único"""
+    """Generar ID unico"""
     import uuid
     return str(uuid.uuid4())
 
 def retry_on_exception(func, max_retries: int = 3, delay: float = 1.0):
-    """Decorador para reintentar función en caso de excepción"""
+    """Decorador para reintentar funcion en caso de excepcion"""
     import time
     import functools
     
@@ -150,7 +150,7 @@ def calculate_percentage(part: int, total: int) -> float:
     return (part / total) * 100
 
 def format_duration(seconds: int) -> str:
-    """Formatear duración en segundos a string legible"""
+    """Formatear duracion en segundos a string legible"""
     if seconds < 60:
         return f"{seconds}s"
     elif seconds < 3600:
@@ -166,7 +166,7 @@ def is_weekend(date: datetime) -> bool:
     return date.weekday() >= 5
 
 def get_working_days(start_date: datetime, end_date: datetime) -> int:
-    """Obtener días laborables entre dos fechas"""
+    """Get dias laborables entre dos fechas"""
     working_days = 0
     current_date = start_date
     
@@ -184,9 +184,9 @@ def merge_dicts(dict1: Dict[str, Any], dict2: Dict[str, Any]) -> Dict[str, Any]:
     return result
 
 def filter_dict(dictionary: Dict[str, Any], keys: List[str]) -> Dict[str, Any]:
-    """Filtrar diccionario por claves específicas"""
+    """Filtrar diccionario por claves especificas"""
     return {k: v for k, v in dictionary.items() if k in keys}
 
 def exclude_dict(dictionary: Dict[str, Any], keys: List[str]) -> Dict[str, Any]:
-    """Excluir claves específicas del diccionario"""
+    """Excluir claves especificas del diccionario"""
     return {k: v for k, v in dictionary.items() if k not in keys}

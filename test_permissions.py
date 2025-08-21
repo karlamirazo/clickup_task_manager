@@ -10,7 +10,7 @@ from core.config import settings
 async def test_permissions():
     """Test different levels of ClickUp API access"""
     
-    print("🔍 Testing ClickUp API permissions...")
+    print("üîç Testing ClickUp API permissions...")
     print("=" * 50)
     
     token = settings.CLICKUP_API_TOKEN
@@ -29,7 +29,7 @@ async def test_permissions():
     ]
     
     for level, endpoint in endpoints:
-        print(f"\n📡 Testing {level}: {endpoint}")
+        print(f"\nüì° Testing {level}: {endpoint}")
         
         try:
             async with aiohttp.ClientSession() as session:
@@ -40,24 +40,24 @@ async def test_permissions():
                         data = await response.json()
                         if level == "Team level":
                             teams = data.get("teams", [])
-                            print(f"   ✅ Success! Found {len(teams)} teams")
+                            print(f"   ‚úÖ Success! Found {len(teams)} teams")
                             for team in teams:
                                 print(f"      - {team.get('name', 'Unknown')} (ID: {team.get('id', 'Unknown')})")
                         elif level == "User level":
                             user = data.get("user", {})
-                            print(f"   ✅ Success! User: {user.get('username', 'Unknown')}")
+                            print(f"   ‚úÖ Success! User: {user.get('username', 'Unknown')}")
                         elif level == "Workspace level":
                             workspace = data.get("team", {})
-                            print(f"   ✅ Success! Workspace: {workspace.get('name', 'Unknown')}")
+                            print(f"   ‚úÖ Success! Workspace: {workspace.get('name', 'Unknown')}")
                     else:
                         text = await response.text()
-                        print(f"   ❌ Error: {text}")
+                        print(f"   ‚ùå Error: {text}")
                         
         except Exception as e:
-            print(f"   ❌ Exception: {e}")
+            print(f"   ‚ùå Exception: {e}")
     
     # Test specific space access
-    print(f"\n🔍 Testing specific space access...")
+    print(f"\nüîç Testing specific space access...")
     try:
         async with aiohttp.ClientSession() as session:
             # First get the workspace details
@@ -73,7 +73,7 @@ async def test_permissions():
                         if space_response.status == 200:
                             spaces_data = await space_response.json()
                             spaces = spaces_data.get("spaces", [])
-                            print(f"   ✅ Found {len(spaces)} spaces")
+                            print(f"   ‚úÖ Found {len(spaces)} spaces")
                             for space in spaces[:3]:  # Show first 3
                                 print(f"      - {space.get('name', 'Unknown')} (ID: {space.get('id', 'Unknown')})")
                             
@@ -81,14 +81,14 @@ async def test_permissions():
                             if spaces:
                                 first_space = spaces[0]
                                 space_id = first_space.get('id')
-                                print(f"\n🔍 Testing list access for space: {first_space.get('name')} (ID: {space_id})")
+                                print(f"\nüîç Testing list access for space: {first_space.get('name')} (ID: {space_id})")
                                 
                                 async with session.get(f"https://api.clickup.com/api/v2/space/{space_id}/list", headers=headers) as list_response:
                                     print(f"   Lists endpoint status: {list_response.status}")
                                     if list_response.status == 200:
                                         lists_data = await list_response.json()
                                         lists = lists_data.get("lists", [])
-                                        print(f"   ✅ Found {len(lists)} lists")
+                                        print(f"   ‚úÖ Found {len(lists)} lists")
                                         for lst in lists[:3]:  # Show first 3
                                             print(f"      - {lst.get('name', 'Unknown')} (ID: {lst.get('id', 'Unknown')})")
                                         
@@ -96,32 +96,32 @@ async def test_permissions():
                                         if lists:
                                             first_list = lists[0]
                                             list_id = first_list.get('id')
-                                            print(f"\n🔍 Testing custom fields access for list: {first_list.get('name')} (ID: {list_id})")
+                                            print(f"\nüîç Testing custom fields access for list: {first_list.get('name')} (ID: {list_id})")
                                             
                                             async with session.get(f"https://api.clickup.com/api/v2/list/{list_id}/field", headers=headers) as field_response:
                                                 print(f"   Custom fields endpoint status: {field_response.status}")
                                                 if field_response.status == 200:
                                                     fields_data = await field_response.json()
                                                     fields = fields_data.get("fields", [])
-                                                    print(f"   ✅ Found {len(fields)} fields")
+                                                    print(f"   ‚úÖ Found {len(fields)} fields")
                                                     for field in fields[:5]:  # Show first 5
                                                         field_type = field.get('type', 'Unknown')
                                                         field_name = field.get('name', 'Unknown')
                                                         print(f"      - {field_name} (Type: {field_type})")
                                                 else:
                                                     text = await field_response.text()
-                                                    print(f"   ❌ Custom fields error: {text}")
+                                                    print(f"   ‚ùå Custom fields error: {text}")
                                     else:
                                         text = await list_response.text()
-                                        print(f"   ❌ Lists error: {text}")
+                                        print(f"   ‚ùå Lists error: {text}")
                         else:
                             text = await space_response.text()
-                            print(f"   ❌ Spaces error: {text}")
+                            print(f"   ‚ùå Spaces error: {text}")
                 else:
-                    print(f"   ❌ Workspace access failed: {response.status}")
+                    print(f"   ‚ùå Workspace access failed: {response.status}")
                     
     except Exception as e:
-        print(f"   ❌ Exception: {e}")
+        print(f"   ‚ùå Exception: {e}")
 
 if __name__ == "__main__":
     asyncio.run(test_permissions())

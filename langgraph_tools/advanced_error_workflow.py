@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Workflow avanzado de LangGraph que demuestra la integración del nodo de logging
-con otros nodos del workflow, siguiendo el patrón solicitado
+Workflow avanzado de LangGraph que demuestra la integracion del nodo de logging
+con otros nodos del workflow, siguiendo el patron solicitado
 """
 
 from langgraph.graph import StateGraph, END
@@ -9,7 +9,7 @@ from typing import Dict, Any, TypedDict
 import os
 import sys
 
-# Agregar el directorio raíz al path para importar utils
+# Agregar el directorio raiz al path para importar utils
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils.deployment_logger import log_error_sync
@@ -32,22 +32,22 @@ class WorkflowState(TypedDict):
 def error_handler(state: WorkflowState) -> WorkflowState:
     """Manejar y clasificar el error"""
     
-    print("🚨 Manejando error en workflow...")
+    print("ðŸš¨ Manejando error en workflow...")
     
     # Clasificar el error por severidad
     severity = state.get("severity", "medium")
     if severity == "high":
-        print("   ⚠️ Error de alta severidad detectado")
+        print("   âš ï¸� Error de alta severidad detectado")
         state["workflow_step"] = "critical_error"
     elif severity == "medium":
-        print("   ⚠️ Error de severidad media detectado")
+        print("   âš ï¸� Error de severidad media detectado")
         state["workflow_step"] = "standard_error"
     else:
-        print("   ℹ️ Error de baja severidad detectado")
+        print("   â„¹ï¸� Error de baja severidad detectado")
         state["workflow_step"] = "minor_error"
     
     state["error_handled"] = True
-    print(f"   ✅ Error clasificado como: {state['workflow_step']}")
+    print(f"   âœ… Error clasificado como: {state['workflow_step']}")
     
     return state
 
@@ -55,13 +55,13 @@ def error_handler(state: WorkflowState) -> WorkflowState:
 def log_error_to_postgres_and_summary(state: WorkflowState) -> WorkflowState:
     """Registrar el error en PostgreSQL y DEPLOYMENT_SUMMARY.txt"""
     
-    print("📝 Registrando error en sistema de logging...")
+    print("ðŸ“� Registrando error en sistema de logging...")
     
     try:
         # Preparar datos para logging
         logging_inputs = {
             "error_description": state.get("error_description", "Error no especificado"),
-            "solution_description": state.get("solution_description", "Solución no documentada"),
+            "solution_description": state.get("solution_description", "Solucion no documentada"),
             "context_info": state.get("context_info", "Sin contexto"),
             "deployment_id": state.get("deployment_id", "unknown"),
             "environment": state.get("environment", "production"),
@@ -76,51 +76,51 @@ def log_error_to_postgres_and_summary(state: WorkflowState) -> WorkflowState:
         state["logging_result"] = result
         
         if result["status"] == "documentado":
-            print("   ✅ Error registrado exitosamente en ambos sistemas")
+            print("   âœ… Error registrado exitosamente en ambos sistemas")
             state["workflow_step"] = "logged"
         else:
-            print(f"   ❌ Error en logging: {result.get('message', 'Error desconocido')}")
+            print(f"   â�Œ Error en logging: {result.get('message', 'Error desconocido')}")
             state["workflow_step"] = "error"
             
     except Exception as e:
         error_msg = f"Error en logging: {str(e)}"
-        print(f"   ❌ {error_msg}")
+        print(f"   â�Œ {error_msg}")
         state["logging_result"] = {"status": "error", "message": error_msg}
     
     return state
 
-# Nodo de notificación
+# Nodo de notificacion
 def notify_team(state: WorkflowState) -> WorkflowState:
     """Notificar al equipo sobre el error"""
     
-    print("📢 Notificando al equipo...")
+    print("ðŸ“¢ Notificando al equipo...")
     
     severity = state.get("severity", "medium")
     if severity == "high":
-        print("   🚨 Notificación URGENTE enviada al equipo")
+        print("   ðŸš¨ Notificacion URGENTE enviada al equipo")
     elif severity == "medium":
-        print("   ⚠️ Notificación de advertencia enviada")
+        print("   âš ï¸� Notificacion de advertencia enviada")
     else:
-        print("   ℹ️ Notificación informativa enviada")
+        print("   â„¹ï¸� Notificacion informativa enviada")
     
     state["workflow_step"] = "notified"
     return state
 
-# Nodo de resolución
+# Nodo de resolucion
 def resolve_error(state: WorkflowState) -> WorkflowState:
     """Marcar el error como resuelto"""
     
-    print("✅ Resolviendo error...")
+    print("âœ… Resolviendo error...")
     
-    # Actualizar estado
+    # Update estado
     state["status"] = "resolved"
     state["workflow_step"] = "completed"
     
-    print("   ✅ Error marcado como resuelto")
+    print("   âœ… Error marcado como resuelto")
     
     return state
 
-# Función de enrutamiento
+# Funcion de enrutamiento
 def route_workflow(state: WorkflowState) -> str:
     """Determinar el siguiente nodo basado en el estado"""
     
@@ -143,11 +143,11 @@ def route_workflow(state: WorkflowState) -> str:
     else:
         return "log_error_to_postgres_and_summary"
 
-# Crear el grafo avanzado
+# Create el grafo avanzado
 def create_advanced_error_workflow() -> StateGraph:
-    """Crear el workflow avanzado de manejo de errores"""
+    """Create el workflow avanzado de manejo de errores"""
     
-    # Crear el grafo
+    # Create el grafo
     graph = StateGraph(WorkflowState)
     
     # Agregar nodos
@@ -194,23 +194,23 @@ def create_advanced_error_workflow() -> StateGraph:
     
     return graph
 
-# Función de conveniencia para uso directo
+# Funcion de conveniencia para uso directo
 def run_error_workflow(error_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Ejecutar el workflow completo de manejo de errores
+    Execute el workflow completo de manejo de errores
     
     Args:
-        error_data: Diccionario con información del error
+        error_data: Diccionario con informacion del error
         
     Returns:
         Dict con resultado del workflow
     """
     try:
-        # Crear y compilar el grafo
+        # Create y compilar el grafo
         graph = create_advanced_error_workflow()
         deployment_graph = graph.compile()
         
-        # Ejecutar el workflow
+        # Execute el workflow
         result = deployment_graph.invoke(error_data)
         
         return {
@@ -229,23 +229,23 @@ def run_error_workflow(error_data: Dict[str, Any]) -> Dict[str, Any]:
 
 # Ejemplo de uso
 if __name__ == "__main__":
-    print("🧪 Probando workflow avanzado de manejo de errores...")
+    print("ðŸ§ª Probando workflow avanzado de manejo de errores...")
     
     # Datos de ejemplo
     sample_error = {
-        "error_description": "Error crítico en endpoint de autenticación",
-        "solution_description": "Reiniciar servicio de autenticación y verificar tokens",
-        "context_info": "Problema en producción - usuarios no pueden iniciar sesión",
+        "error_description": "Error critico en endpoint de autenticacion",
+        "solution_description": "Reiniciar servicio de autenticacion y verificar tokens",
+        "context_info": "Problema en produccion - usuarios no pueden iniciar sesion",
         "deployment_id": "railway-prod-456",
         "environment": "production",
         "severity": "high",
         "status": "pending"
     }
     
-    # Ejecutar workflow completo
+    # Execute workflow completo
     result = run_error_workflow(sample_error)
     
-    print(f"\n📋 Resultado del workflow:")
+    print(f"\nðŸ“‹ Resultado del workflow:")
     print(f"   - Status: {result['status']}")
     print(f"   - Paso final: {result.get('final_step', 'N/A')}")
     print(f"   - Error resuelto: {result.get('error_resolved', False)}")

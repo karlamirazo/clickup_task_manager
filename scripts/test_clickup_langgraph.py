@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 async def run_suite() -> None:
     load_dotenv()
     token = os.getenv("CLICKUP_API_TOKEN")
-    assert token, "CLICKUP_API_TOKEN no configurado"
+    assert token, "CLICKUP_API_TOKEN no configured"
 
     client = ClickUpTools(api_token=token)
 
@@ -34,7 +34,7 @@ async def run_suite() -> None:
     assert lists, "No se encontraron listas"
     list_id = lists[0]["id"]
 
-    # 2) Crear tarea
+    # 2) Create tarea
     created = await client.create_task(list_id, name="Test LangGraph Tools", description="End-to-end")
     task_id = created["id"]
     print("CREATED:", task_id)

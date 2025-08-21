@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabla de Usuarios y Tareas - ClickUp Project Manager</title>
+    <link rel="stylesheet" href="/styles.css?v=20250119">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .users-tasks-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .page-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .table-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            border: 1px solid #e9ecef;
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .table-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+
+        .filter-select {
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background: white;
+            font-size: 0.9rem;
+            min-width: 150px;
+        }
+
+        .btn-refresh {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-refresh:hover {
+            transform: translateY(-2px);
+        }
+
+        .users-tasks-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .users-tasks-table th {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .users-tasks-table td {
+            padding: 18px 15px;
+            border-bottom: 1px solid #f1f3f4;
+            vertical-align: middle;
+        }
+
+        .users-tasks-table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        .users-tasks-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-details h4 {
+            margin: 0 0 3px 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .user-details p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .task-info {
+            max-width: 300px;
+        }
+
+        .task-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .task-description {
+            color: #6c757d;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .priority-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .priority-urgent {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .priority-high {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .priority-normal {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .priority-low {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+            min-width: 100px;
+        }
+
+                 .status-pending {
+             background: #f3f4f6;
+             color: #374151;
+         }
+ 
+         .status-in-progress {
+             background: #dbeafe;
+             color: #2563eb;
+         }
+ 
+         .status-done {
+             background: #dcfce7;
+             color: #16a34a;
+         }
+
+        .due-date {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .due-date.overdue {
+            color: #dc2626;
+        }
+
+        .due-date.due-soon {
+            color: #d97706;
+        }
+
+        .due-date.on-time {
+            color: #16a34a;
+        }
+
+        .due-date-icon {
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .pagination button:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .pagination button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .users-tasks-container {
+                padding: 10px;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .table-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                min-width: auto;
+            }
+            
+            .users-tasks-table {
+                font-size: 0.85rem;
+            }
+            
+            .users-tasks-table th,
+            .users-tasks-table td {
+                padding: 12px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="users-tasks-container">
+        <!-- Header de la página -->
+        <div class="page-header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h1 class="page-title">
+                        <i class="fas fa-users"></i>
+                        Tabla de Usuarios y Tareas
+                    </h1>
+                    <p class="page-subtitle">
+                        Vista completa de usuarios, tareas asignadas y fechas límite de entrega
+                    </p>
+                </div>
+                <a href="/" class="btn-refresh" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); margin-top: 10px;">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver al Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Tarjetas de estadísticas -->
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-number" id="total-users">-</div>
+                <div class="stat-label">Usuarios Activos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="stat-number" id="total-tasks">-</div>
+                <div class="stat-label">Total de Tareas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-number" id="overdue-tasks">-</div>
+                <div class="stat-label">Tareas Vencidas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-number" id="due-soon-tasks">-</div>
+                <div class="stat-label">Vencen Pronto</div>
+            </div>
+        </div>
+
+        <!-- Tabla principal -->
+        <div class="table-section">
+            <div class="table-header">
+                <h2 class="table-title">
+                    <i class="fas fa-table"></i>
+                    Detalle de Usuarios y Tareas
+                </h2>
+                <div class="table-controls">
+                    <div class="search-box">
+                        <input type="text" class="search-input" id="search-input" placeholder="Buscar por usuario, tarea o descripción...">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                                         <select class="filter-select" id="status-filter">
+                         <option value="">Todos los estados</option>
+                         <option value="pendiente">PENDIENTE</option>
+                         <option value="en curso">EN CURSO</option>
+                         <option value="completado">COMPLETADO</option>
+                     </select>
+                    <select class="filter-select" id="priority-filter">
+                        <option value="">Todas las prioridades</option>
+                        <option value="1">Urgente</option>
+                        <option value="2">Alta</option>
+                        <option value="3">Normal</option>
+                        <option value="4">Baja</option>
+                    </select>
+                    <button class="btn-refresh" onclick="refreshData()">
+                        <i class="fas fa-sync-alt"></i>
+                        Actualizar
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="users-tasks-table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Tarea</th>
+                            <th>Prioridad</th>
+                            <th>Estado</th>
+                            <th>Fecha Límite</th>
+                            <th>Lista</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-tasks-table-body">
+                        <tr>
+                            <td colspan="6" class="empty-state">
+                                <i class="fas fa-spinner loading-spinner"></i>
+                                <h3>Cargando datos...</h3>
+                                <p>Obteniendo información de usuarios y tareas</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            <div class="pagination" id="pagination" style="display: none;">
+                <button id="prev-page" onclick="changePage(-1)">Anterior</button>
+                <span id="page-info">Página 1 de 1</span>
+                <button id="next-page" onclick="changePage(1)">Siguiente</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        const itemsPerPage = 20;
+        let listMap = {}; // Mapeo de listas específicas
+
+        // Inicializar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Búsqueda en tiempo real
+            document.getElementById('search-input').addEventListener('input', function(e) {
+                filterData();
+            });
+
+            // Filtros
+            document.getElementById('status-filter').addEventListener('change', filterData);
+            document.getElementById('priority-filter').addEventListener('change', filterData);
+        }
+
+        async function loadData() {
+            try {
+                showLoading();
+                console.log('🔄 Iniciando carga de datos...');
+                
+                // Cargar tareas
+                console.log('📋 Cargando tareas...');
+                const tasksResponse = await fetch('/api/v1/tasks/?include_closed=true&page=0&limit=1000');
+                console.log('✅ Respuesta de tareas:', tasksResponse.status);
+                if (!tasksResponse.ok) {
+                    throw new Error(`HTTP error! status: ${tasksResponse.status}`);
+                }
+                const tasksData = await tasksResponse.json();
+                console.log('📊 Datos de tareas:', tasksData);
+                console.log('📊 Tipo de datos de tareas:', typeof tasksData);
+                console.log('📊 ¿Es array?', Array.isArray(tasksData));
+                
+                // Cargar usuarios
+                console.log('👥 Cargando usuarios...');
+                const usersResponse = await fetch('/api/v1/users/?workspace_id=9014943317');
+                console.log('✅ Respuesta de usuarios:', usersResponse.status);
+                if (!usersResponse.ok) {
+                    throw new Error(`HTTP error! status: ${usersResponse.status}`);
+                }
+                const usersData = await usersResponse.json();
+                console.log('📊 Datos de usuarios:', usersData);
+                console.log('📊 Tipo de datos de usuarios:', typeof usersData);
+                console.log('📊 ¿Es array?', Array.isArray(usersData));
+                
+                // Cargar espacios y listas
+                console.log('🏢 Cargando espacios...');
+                const spacesResponse = await fetch('/api/v1/workspaces/9014943317/spaces');
+                console.log('✅ Respuesta de espacios:', spacesResponse.status);
+                if (!spacesResponse.ok) {
+                    throw new Error(`HTTP error! status: ${spacesResponse.status}`);
+                }
+                const spacesData = await spacesResponse.json();
+                console.log('📊 Datos de espacios:', spacesData);
+                console.log('📊 Tipo de datos de espacios:', typeof spacesData);
+                console.log('📊 ¿Es array?', Array.isArray(spacesData));
+                
+                // Procesar y combinar datos
+                console.log('🔄 Procesando datos...');
+                // La API de tareas devuelve directamente un array, no un objeto con propiedad 'tasks'
+                const tasks = Array.isArray(tasksData) ? tasksData : (tasksData.tasks || []);
+                const users = Array.isArray(usersData) ? usersData : (usersData.users || []);
+                const spaces = Array.isArray(spacesData) ? spacesData : (spacesData.spaces || []);
+                
+                console.log('🔍 Datos finales para procesar:');
+                console.log('🔍 Tareas:', tasks.length, tasks);
+                console.log('🔍 Usuarios:', users.length, users);
+                console.log('🔍 Espacios:', spaces.length, spaces);
+                
+                processData(tasks, users, spaces);
+                
+            } catch (error) {
+                console.error('❌ Error cargando datos:', error);
+                showError(`Error al cargar los datos: ${error.message}. Por favor, intenta nuevamente.`);
+            }
+        }
+
+        function processData(tasks, users, spaces) {
+            console.log('🔄 Procesando datos...');
+            console.log('📋 Tareas recibidas:', tasks.length);
+            console.log('👥 Usuarios recibidos:', users.length);
+            console.log('🏢 Espacios recibidos:', spaces.length);
+            
+            // Verificar que tenemos datos válidos
+            if (!Array.isArray(tasks) || tasks.length === 0) {
+                console.warn('⚠️ No hay tareas para procesar');
+                showError('No se encontraron tareas para mostrar');
+                return;
+            }
+            
+            // Crear mapeo de usuarios
+            const userMap = {};
+            users.forEach(user => {
+                // La API devuelve usuarios con estructura {id, clickup_id, username, email, ...}
+                const userId = user.id || user.clickup_id;
+                if (userId) {
+                    userMap[userId] = {
+                        id: userId,
+                        name: user.username || user.name || 'Usuario',
+                        email: user.email || 'N/A'
+                    };
+                }
+            });
+            
+                         // Agregar usuarios de ejemplo para IDs que no están en la API
+             // Basándonos en los assignee_id que vemos en las tareas
+             const additionalUsers = {
+                 '88425546': { id: '88425546', name: 'Veronica Mirazo', email: 'karla_r@hotmail.com' },
+                 '88425547': { id: '88425547', name: 'Karla Rosas', email: 'lakitu_98@yahoo.com' }
+             };
+            
+            // Combinar usuarios de la API con usuarios adicionales
+            Object.assign(userMap, additionalUsers);
+            
+            console.log('🗺️ Mapeo de usuarios creado:', Object.keys(userMap).length, 'usuarios');
+            console.log('🗺️ Usuarios mapeados:', userMap);
+
+            // Crear mapeo de espacios y listas
+            const spaceMap = {};
+            spaces.forEach(space => {
+                spaceMap[space.id] = space;
+                if (space.lists) {
+                    space.lists.forEach(list => {
+                        list.space_name = space.name;
+                    });
+                }
+            });
+            
+            // Agregar mapeo de listas específicas basándonos en los list_id que vemos en las tareas
+            listMap = {
+                '901411770471': { 
+                    id: '901411770471', 
+                    name: 'Proyecto 1', 
+                    space_name: 'Espacio del equipo [ES-LA]' 
+                }
+            };
+            
+            console.log('🗺️ Mapeo de espacios creado:', Object.keys(spaceMap).length, 'espacios');
+            console.log('🗺️ Mapeo de listas creado:', Object.keys(listMap).length, 'listas');
+
+            // Combinar datos de tareas con información de usuarios
+            currentData = tasks.map(task => {
+                console.log('🔍 Procesando tarea:', task.name, 'assignee_id:', task.assignee_id);
+                const user = userMap[task.assignee_id] || { name: 'Sin asignar', email: 'N/A' };
+                const list = findListById(task.list_id, spaces);
+                
+                return {
+                    ...task,
+                    user_name: user.name || 'Sin asignar',
+                    user_email: user.email || 'N/A',
+                    user_id: task.assignee_id,
+                    list_name: list ? list.name : 'Lista desconocida',
+                    space_name: list ? list.space_name : 'Espacio desconocido',
+                    due_date_formatted: formatDueDate(task.due_date),
+                    due_date_class: getDueDateClass(task.due_date),
+                    priority_class: getPriorityClass(task.priority),
+                    status_class: getStatusClass(task.status)
+                };
+            });
+            console.log('📊 Tareas procesadas:', currentData);
+            console.log('✅ Datos combinados:', currentData.length, 'tareas procesadas');
+
+            // Agrupar por usuario
+            currentData.sort((a, b) => {
+                if (a.user_name === 'Sin asignar') return 1;
+                if (b.user_name === 'Sin asignar') return -1;
+                return a.user_name.localeCompare(b.user_name);
+            });
+
+            filteredData = [...currentData];
+            console.log('🔄 Actualizando estadísticas y tabla...');
+            updateStats();
+            renderTable();
+            console.log('✅ Procesamiento completado');
+        }
+
+        function findListById(listId, spaces) {
+            // Primero buscar en el mapeo de listas específicas
+            const specificList = listMap[listId];
+            if (specificList) {
+                return specificList;
+            }
+            
+            // Si no se encuentra, buscar en los espacios
+            for (const space of spaces) {
+                if (space.lists) {
+                    const list = space.lists.find(l => l.id === listId);
+                    if (list) {
+                        list.space_name = space.name;
+                        return list;
+                    }
+                }
+            }
+            return null;
+        }
+
+        function formatDueDate(dueDate) {
+            if (!dueDate) return 'Sin fecha límite';
+            
+            // Las fechas vienen como string ISO, no como timestamp
+            const date = new Date(dueDate);
+            
+            // Verificar si la fecha es válida
+            if (isNaN(date.getTime())) {
+                return 'Fecha inválida';
+            }
+            
+            return date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function getDueDateClass(dueDate) {
+            if (!dueDate) return 'on-time';
+            
+            const now = new Date();
+            const due = new Date(dueDate); // Las fechas vienen como string ISO
+            
+            // Verificar si la fecha es válida
+            if (isNaN(due.getTime())) {
+                return 'on-time';
+            }
+            
+            const diffTime = due - now;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays < 0) return 'overdue';
+            if (diffDays <= 3) return 'due-soon';
+            return 'on-time';
+        }
+
+        function getPriorityClass(priority) {
+            switch (priority) {
+                case 1: return 'priority-urgent';
+                case 2: return 'priority-high';
+                case 3: return 'priority-normal';
+                case 4: return 'priority-low';
+                default: return 'priority-normal';
+            }
+        }
+
+        function getStatusClass(status) {
+            switch (status?.toLowerCase()) {
+                case 'to do':
+                case 'por hacer':
+                case 'pendiente':
+                    return 'status-pending';
+                case 'in progress':
+                case 'en progreso':
+                case 'en curso':
+                    return 'status-in-progress';
+                case 'done':
+                case 'completado':
+                    return 'status-done';
+                default:
+                    return 'status-pending';
+            }
+        }
+
+        function getPriorityText(priority) {
+            switch (priority) {
+                case 1: return 'Urgente';
+                case 2: return 'Alta';
+                case 3: return 'Normal';
+                case 4: return 'Baja';
+                default: return 'Normal';
+            }
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'to do': 'PENDIENTE',
+                'in progress': 'EN CURSO',
+                'en progreso': 'EN CURSO',
+                'en curso': 'EN CURSO',
+                'pendiente': 'PENDIENTE',
+                'done': 'COMPLETADO',
+                'completado': 'COMPLETADO'
+            };
+            return statusMap[status?.toLowerCase()] || 'PENDIENTE';
+        }
+
+        function filterData() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const statusFilter = document.getElementById('status-filter').value;
+            const priorityFilter = document.getElementById('priority-filter').value;
+
+            filteredData = currentData.filter(item => {
+                const matchesSearch = 
+                    item.user_name.toLowerCase().includes(searchTerm) ||
+                    item.name.toLowerCase().includes(searchTerm) ||
+                    (item.description && item.description.toLowerCase().includes(searchTerm));
+                
+                                 const matchesStatus = !statusFilter || getStatusText(item.status) === statusFilter;
+                const matchesPriority = !priorityFilter || item.priority == priorityFilter;
+
+                return matchesSearch && matchesStatus && matchesPriority;
+            });
+
+            currentPage = 1;
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('users-tasks-table-body');
+            console.log('🎨 Renderizando tabla con', filteredData.length, 'elementos');
+            
+            if (filteredData.length === 0) {
+                console.warn('⚠️ No hay datos filtrados para mostrar');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <i class="fas fa-search"></i>
+                            <h3>No se encontraron resultados</h3>
+                            <p>Intenta ajustar los filtros de búsqueda</p>
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('pagination').style.display = 'none';
+                return;
+            }
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = filteredData.slice(startIndex, endIndex);
+
+            tbody.innerHTML = pageData.map(item => `
+                <tr>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                ${item.user_name.charAt(0).toUpperCase()}
+                            </div>
+                            <div class="user-details">
+                                <h4>${item.user_name}</h4>
+                                <p>${item.user_email}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="task-info">
+                            <div class="task-name">${item.name}</div>
+                            ${item.description ? `<div class="task-description">${item.description}</div>` : ''}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="priority-badge ${item.priority_class}">
+                            ${getPriorityText(item.priority)}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge ${item.status_class}">
+                            ${getStatusText(item.status)}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="due-date ${item.due_date_class}">
+                            <i class="fas fa-calendar-alt due-date-icon"></i>
+                            ${item.due_date_formatted}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="list-info">
+                            <strong>${item.list_name}</strong>
+                            <br>
+                            <small style="color: #6c757d;">${item.space_name}</small>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            updatePagination();
+        }
+
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                pagination.style.display = 'none';
+                return;
+            }
+
+            pagination.style.display = 'flex';
+            document.getElementById('page-info').textContent = `Página ${currentPage} de ${totalPages}`;
+            document.getElementById('prev-page').disabled = currentPage === 1;
+            document.getElementById('next-page').disabled = currentPage === totalPages;
+        }
+
+        function changePage(delta) {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            const newPage = currentPage + delta;
+            
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                renderTable();
+            }
+        }
+
+        function updateStats() {
+            const totalUsers = new Set(currentData.map(item => item.user_id)).size;
+            const totalTasks = currentData.length;
+            const overdueTasks = currentData.filter(item => item.due_date_class === 'overdue').length;
+            const dueSoonTasks = currentData.filter(item => item.due_date_class === 'due-soon').length;
+
+            document.getElementById('total-users').textContent = totalUsers;
+            document.getElementById('total-tasks').textContent = totalTasks;
+            document.getElementById('overdue-tasks').textContent = overdueTasks;
+            document.getElementById('due-soon-tasks').textContent = dueSoonTasks;
+        }
+
+        function showLoading() {
+            const tbody = document.getElementById('users-tasks-table-body');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="empty-state">
+                        <i class="fas fa-spinner loading-spinner"></i>
+                        <h3>Cargando datos...</h3>
+                        <p>Obteniendo información de usuarios y tareas</p>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function showError(message) {
+            const tbody = document.getElementById('users-tasks-table-body');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="empty-state">
+                        <i class="fas fa-exclamation-triangle" style="color: #dc2626;"></i>
+                        <h3>Error</h3>
+                        <p>${message}</p>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function refreshData() {
+            const refreshBtn = document.querySelector('.btn-refresh i');
+            refreshBtn.className = 'fas fa-spinner loading-spinner';
+            
+            loadData().finally(() => {
+                refreshBtn.className = 'fas fa-sync-alt';
+            });
+        }
+    </script>
+</body>
+</html>

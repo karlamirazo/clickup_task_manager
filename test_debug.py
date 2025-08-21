@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script de debugging para probar la conexión con ClickUp
+Script de debugging para probar la conexion con ClickUp
 """
 
 import asyncio
@@ -9,38 +9,38 @@ from core.clickup_client import ClickUpClient
 from core.config import settings
 
 async def test_clickup_connection():
-    """Probar conexión con ClickUp"""
-    print("🔍 Probando conexión con ClickUp...")
+    """Test conexion con ClickUp"""
+    print("ğŸ”� Probando conexion con ClickUp...")
     
-    # Verificar configuración
-    print(f"📋 Token configurado: {'✅' if settings.CLICKUP_API_TOKEN else '❌'}")
-    print(f"📋 Longitud del token: {len(settings.CLICKUP_API_TOKEN) if settings.CLICKUP_API_TOKEN else 0}")
-    print(f"📋 URL base: {settings.CLICKUP_API_BASE_URL}")
+    # Verificar configuracion
+    print(f"ğŸ“‹ Token configured: {'âœ…' if settings.CLICKUP_API_TOKEN else 'â�Œ'}")
+    print(f"ğŸ“‹ Longitud del token: {len(settings.CLICKUP_API_TOKEN) if settings.CLICKUP_API_TOKEN else 0}")
+    print(f"ğŸ“‹ URL base: {settings.CLICKUP_API_BASE_URL}")
     
     if not settings.CLICKUP_API_TOKEN:
-        print("❌ No hay token configurado")
+        print("â�Œ No hay token configured")
         return
     
-    # Crear cliente
+    # Create cliente
     client = ClickUpClient()
-    print(f"🔧 Cliente creado con token: {client.api_token[:10]}...")
+    print(f"ğŸ”§ Cliente creado con token: {client.api_token[:10]}...")
     
     try:
-        # Probar conexión
-        print("🔄 Probando endpoint /team...")
+        # Test conexion
+        print("ğŸ”„ Probando endpoint /team...")
         workspaces = await client.get_workspaces()
-        print(f"✅ Conexión exitosa! Workspaces encontrados: {len(workspaces)}")
+        print(f"âœ… Connection successful! Workspaces encontrados: {len(workspaces)}")
         
         if workspaces:
-            print("📋 Primer workspace:")
+            print("ğŸ“‹ Primer workspace:")
             print(f"   ID: {workspaces[0].get('id')}")
             print(f"   Nombre: {workspaces[0].get('name')}")
             
     except Exception as e:
-        print(f"❌ Error en la conexión: {e}")
-        print(f"❌ Tipo de error: {type(e)}")
+        print(f"â�Œ Error en la conexion: {e}")
+        print(f"â�Œ Tipo de error: {type(e)}")
         import traceback
-        print(f"❌ Traceback: {traceback.format_exc()}")
+        print(f"â�Œ Traceback: {traceback.format_exc()}")
 
 if __name__ == "__main__":
     asyncio.run(test_clickup_connection())

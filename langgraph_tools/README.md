@@ -1,32 +1,32 @@
-# 🚀 Sistema de Logging de Errores con LangGraph
+# ðŸš€ Sistema de Logging de Errores con LangGraph
 
-Este directorio contiene workflows de LangGraph para logging automático de errores de deployment, integrando con el sistema de logging dual (PostgreSQL + DEPLOYMENT_SUMMARY.txt).
+Este directorio contiene workflows de LangGraph para logging automÃ¡tico de errores de deployment, integrando con el sistema de logging dual (PostgreSQL + DEPLOYMENT_SUMMARY.txt).
 
-## 📋 **Componentes del Sistema**
+## ðŸ“‹ **Componentes del Sistema**
 
 ### 1. **Sistema Base de Logging** (`utils/deployment_logger.py`)
-- Clase `DeploymentLogger` para logging automático
+- Clase `DeploymentLogger` para logging automÃ¡tico
 - Funciones de conveniencia: `log_error_sync()`, `log_error_to_postgres_and_summary()`
 - Soporte para PostgreSQL y SQLite
 - Logging dual: base de datos + archivo de texto
 
 ### 2. **Workflow Simple** (`simple_error_logging.py`)
 - Grafo de un solo nodo para logging directo
-- Ideal para integración simple en workflows existentes
-- Patrón: `log_error → END`
+- Ideal para integraciÃ³n simple en workflows existentes
+- PatrÃ³n: `log_error â†’ END`
 
 ### 3. **Workflow Avanzado** (`advanced_error_workflow.py`)
-- Workflow completo con múltiples nodos
-- Flujo: `error_handler → log_error → notify_team → resolve_error → END`
-- Clasificación automática por severidad
-- Notificaciones automáticas al equipo
+- Workflow completo con mÃºltiples nodos
+- Flujo: `error_handler â†’ log_error â†’ notify_team â†’ resolve_error â†’ END`
+- ClasificaciÃ³n automÃ¡tica por severidad
+- Notificaciones automÃ¡ticas al equipo
 
 ### 4. **Workflow Completo** (`error_logging_workflow.py`)
-- Workflow con validación, logging y reportes
+- Workflow con validaciÃ³n, logging y reportes
 - Manejo de errores del workflow
-- Generación de reportes estructurados
+- GeneraciÃ³n de reportes estructurados
 
-## 🎯 **Casos de Uso**
+## ðŸŽ¯ **Casos de Uso**
 
 ### **Caso 1: Logging Simple**
 ```python
@@ -34,8 +34,8 @@ from langgraph_tools.simple_error_logging import log_error_with_graph
 
 error_data = {
     "error_description": "Error en endpoint /tasks",
-    "solution_description": "Corregir validación de modelo",
-    "context_info": "Problema en creación de tareas",
+    "solution_description": "Corregir validaciÃ³n de modelo",
+    "context_info": "Problema en creaciÃ³n de tareas",
     "deployment_id": "railway-123",
     "environment": "production",
     "severity": "high",
@@ -49,16 +49,16 @@ result = log_error_with_graph(error_data)
 ```python
 from langgraph_tools.advanced_error_workflow import run_error_workflow
 
-# El workflow maneja automáticamente:
-# 1. Clasificación del error
+# El workflow maneja automÃ¡ticamente:
+# 1. ClasificaciÃ³n del error
 # 2. Logging en BD y archivo
-# 3. Notificación al equipo
-# 4. Resolución del error
+# 3. NotificaciÃ³n al equipo
+# 4. ResoluciÃ³n del error
 
 result = run_error_workflow(error_data)
 ```
 
-### **Caso 3: Integración en Workflows Existentes**
+### **Caso 3: IntegraciÃ³n en Workflows Existentes**
 ```python
 from langgraph.graph import StateGraph, END
 from langgraph_tools.simple_error_logging import log_error_to_postgres_and_summary
@@ -78,7 +78,7 @@ graph.add_edge("log_error", END)
 deployment_graph = graph.compile()
 ```
 
-## 🔧 **Configuración**
+## ðŸ”§ **ConfiguraciÃ³n**
 
 ### **Variables de Entorno**
 ```bash
@@ -94,14 +94,14 @@ DATABASE_URL=postgresql://user:pass@host:port/db
 pip install langgraph sqlalchemy aiosqlite psycopg2-binary
 ```
 
-## 📊 **Estructura de Datos**
+## ðŸ“Š **Estructura de Datos**
 
 ### **Input del Error**
 ```python
 error_data = {
-    "error_description": "Descripción del problema",
-    "solution_description": "Solución implementada",
-    "context_info": "Información adicional del contexto",
+    "error_description": "DescripciÃ³n del problema",
+    "solution_description": "SoluciÃ³n implementada",
+    "context_info": "InformaciÃ³n adicional del contexto",
     "deployment_id": "ID del deployment (opcional)",
     "environment": "production|development|staging",
     "severity": "high|medium|low|info",
@@ -119,19 +119,19 @@ result = {
 }
 ```
 
-## 🚨 **Manejo de Errores**
+## ðŸš¨ **Manejo de Errores**
 
 ### **Errores del Sistema de Logging**
 - Si falla PostgreSQL, se intenta SQLite
 - Si falla la base de datos, se escribe solo en archivo
-- Errores del workflow se registran automáticamente
+- Errores del workflow se registran automÃ¡ticamente
 
 ### **Errores del Workflow**
-- Validación de campos obligatorios
+- ValidaciÃ³n de campos obligatorios
 - Manejo de excepciones en cada nodo
-- Logging automático de fallos del workflow
+- Logging automÃ¡tico de fallos del workflow
 
-## 📈 **Monitoreo y Reportes**
+## ðŸ“ˆ **Monitoreo y Reportes**
 
 ### **Base de Datos**
 ```sql
@@ -147,36 +147,36 @@ AND status = 'pending';
 ```
 
 ### **Archivo de Texto**
-- `DEPLOYMENT_SUMMARY.txt` se actualiza automáticamente
-- Formato Markdown para fácil lectura
+- `DEPLOYMENT_SUMMARY.txt` se actualiza automÃ¡ticamente
+- Formato Markdown para fÃ¡cil lectura
 - Historial completo de problemas y soluciones
 
-## 🔄 **Flujos de Trabajo**
+## ðŸ”„ **Flujos de Trabajo**
 
 ### **Flujo Simple**
 ```
-Input → log_error → END
+Input â†’ log_error â†’ END
 ```
 
 ### **Flujo Avanzado**
 ```
-Input → error_handler → log_error → notify_team → resolve_error → END
+Input â†’ error_handler â†’ log_error â†’ notify_team â†’ resolve_error â†’ END
 ```
 
 ### **Flujo Completo**
 ```
-Input → validate → log_error → generate_report → END
+Input â†’ validate â†’ log_error â†’ generate_report â†’ END
 ```
 
-## 💡 **Mejores Prácticas**
+## ðŸ’¡ **Mejores PrÃ¡cticas**
 
 1. **Siempre incluir `error_description`** - Campo obligatorio
-2. **Usar `solution_description`** - Documentar la solución implementada
-3. **Especificar `environment`** - Para filtrado y análisis
-4. **Clasificar `severity`** - Para priorización de problemas
+2. **Usar `solution_description`** - Documentar la soluciÃ³n implementada
+3. **Especificar `environment`** - Para filtrado y anÃ¡lisis
+4. **Clasificar `severity`** - Para priorizaciÃ³n de problemas
 5. **Actualizar `status`** - Mantener estado actualizado
 
-## 🧪 **Testing**
+## ðŸ§ª **Testing**
 
 ### **Ejecutar Tests Locales**
 ```bash
@@ -199,20 +199,20 @@ python scripts/create_deployment_logs_table.py
 cat DEPLOYMENT_SUMMARY.txt
 ```
 
-## 🚀 **Deployment en Railway**
+## ðŸš€ **Deployment en Railway**
 
 1. **Commit y Push** de todos los archivos
-2. **Railway detecta cambios** automáticamente
-3. **Deployment automático** con nueva funcionalidad
+2. **Railway detecta cambios** automÃ¡ticamente
+3. **Deployment automÃ¡tico** con nueva funcionalidad
 4. **Verificar logs** en Railway para confirmar funcionamiento
 
-## 📞 **Soporte**
+## ðŸ“ž **Soporte**
 
-- **Documentación**: Este archivo README
+- **DocumentaciÃ³n**: Este archivo README
 - **Ejemplos**: Archivos de prueba incluidos
 - **Logs**: Sistema de logging dual para debugging
-- **Workflows**: Múltiples patrones para diferentes necesidades
+- **Workflows**: MÃºltiples patrones para diferentes necesidades
 
 ---
 
-**🎯 El sistema está diseñado para ser robusto, flexible y fácil de integrar en cualquier workflow de LangGraph existente.**
+**ðŸŽ¯ El sistema estÃ¡ diseÃ±ado para ser robusto, flexible y fÃ¡cil de integrar en cualquier workflow de LangGraph existente.**

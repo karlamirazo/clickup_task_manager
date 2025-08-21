@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ClickUp Project Manager - Dashboard</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/styles.css?v=20250119">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -12,9 +12,14 @@
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <div class="header-content">
+            <div class="header-content" style="text-align: center; width: 100%;">
                 <h1><i class="fas fa-tasks"></i> ClickUp Project Manager</h1>
                 <p>Agente Inteligente para gestión de tareas</p>
+                <div style="margin-top: 10px;">
+                    <button class="btn btn-primary" onclick="window.location.href='/'" style="background: #6f42c1; border: none; padding: 8px 16px; border-radius: 6px;">
+                        <i class="fas fa-tachometer-alt"></i> Volver al Dashboard Principal
+                    </button>
+                </div>
             </div>
             <div class="status-indicator">
                 <span id="connection-status" class="status-badge">
@@ -25,10 +30,7 @@
 
         <!-- Navigation -->
         <nav class="nav-tabs">
-            <button class="tab-btn active" data-tab="dashboard">
-                <i class="fas fa-home"></i> Dashboard
-            </button>
-            <button class="tab-btn" data-tab="tasks">
+            <button class="tab-btn active" data-tab="tasks">
                 <i class="fas fa-tasks"></i> Tareas
             </button>
             <button class="tab-btn" data-tab="workspaces">
@@ -42,10 +44,24 @@
             </button>
         </nav>
 
+        <!-- Información de Navegación -->
+        <div style="text-align: center; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 10px; border: 1px solid #e9ecef;">
+            <p style="margin: 0; color: #6c757d; font-size: 0.9rem;">
+                <i class="fas fa-info-circle"></i> 
+                <strong>Lista de Tareas</strong> - Aquí puedes gestionar y crear tareas. 
+                El <strong>Dashboard Principal</strong> está disponible en la ruta principal.
+            </p>
+            <div style="margin-top: 15px;">
+                <a href="/users-tasks" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea, #764ba2); border: none; padding: 12px 24px; border-radius: 8px; color: white; text-decoration: none; font-weight: 500; transition: transform 0.2s ease;">
+                    <i class="fas fa-users"></i> Ver Tabla de Usuarios y Tareas
+                </a>
+            </div>
+        </div>
+
         <!-- Main Content -->
         <main class="main-content">
             <!-- Dashboard Tab -->
-            <div id="dashboard" class="tab-content active">
+            <div id="dashboard" class="tab-content">
                 <div class="dashboard-grid">
                     <div class="card">
                         <div class="card-header">
@@ -69,25 +85,28 @@
 
                     <div class="card">
                         <div class="card-header">
-                            <h3><i class="fas fa-chart-pie"></i> Estadísticas Rápidas</h3>
-                            <button class="btn btn-sm btn-outline-primary" onclick="refreshDashboardCounters()" title="Actualizar contadores">
+                            <h3><i class="fas fa-table"></i> Tabla de Tareas</h3>
+                            <button class="btn btn-sm btn-outline-primary" onclick="refreshTaskTable()" title="Actualizar tabla">
                                 <i class="fas fa-sync-alt"></i>
                             </button>
                         </div>
                         <div class="card-body">
-                            <div class="stats-grid">
-                                <div class="stat-item">
-                                    <div class="stat-number" id="total-tasks">-</div>
-                                    <div class="stat-label">Tareas Totales</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-number" id="pending-tasks">-</div>
-                                    <div class="stat-label">Pendientes</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-number" id="completed-tasks">-</div>
-                                    <div class="stat-label">Completadas</div>
-                                </div>
+                            <div class="table-container">
+                                <table class="task-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Tarea</th>
+                                            <th>Usuario</th>
+                                            <th>Prioridad</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="task-table-body">
+                                        <tr>
+                                            <td colspan="4" class="text-center">Cargando tareas...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -98,107 +117,12 @@
                         </div>
                         <div class="card-body">
                             <div class="quick-actions">
-                                <button class="btn btn-primary" onclick="showCreateTaskModal()">
+                                <button class="btn btn-success" onclick="showCreateTaskForm()">
                                     <i class="fas fa-plus"></i> Nueva Tarea
                                 </button>
-                                <button id="dashboard-sync-btn" class="btn btn-secondary" onclick="syncAllTasks()">
-                                    <i class="fas fa-sync"></i> Sincronizar
+                                <button class="btn btn-info" onclick="manualSync()">
+                                    <i class="fas fa-sync-alt"></i> Sincronizar
                                 </button>
-                                <button id="dashboard-report-btn" class="btn btn-info" onclick="generateReport()">
-                                    <i class="fas fa-file-alt"></i> Generar Reporte
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="dashboard-section">
-                        <h3>📊 Visualización de Reportes</h3>
-                        <div class="report-visualization">
-                            <div class="report-controls">
-                                <button id="generate-visual-report" class="btn btn-primary">
-                                    <i class="fas fa-chart-bar"></i> Generar Reporte Visual
-                                </button>
-                                <button id="refresh-report" class="btn btn-secondary" style="display: none;">
-                                    <i class="fas fa-sync"></i> Actualizar
-                                </button>
-                            </div>
-                            
-                            <div id="report-container" class="report-container" style="display: none;">
-                                <div class="report-header">
-                                    <h4>📈 Reporte de Tareas - <span id="report-date"></span></h4>
-                                </div>
-                                
-                                <div class="report-grid">
-                                    <!-- Estadísticas principales -->
-                                    <div class="report-card main-stats">
-                                        <h5>📊 Resumen General</h5>
-                                        <div class="stats-grid">
-                                            <div class="stat-item">
-                                                <div class="stat-number" id="report-total-tasks">0</div>
-                                                <div class="stat-label">Total Tareas</div>
-                                            </div>
-                                            <div class="stat-item">
-                                                <div class="stat-number" id="report-completed-tasks">0</div>
-                                                <div class="stat-label">Completadas</div>
-                                            </div>
-                                            <div class="stat-item">
-                                                <div class="stat-number" id="report-pending-tasks">0</div>
-                                                <div class="stat-label">Pendientes</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Gráfico de estados -->
-                                    <div class="report-card">
-                                        <h5>📋 Distribución por Estado</h5>
-                                        <div class="chart-container">
-                                            <canvas id="status-chart" width="300" height="200"></canvas>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Gráfico de prioridades -->
-                                    <div class="report-card">
-                                        <h5>🎯 Distribución por Prioridad</h5>
-                                        <div class="chart-container">
-                                            <canvas id="priority-chart" width="300" height="200"></canvas>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Gráfico de asignaciones -->
-                                    <div class="report-card">
-                                        <h5>👥 Distribución por Asignación</h5>
-                                        <div class="chart-container">
-                                            <canvas id="assignee-chart" width="300" height="200"></canvas>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Tabla de detalles -->
-                                    <div class="report-card full-width">
-                                        <h5>📋 Detalles de Tareas</h5>
-                                        <div class="table-container">
-                                            <table id="report-table" class="report-table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>📝 Nombre</th>
-                                                        <th>📊 Estado</th>
-                                                        <th>⚡ Prioridad</th>
-                                                        <th>👤 Asignado</th>
-                                                        <th>📅 Fecha Creación</th>
-                                                        <th>📋 Lista</th>
-                                                        <th>🏢 Workspace</th>
-                                                        <th>🆔 ID</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="report-table-body">
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div id="report-loading" class="report-loading" style="display: none;">
-                                <div class="loading-spinner"></div>
-                                <p>Generando reporte visual...</p>
                             </div>
                         </div>
                     </div>
@@ -333,7 +257,11 @@
                         <label for="task-assignee">Asignar a:</label>
                         <select id="task-assignee">
                             <option value="">Sin asignar</option>
+                            <option value="Karla Rosas">Karla Rosas</option>
+                            <option value="Veronica Mirazo">Veronica Mirazo</option>
+                            <option value="Karla Ve">Karla Ve</option>
                         </select>
+                        <small>Usuario del workspace de ClickUp</small>
                     </div>
                     <div class="form-group">
                         <label for="task-priority">Prioridad:</label>
@@ -360,17 +288,16 @@
                             <small>Se guardará en el campo personalizado "Nombre" de ClickUp (si existe)</small>
                         </div>
                         <div class="form-group">
-                                                    <label for="task-email">📧 Email para notificaciones: <span style="color: red;">*</span></label>
-                        <input type="email" id="task-email" placeholder="ejemplo@correo.com" required>
-                        <small style="color: #666;">Campo obligatorio para notificaciones</small>
+                            <label for="task-email">📧 Email para notificaciones: <span style="color: red;">*</span></label>
+                            <input type="email" id="task-email" placeholder="ejemplo@correo.com" required>
+                            <small style="color: #666;">Campo obligatorio para notificaciones</small>
                             <small>Email donde se enviarán las notificaciones</small>
                         </div>
-                                            <div class="form-group">
-                        <label for="task-phone">📱 Celular (opcional):</label>
-                        <input type="text" id="task-phone" placeholder="+525648752201">
-                        <small style="color: #666;">Campo opcional para contacto</small>
-                    </div>
-                    
+                        <div class="form-group">
+                            <label for="task-phone">📱 Celular (opcional):</label>
+                            <input type="text" id="task-phone" placeholder="+525648752201">
+                            <small style="color: #666;">Campo opcional para contacto</small>
+                        </div>
                     </div>
                     
                     <div class="form-actions">
@@ -409,6 +336,16 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label for="edit-task-assignee">Asignar a:</label>
+                        <select id="edit-task-assignee">
+                            <option value="">Sin asignar</option>
+                            <option value="Karla Rosas">Karla Rosas</option>
+                            <option value="Veronica Mirazo">Veronica Mirazo</option>
+                            <option value="Karla Ve">Karla Ve</option>
+                        </select>
+                        <small>Usuario del workspace de ClickUp</small>
+                    </div>
+                    <div class="form-group">
                         <label for="edit-task-priority">Prioridad:</label>
                         <select id="edit-task-priority">
                             <option value="4">Baja</option>
@@ -433,17 +370,16 @@
                             <small>Se guardará en el campo personalizado "Nombre" de ClickUp (si existe)</small>
                         </div>
                         <div class="form-group">
-                                                    <label for="edit-task-email">📧 Email para notificaciones: <span style="color: red;">*</span></label>
-                        <input type="email" id="edit-task-email" placeholder="ejemplo@correo.com" required>
-                        <small style="color: #666;">Campo obligatorio para notificaciones</small>
+                            <label for="edit-task-email">📧 Email para notificaciones: <span style="color: red;">*</span></label>
+                            <input type="email" id="edit-task-email" placeholder="ejemplo@correo.com" required>
+                            <small style="color: #666;">Campo obligatorio para notificaciones</small>
                             <small>Email donde se enviarán las notificaciones</small>
                         </div>
                         <div class="form-group">
-                                                    <label for="edit-task-phone">📱 Celular (opcional):</label>
-                        <input type="text" id="edit-task-phone" placeholder="+525648752201">
-                        <small style="color: #666;">Campo opcional para contacto</small>
+                            <label for="edit-task-phone">📱 Celular (opcional):</label>
+                            <input type="text" id="edit-task-phone" placeholder="+525648752201">
+                            <small style="color: #666;">Campo opcional para contacto</small>
                         </div>
-                        
                     </div>
                     
                     <div class="form-actions">
@@ -530,6 +466,6 @@
         </div>
     </div>
 
-    <script src="/static/script.js"></script>
+    <script src="/script.js?v=20250119"></script>
 </body>
 </html>

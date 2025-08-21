@@ -1,53 +1,50 @@
 """
-Esquemas Pydantic para automatizaciones
+Pydantic schemas for automations
 """
 
-from datetime import datetime
-from typing import Optional, Dict, Any, List
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field
+from datetime import datetime
 
 class AutomationBase(BaseModel):
-    """Esquema base para automatizaciones"""
-    name: str = Field(..., min_length=1, max_length=255, description="Nombre de la automatización")
-    description: Optional[str] = Field(None, description="Descripción de la automatización")
-    trigger_type: str = Field(..., description="Tipo de trigger")
-    trigger_conditions: Optional[Dict[str, Any]] = Field(None, description="Condiciones del trigger")
-    actions: List[Dict[str, Any]] = Field(..., min_items=1, description="Acciones a ejecutar")
-    workspace_id: str = Field(..., description="ID del workspace")
+    """Base schema for automations"""
+    name: str = Field(..., min_length=1, max_length=255, description="Automation name")
+    description: Optional[str] = Field(None, description="Automation description")
+    trigger_type: str = Field(..., description="Trigger type")
+    action_type: str = Field(..., description="Action type")
+    is_active: bool = True
+    config: Dict[str, Any] = Field(default_factory=dict, description="Automation configuration")
 
 class AutomationCreate(AutomationBase):
-    """Esquema para crear una automatización"""
+    """Schema for creating an automation"""
     pass
 
 class AutomationUpdate(BaseModel):
-    """Esquema para actualizar una automatización"""
-    name: Optional[str] = Field(None, min_length=1, max_length=255)
-    description: Optional[str] = None
+    """Schema for updating an automation"""
+    name: Optional[str] = Field(None, min_length=1, max_length=255, description="Automation name")
+    description: Optional[str] = Field(None, description="Automation description")
     trigger_type: Optional[str] = None
-    trigger_conditions: Optional[Dict[str, Any]] = None
-    actions: Optional[List[Dict[str, Any]]] = Field(None, min_items=1)
-    active: Optional[bool] = None
-    enabled: Optional[bool] = None
+    action_type: Optional[str] = None
+    is_active: Optional[bool] = None
+    config: Optional[Dict[str, Any]] = None
 
 class AutomationResponse(AutomationBase):
-    """Esquema de respuesta para automatizaciones"""
+    """Response schema for automations"""
     id: int
-    active: bool
-    enabled: bool
+    workspace_id: str
     created_at: datetime
     updated_at: datetime
     last_executed: Optional[datetime] = None
-    task_id: Optional[int] = None
-    execution_count: int
-    error_count: int
-    last_error: Optional[str] = None
+    execution_count: int = 0
+    success_count: int = 0
+    error_count: int = 0
     
     class Config:
         from_attributes = True
 
 class AutomationList(BaseModel):
-    """Esquema para lista de automatizaciones"""
-    automations: list[AutomationResponse]
+    """Schema for automation list"""
+    automations: List[AutomationResponse]
     total: int
     page: int
     limit: int

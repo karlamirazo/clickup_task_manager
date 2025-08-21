@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Workflow simplificado de LangGraph para logging automático de errores
-Integra directamente la función de logging como nodo del grafo
+Workflow simplificado de LangGraph para logging automatico de errores
+Integra directamente la funcion de logging como nodo del grafo
 """
 
 from langgraph.graph import StateGraph, END
@@ -9,7 +9,7 @@ from typing import Dict, Any, TypedDict
 import os
 import sys
 
-# Agregar el directorio raíz al path para importar utils
+# Agregar el directorio raiz al path para importar utils
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils.deployment_logger import log_error_sync
@@ -30,13 +30,13 @@ class ErrorState(TypedDict):
 def log_error_to_postgres_and_summary(state: ErrorState) -> ErrorState:
     """Registrar el error en PostgreSQL y DEPLOYMENT_SUMMARY.txt"""
     
-    print("🚨 Registrando error en sistema de logging...")
+    print("ðŸš¨ Registrando error en sistema de logging...")
     
     try:
         # Preparar datos para logging
         logging_inputs = {
             "error_description": state.get("error_description", "Error no especificado"),
-            "solution_description": state.get("solution_description", "Solución no documentada"),
+            "solution_description": state.get("solution_description", "Solucion no documentada"),
             "context_info": state.get("context_info", "Sin contexto"),
             "deployment_id": state.get("deployment_id", "unknown"),
             "environment": state.get("environment", "production"),
@@ -51,22 +51,22 @@ def log_error_to_postgres_and_summary(state: ErrorState) -> ErrorState:
         state["logging_result"] = result
         
         if result["status"] == "documentado":
-            print("✅ Error registrado exitosamente en ambos sistemas")
+            print("âœ… Error registrado exitosamente en ambos sistemas")
         else:
-            print(f"❌ Error en logging: {result.get('message', 'Error desconocido')}")
+            print(f"â�Œ Error en logging: {result.get('message', 'Error desconocido')}")
             
     except Exception as e:
         error_msg = f"Error en logging: {str(e)}"
-        print(f"❌ {error_msg}")
+        print(f"â�Œ {error_msg}")
         state["logging_result"] = {"status": "error", "message": error_msg}
     
     return state
 
-# Crear el grafo simplificado
+# Create el grafo simplificado
 def create_simple_error_logging_graph() -> StateGraph:
-    """Crear un grafo simple para logging de errores"""
+    """Create un grafo simple para logging de errores"""
     
-    # Crear el grafo
+    # Create el grafo
     graph = StateGraph(ErrorState)
     
     # Agregar el nodo de logging
@@ -80,23 +80,23 @@ def create_simple_error_logging_graph() -> StateGraph:
     
     return graph
 
-# Función de conveniencia para uso directo
+# Funcion de conveniencia para uso directo
 def log_error_with_graph(error_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Función de conveniencia para usar el grafo de logging
+    Funcion de conveniencia para usar el grafo de logging
     
     Args:
-        error_data: Diccionario con información del error
+        error_data: Diccionario con informacion del error
         
     Returns:
         Dict con resultado del logging
     """
     try:
-        # Crear y compilar el grafo
+        # Create y compilar el grafo
         graph = create_simple_error_logging_graph()
         deployment_graph = graph.compile()
         
-        # Ejecutar el grafo
+        # Execute el grafo
         result = deployment_graph.invoke(error_data)
         
         return {
@@ -114,12 +114,12 @@ def log_error_with_graph(error_data: Dict[str, Any]) -> Dict[str, Any]:
 
 # Ejemplo de uso
 if __name__ == "__main__":
-    print("🧪 Probando grafo simplificado de logging...")
+    print("ðŸ§ª Probando grafo simplificado de logging...")
     
     # Datos de ejemplo
     sample_error = {
         "error_description": "Error de sintaxis en archivo Python",
-        "solution_description": "Corregir indentación y verificar sintaxis",
+        "solution_description": "Corregir indentacion y verificar sintaxis",
         "context_info": "Problema durante desarrollo local - archivo main.py",
         "deployment_id": "local-dev-123",
         "environment": "development",
@@ -127,10 +127,10 @@ if __name__ == "__main__":
         "status": "resolved"
     }
     
-    # Ejecutar grafo
+    # Execute grafo
     result = log_error_with_graph(sample_error)
     
-    print(f"\n📋 Resultado del grafo:")
+    print(f"\nðŸ“‹ Resultado del grafo:")
     print(f"   - Status: {result['status']}")
     print(f"   - Estado final: {result.get('final_status', 'N/A')}")
     

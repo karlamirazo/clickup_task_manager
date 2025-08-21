@@ -14,7 +14,7 @@ from core.config import settings
 def log_notification(notification_type: str, recipient: str, status: str, 
                     task_id: str = None, task_name: str = None, 
                     error_message: str = None, delivery_time: float = None):
-    """Registrar una notificación en los logs (best effort)"""
+    """Registrar una notificacion en los logs (best effort)"""
     try:
         from core.database import get_db
         from models.notification_log import NotificationLog
@@ -42,9 +42,9 @@ def log_notification(notification_type: str, recipient: str, status: str,
         
     except Exception as e:
         # No fallar si no se puede registrar el log
-        print(f"⚠️ Error registrando log de notificación: {e}")
+        print(f"âš ï¸� Error registrando log de notificacion: {e}")
 
-# Importación condicional de Twilio (solo si SMS está habilitado)
+# Importacion condicional de Twilio (solo si SMS esta habilitado)
 try:
     from twilio.rest import Client as TwilioClient
     TWILIO_AVAILABLE = True
@@ -58,25 +58,25 @@ async def send_email_async(
     text_body: str,
     html_body: Optional[str] = None,
 ) -> None:
-    """Enviar correo electrónico usando SMTP (async)."""
+    """Enviar correo electronico usando SMTP (async)."""
     
-    # Verificar configuración
+    # Verificar configuracion
     if not settings.SMTP_HOST:
-        print("❌ SMTP_HOST no configurado")
+        print("â�Œ SMTP_HOST no configured")
         return
     if not settings.SMTP_FROM:
-        print("❌ SMTP_FROM no configurado")
+        print("â�Œ SMTP_FROM no configured")
         return
     if not to_addresses:
-        print("❌ No hay direcciones de email de destino")
+        print("â�Œ No hay direcciones de email de destino")
         return
     if not settings.SMTP_USER or not settings.SMTP_PASSWORD:
-        print("❌ Credenciales SMTP no configuradas")
+        print("â�Œ Credenciales SMTP no configuradas")
         return
 
-    print(f"📧 Enviando email a: {to_addresses}")
-    print(f"   📤 SMTP Host: {settings.SMTP_HOST}:{settings.SMTP_PORT}")
-    print(f"   👤 SMTP User: {settings.SMTP_USER}")
+    print(f"ğŸ“§ Enviando email a: {to_addresses}")
+    print(f"   ğŸ“¤ SMTP Host: {settings.SMTP_HOST}:{settings.SMTP_PORT}")
+    print(f"   ğŸ‘¤ SMTP User: {settings.SMTP_USER}")
 
     # Construir mensaje
     msg = EmailMessage()
@@ -93,9 +93,9 @@ async def send_email_async(
 
         use_ssl = bool(settings.SMTP_USE_SSL)
         use_tls = bool(settings.SMTP_USE_TLS)
-        print(f"🔐 Conectando con SSL={use_ssl}, TLS={use_tls}")
+        print(f"ğŸ”� Conectando con SSL={use_ssl}, TLS={use_tls}")
         
-        # Para Gmail, usar configuración estándar
+        # Para Gmail, usar configuracion estandar
         if settings.SMTP_HOST == "smtp.gmail.com" and settings.SMTP_PORT == 587:
             # Gmail requiere STARTTLS
             smtp = aiosmtplib.SMTP(hostname=settings.SMTP_HOST, port=settings.SMTP_PORT, start_tls=True)
@@ -103,22 +103,22 @@ async def send_email_async(
             smtp = aiosmtplib.SMTP(hostname=settings.SMTP_HOST, port=settings.SMTP_PORT)
             
         await smtp.connect()
-        print("✅ Conectado al servidor SMTP")
+        print("âœ… Conectado al servidor SMTP")
         
         await smtp.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
-        print("✅ Login SMTP exitoso")
+        print("âœ… Login SMTP exitoso")
         
         await smtp.send_message(msg)
-        print(f"✅ Email enviado exitosamente a {len(to_addresses)} destinatarios")
+        print(f"âœ… Email enviado exitosamente a {len(to_addresses)} destinatarios")
         
-        # Registrar log de éxito para cada destinatario
+        # Registrar log de exito para cada destinatario
         for addr in to_addresses:
             log_notification("email", addr, "sent")
         
         await smtp.quit()
         
     except Exception as e:
-        print(f"❌ Error enviando email: {e}")
+        print(f"â�Œ Error enviando email: {e}")
         print(f"   Host: {settings.SMTP_HOST}:{settings.SMTP_PORT}")
         print(f"   User: {settings.SMTP_USER}")
         print(f"   To: {to_addresses}")
@@ -138,12 +138,12 @@ async def send_telegram_async(
     """Enviar mensaje de Telegram usando Bot API.
     
     to_chat_ids puede contener:
-    - Chat IDs numéricos: "123456789"
+    - Chat IDs numericos: "123456789"
     - Usernames: "@username" 
-    - Chat IDs extraídos de campos personalizados
+    - Chat IDs extraidos de campos personalizados
     """
     if not settings.TELEGRAM_ENABLED or not settings.TELEGRAM_BOT_TOKEN or not to_chat_ids:
-        print("🚫 Telegram deshabilitado en configuración")
+        print("ğŸš« Telegram deshabilitado en configuracion")
         return
 
     try:
@@ -175,17 +175,17 @@ async def send_telegram_async(
                         error_msg = response.text
                         print(f"Error enviando Telegram a {chat_id}: {response.status_code} - {error_msg}")
                         
-                        # Información adicional para depuración
+                        # Informacion adicional para depuracion
                         if "chat not found" in error_msg.lower():
                             if chat_id.startswith("@"):
-                                print(f"💡 Username {chat_id}: El usuario debe iniciar conversación con el bot primero")
-                                print(f"💡 Dile al usuario que envíe /start a @Clickup_tasks_bot en Telegram")
+                                print(f"ğŸ’¡ Username {chat_id}: El usuario debe iniciar conversacion con el bot primero")
+                                print(f"ğŸ’¡ Dile al usuario que envie /start a @Clickup_tasks_bot en Telegram")
                             else:
-                                print(f"💡 Chat ID {chat_id}: Verifica que el ID sea correcto")
+                                print(f"ğŸ’¡ Chat ID {chat_id}: Verifica que el ID sea correcto")
                         elif "forbidden" in error_msg.lower():
-                            print(f"💡 Usuario {chat_id} bloqueó el bot o nunca inició conversación")
+                            print(f"ğŸ’¡ Usuario {chat_id} bloqueo el bot o nunca inicio conversacion")
                     else:
-                        print(f"✅ Telegram enviado a {chat_id}")
+                        print(f"âœ… Telegram enviado a {chat_id}")
                 except Exception as e:
                     print(f"Error enviando Telegram a {chat_id}: {e}")
                     continue
@@ -210,10 +210,10 @@ def build_task_email_content(
         "updated": "Tarea actualizada",
         "deleted": "Tarea eliminada",
     }
-    subject = f"[ClickUp] {action_map.get(action, 'Notificación de tarea')}: {name}"
+    subject = f"[ClickUp] {action_map.get(action, 'Notificacion de tarea')}: {name}"
 
     lines = [
-        action_map.get(action, "Notificación de tarea"),
+        action_map.get(action, "Notificacion de tarea"),
         f"Nombre: {name}",
         f"ID: {task_id}",
     ]
@@ -224,7 +224,7 @@ def build_task_email_content(
     if assignee_name:
         lines.append(f"Asignado a: {assignee_name}")
     if due_date_iso:
-        lines.append(f"Fecha límite: {due_date_iso}")
+        lines.append(f"Fecha limite: {due_date_iso}")
     text_body = "\n".join(lines)
 
     html_lines = [f"<p>{line}</p>" for line in lines]
@@ -243,22 +243,22 @@ def build_task_telegram_message(
 ) -> str:
     """Construir mensaje de Telegram para la tarea."""
     action_map = {
-        "created": "🆕 Nueva tarea",
-        "updated": "✏️ Tarea actualizada", 
-        "deleted": "🗑️ Tarea eliminada",
+        "created": "ğŸ†• Nueva tarea",
+        "updated": "âœ�ï¸� Tarea actualizada", 
+        "deleted": "ğŸ—‘ï¸� Tarea eliminada",
     }
     
-    # Usar formato HTML de Telegram (más compatible)
-    parts = [f"<b>{action_map.get(action, '📋 Tarea')}</b>", f"📝 <b>{name}</b>", f"🆔 <code>{task_id}</code>"]
+    # Usar formato HTML de Telegram (mas compatible)
+    parts = [f"<b>{action_map.get(action, 'ğŸ“‹ Tarea')}</b>", f"ğŸ“� <b>{name}</b>", f"ğŸ†” <code>{task_id}</code>"]
     if status:
-        parts.append(f"📊 Estado: {status}")
+        parts.append(f"ğŸ“Š Estado: {status}")
     if priority is not None:
-        priority_emoji = {1: "🔴", 2: "🟠", 3: "🟡", 4: "🟢"}.get(priority, "⚪")
+        priority_emoji = {1: "ğŸ”´", 2: "ğŸŸ ", 3: "ğŸŸ¡", 4: "ğŸŸ¢"}.get(priority, "âšª")
         parts.append(f"{priority_emoji} Prioridad: {priority}")
     if assignee_name:
-        parts.append(f"👤 Asignado: {assignee_name}")
+        parts.append(f"ğŸ‘¤ Asignado: {assignee_name}")
     if due_date_iso:
-        parts.append(f"⏰ Vence: {due_date_iso}")
+        parts.append(f"â�° Vence: {due_date_iso}")
     return "\n".join(parts)
 
 
@@ -268,19 +268,19 @@ async def send_sms_async(
 ) -> None:
     """Enviar SMS usando Twilio."""
     if not settings.SMS_ENABLED:
-        print("🚫 SMS deshabilitado en configuración")
+        print("ğŸš« SMS deshabilitado en configuracion")
         return
         
     if not TWILIO_AVAILABLE:
-        print("❌ Twilio no está disponible. Instala con: pip install twilio")
+        print("â�Œ Twilio no esta disponible. Instala con: pip install twilio")
         return
     
     if not all([settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN, settings.TWILIO_SMS_FROM]):
-        print("❌ Configuración de Twilio incompleta")
+        print("â�Œ Configuracion de Twilio incompleta")
         return
     
     if not to_numbers:
-        print("⚠️ No hay números de teléfono para SMS")
+        print("âš ï¸� No hay numeros de telefono para SMS")
         return
     
     try:
@@ -294,30 +294,30 @@ async def send_sms_async(
                     from_=settings.TWILIO_SMS_FROM,
                     to=phone_number
                 )
-                print(f"✅ SMS enviado a {phone_number}: {message_obj.sid}")
+                print(f"âœ… SMS enviado a {phone_number}: {message_obj.sid}")
                 
-                # Registrar log de éxito
+                # Registrar log de exito
                 log_notification("sms", phone_number, "sent")
                 
             except Exception as e:
                 error_msg = str(e)
                 if "unverified" in error_msg.lower():
-                    print(f"❌ Error enviando SMS a {phone_number}:")
-                    print(f"   📞 El número {phone_number} no está verificado en Twilio")
-                    print(f"   🔧 Soluciones:")
-                    print(f"      1. Verificar número en: https://console.twilio.com/us1/develop/phone-numbers/manage/verified")
-                    print(f"      2. O comprar un número Twilio para enviar a números no verificados")
+                    print(f"â�Œ Error enviando SMS a {phone_number}:")
+                    print(f"   ğŸ“� El numero {phone_number} no esta verificado en Twilio")
+                    print(f"   ğŸ”§ Soluciones:")
+                    print(f"      1. Verificar numero en: https://console.twilio.com/us1/develop/phone-numbers/manage/verified")
+                    print(f"      2. O comprar un numero Twilio para enviar a numeros no verificados")
                 elif "21608" in error_msg:
-                    print(f"❌ Error 21608 - Número no verificado: {phone_number}")
-                    print(f"   🔧 Verifica el número en Twilio Console")
+                    print(f"â�Œ Error 21608 - Numero no verificado: {phone_number}")
+                    print(f"   ğŸ”§ Verifica el numero en Twilio Console")
                 else:
-                    print(f"❌ Error enviando SMS a {phone_number}: {e}")
+                    print(f"â�Œ Error enviando SMS a {phone_number}: {e}")
                 
                 # Registrar log de error
                 log_notification("sms", phone_number, "failed", error_message=str(e))
                 
     except Exception as e:
-        print(f"❌ Error configurando cliente Twilio: {e}")
+        print(f"â�Œ Error configurando cliente Twilio: {e}")
 
 
 def build_task_sms_message(
@@ -329,7 +329,7 @@ def build_task_sms_message(
     assignee_name: Optional[str] = None,
     due_date_iso: Optional[str] = None,
 ) -> str:
-    """Construir mensaje SMS para la tarea (versión corta)."""
+    """Construir mensaje SMS para la tarea (version corta)."""
     action_map = {
         "created": "Nueva tarea",
         "updated": "Tarea actualizada", 
@@ -356,18 +356,18 @@ def build_task_sms_message(
 def extract_contacts_from_custom_fields(
     custom_fields: Optional[dict],
 ) -> tuple[list[str], list[str], list[str]]:
-    """Extraer emails, chat IDs de Telegram y números de SMS desde campos personalizados de la tarea.
+    """Extraer emails, chat IDs de Telegram y numeros de SMS desde campos personalizados de la tarea.
 
     Usa variables de entorno TASK_EMAIL_FIELDS, TASK_TELEGRAM_FIELDS y TASK_SMS_FIELDS (IDs o nombres de campos, separados por coma).
     
     Para el campo "Celular", acepta estos formatos:
     - Chat ID de Telegram: "837060200" 
     - Username de Telegram: "@karlamirazo" o "karlamirazo"
-    - Número de teléfono para SMS: "+1234567890" o "1234567890"
+    - Numero de telefono para SMS: "+1234567890" o "1234567890"
     - Chat ID de grupo: "-1001234567890"
-    - Formato híbrido: "+1234567890,@karlamirazo" (teléfono,telegram)
+    - Formato hibrido: "+1234567890,@karlamirazo" (telefono,telegram)
     
-    NOTA: Los números de teléfono (+1234567890) se usan para SMS, pero NO 
+    NOTA: Los numeros de telefono (+1234567890) se usan para SMS, pero NO 
     se pueden usar directamente con Telegram Bot API.
     
     Retorna listas: (emails, telegram_chat_ids, sms_numbers)
@@ -394,14 +394,14 @@ def extract_contacts_from_custom_fields(
             return
         v = str(value).strip()
         
-        # Si contiene coma, separar número de teléfono y telegram
+        # Si contiene coma, separar numero de telefono y telegram
         if "," in v:
             parts = [p.strip() for p in v.split(",")]
             for part in parts:
                 if part.startswith('@') or (part.isdigit() and len(part) > 6 and not part.startswith('+')):
                     telegram_chat_ids.append(part)
         else:
-            # Verificar si es Chat ID de Telegram (números largos sin + al inicio)
+            # Verificar si es Chat ID de Telegram (numeros largos sin + al inicio)
             if v.isdigit() and len(v) > 6 and not v.startswith('+'):
                 telegram_chat_ids.append(v)
             # Verificar si es username de Telegram
@@ -413,29 +413,29 @@ def extract_contacts_from_custom_fields(
             # Si parece username sin @, agregarlo
             elif v and not v.isspace() and not v.startswith('+'):
                 telegram_chat_ids.append(v)
-            # Si es un número de teléfono (+1234567890), no agregarlo aquí
-            # Los números de teléfono se manejan en _try_add_sms
+            # Si es un numero de telefono (+1234567890), no agregarlo aqui
+            # Los numeros de telefono se manejan en _try_add_sms
 
     def _try_add_sms(value: Optional[str]):
         if not value:
             return
         v = str(value).strip()
         
-        # Si contiene coma, separar número de teléfono y telegram
+        # Si contiene coma, separar numero de telefono y telegram
         if "," in v:
             parts = [p.strip() for p in v.split(",")]
             for part in parts:
                 if part.startswith('+') or (part.isdigit() and len(part) >= 8):
-                    # Normalizar número de teléfono
+                    # Normalizar numero de telefono
                     if not part.startswith('+'):
                         part = '+' + part
                     sms_numbers.append(part)
         else:
-            # Verificar si es número de teléfono para SMS
+            # Verificar si es numero de telefono para SMS
             if v.startswith('+') and v[1:].isdigit() and len(v) >= 9:
                 sms_numbers.append(v)
             elif v.isdigit() and len(v) >= 8:
-                # Agregar + si es un número sin código de país
+                # Agregar + si es un numero sin codigo de pais
                 sms_numbers.append('+' + v)
 
     # Coincidir por clave directa
@@ -468,7 +468,7 @@ def extract_contacts_from_custom_fields(
             except Exception:
                 continue
 
-    # Devolver únicos
+    # Devolver unicos
     return list(dict.fromkeys(emails)), list(dict.fromkeys(telegram_chat_ids)), list(dict.fromkeys(sms_numbers))
 
 

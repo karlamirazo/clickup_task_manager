@@ -10,7 +10,7 @@ from datetime import datetime
 
 def check_interface_endpoints():
     """Verificar endpoints de la interfaz"""
-    print("🌐 Verificando endpoints de la interfaz...")
+    print("ğŸŒ� Verificando endpoints de la interfaz...")
     
     base_url = "https://clickuptaskmanager-production.up.railway.app"
     endpoints = {
@@ -25,12 +25,12 @@ def check_interface_endpoints():
     
     for name, endpoint in endpoints.items():
         try:
-            print(f"🔍 Verificando {name} ({endpoint})...")
+            print(f"ğŸ”� Verificando {name} ({endpoint})...")
             response = requests.get(f"{base_url}{endpoint}", timeout=10)
             
             if response.status_code == 200:
-                print(f"   ✅ {name}: OK (Status: {response.status_code})")
-                print(f"   📄 Tamaño: {len(response.content)} bytes")
+                print(f"   âœ… {name}: OK (Status: {response.status_code})")
+                print(f"   ğŸ“„ Tamano: {len(response.content)} bytes")
                 results[name] = {
                     "status": "success",
                     "status_code": response.status_code,
@@ -38,7 +38,7 @@ def check_interface_endpoints():
                     "content_type": response.headers.get("Content-Type", "unknown")
                 }
             else:
-                print(f"   ❌ {name}: Error (Status: {response.status_code})")
+                print(f"   â�Œ {name}: Error (Status: {response.status_code})")
                 results[name] = {
                     "status": "error",
                     "status_code": response.status_code,
@@ -46,7 +46,7 @@ def check_interface_endpoints():
                 }
                 
         except Exception as e:
-            print(f"   ❌ {name}: Error de conexión - {e}")
+            print(f"   â�Œ {name}: Error de conexion - {e}")
             results[name] = {
                 "status": "error",
                 "error": str(e)
@@ -56,7 +56,7 @@ def check_interface_endpoints():
 
 def check_api_endpoints_for_interface():
     """Verificar endpoints de API que usa la interfaz"""
-    print("\n🔌 Verificando endpoints de API para la interfaz...")
+    print("\nğŸ”Œ Verificando endpoints de API para la interfaz...")
     
     base_url = "https://clickuptaskmanager-production.up.railway.app"
     api_endpoints = {
@@ -72,11 +72,11 @@ def check_api_endpoints_for_interface():
     
     for name, endpoint in api_endpoints.items():
         try:
-            print(f"🔍 Verificando API {name} ({endpoint})...")
+            print(f"ğŸ”� Verificando API {name} ({endpoint})...")
             response = requests.get(f"{base_url}{endpoint}", timeout=10)
             
             if response.status_code == 200:
-                print(f"   ✅ {name}: OK (Status: {response.status_code})")
+                print(f"   âœ… {name}: OK (Status: {response.status_code})")
                 try:
                     data = response.json()
                     api_results[name] = {
@@ -93,7 +93,7 @@ def check_api_endpoints_for_interface():
                         "content": response.text[:100]
                     }
             else:
-                print(f"   ⚠️ {name}: {response.status_code} - {response.text[:100]}")
+                print(f"   âš ï¸� {name}: {response.status_code} - {response.text[:100]}")
                 api_results[name] = {
                     "status": "warning",
                     "status_code": response.status_code,
@@ -101,7 +101,7 @@ def check_api_endpoints_for_interface():
                 }
                 
         except Exception as e:
-            print(f"   ❌ {name}: Error - {e}")
+            print(f"   â�Œ {name}: Error - {e}")
             api_results[name] = {
                 "status": "error",
                 "error": str(e)
@@ -110,8 +110,8 @@ def check_api_endpoints_for_interface():
     return api_results
 
 def check_interface_features():
-    """Verificar características específicas de la interfaz"""
-    print("\n🎨 Verificando características de la interfaz...")
+    """Verificar caracteristicas especificas de la interfaz"""
+    print("\nğŸ�¨ Verificando caracteristicas de la interfaz...")
     
     base_url = "https://clickuptaskmanager-production.up.railway.app"
     features = {}
@@ -132,11 +132,11 @@ def check_interface_features():
                 "has_workspaces": "workspaces" in content
             }
             
-            print("   ✅ Interfaz principal: HTML completo y bien estructurado")
+            print("   âœ… Interfaz principal: HTML completo y bien estructurado")
             
     except Exception as e:
         features["HTML Completo"] = {"status": "error", "error": str(e)}
-        print(f"   ❌ Error verificando HTML: {e}")
+        print(f"   â�Œ Error verificando HTML: {e}")
     
     # Verificar CSS
     try:
@@ -150,11 +150,11 @@ def check_interface_features():
                 "has_responsive": "@media" in css_content,
                 "has_animations": "transition" in css_content or "animation" in css_content
             }
-            print("   ✅ CSS: Estilos completos con gradientes y responsive")
+            print("   âœ… CSS: Estilos completos con gradientes y responsive")
             
     except Exception as e:
         features["CSS"] = {"status": "error", "error": str(e)}
-        print(f"   ❌ Error verificando CSS: {e}")
+        print(f"   â�Œ Error verificando CSS: {e}")
     
     # Verificar JavaScript
     try:
@@ -168,61 +168,61 @@ def check_interface_features():
                 "has_error_handling": "catch" in js_content,
                 "has_ui_updates": "innerhtml" in js_content or "textContent" in js_content
             }
-            print("   ✅ JavaScript: Funcionalidad completa con API calls")
+            print("   âœ… JavaScript: Funcionalidad completa con API calls")
             
     except Exception as e:
         features["JavaScript"] = {"status": "error", "error": str(e)}
-        print(f"   ❌ Error verificando JavaScript: {e}")
+        print(f"   â�Œ Error verificando JavaScript: {e}")
     
     return features
 
 def generate_interface_report(interface_results, api_results, features):
     """Generar reporte completo de la interfaz"""
     print("\n" + "=" * 70)
-    print("📊 REPORTE COMPLETO DE LA INTERFAZ")
+    print("ğŸ“Š REPORTE COMPLETO DE LA INTERFAZ")
     print("=" * 70)
     
     # Resumen de endpoints de interfaz
-    print("\n🌐 ENDPOINTS DE INTERFAZ:")
+    print("\nğŸŒ� ENDPOINTS DE INTERFAZ:")
     for name, result in interface_results.items():
-        status_icon = "✅" if result.get("status") == "success" else "❌"
+        status_icon = "âœ…" if result.get("status") == "success" else "â�Œ"
         print(f"   {status_icon} {name}: {result.get('status', 'error')}")
         if result.get("status") == "success":
-            print(f"      📄 Tamaño: {result.get('size', 0)} bytes")
-            print(f"      🎨 Tipo: {result.get('content_type', 'unknown')}")
+            print(f"      ğŸ“„ Tamano: {result.get('size', 0)} bytes")
+            print(f"      ğŸ�¨ Tipo: {result.get('content_type', 'unknown')}")
     
     # Resumen de API endpoints
-    print("\n🔌 ENDPOINTS DE API:")
+    print("\nğŸ”Œ ENDPOINTS DE API:")
     for name, result in api_results.items():
         if result.get("status") == "success":
-            status_icon = "✅"
+            status_icon = "âœ…"
         elif result.get("status") == "warning":
-            status_icon = "⚠️"
+            status_icon = "âš ï¸�"
         else:
-            status_icon = "❌"
+            status_icon = "â�Œ"
         
         print(f"   {status_icon} {name}: {result.get('status', 'error')}")
         if result.get("status") == "success":
-            print(f"      📊 Tipo de datos: {result.get('data_type', 'unknown')}")
-            print(f"      📈 Tiene datos: {result.get('has_data', False)}")
+            print(f"      ğŸ“Š Tipo de datos: {result.get('data_type', 'unknown')}")
+            print(f"      ğŸ“ˆ Tiene datos: {result.get('has_data', False)}")
     
-    # Resumen de características
-    print("\n🎨 CARACTERÍSTICAS DE LA INTERFAZ:")
+    # Resumen de caracteristicas
+    print("\nğŸ�¨ CARACTERISTICAS DE LA INTERFAZ:")
     for name, result in features.items():
         if result.get("status") == "success":
-            status_icon = "✅"
+            status_icon = "âœ…"
             print(f"   {status_icon} {name}: Funcional")
             
-            # Mostrar detalles específicos
+            # Mostrar detalles especificos
             if name == "HTML Completo":
                 html_features = []
                 if result.get("has_doctype"): html_features.append("DOCTYPE")
-                if result.get("has_title"): html_features.append("Título")
-                if result.get("has_navigation"): html_features.append("Navegación")
+                if result.get("has_title"): html_features.append("Titulo")
+                if result.get("has_navigation"): html_features.append("Navegacion")
                 if result.get("has_dashboard"): html_features.append("Dashboard")
                 if result.get("has_tasks"): html_features.append("Tareas")
                 if result.get("has_workspaces"): html_features.append("Workspaces")
-                print(f"      📋 Elementos: {', '.join(html_features)}")
+                print(f"      ğŸ“‹ Elementos: {', '.join(html_features)}")
             
             elif name == "CSS":
                 css_features = []
@@ -230,7 +230,7 @@ def generate_interface_report(interface_results, api_results, features):
                 if result.get("has_gradients"): css_features.append("Gradientes")
                 if result.get("has_responsive"): css_features.append("Responsive")
                 if result.get("has_animations"): css_features.append("Animaciones")
-                print(f"      🎨 Estilos: {', '.join(css_features)}")
+                print(f"      ğŸ�¨ Estilos: {', '.join(css_features)}")
             
             elif name == "JavaScript":
                 js_features = []
@@ -238,13 +238,13 @@ def generate_interface_report(interface_results, api_results, features):
                 if result.get("has_api_calls"): js_features.append("API Calls")
                 if result.get("has_error_handling"): js_features.append("Error Handling")
                 if result.get("has_ui_updates"): js_features.append("UI Updates")
-                print(f"      ⚡ Funcionalidad: {', '.join(js_features)}")
+                print(f"      âš¡ Funcionalidad: {', '.join(js_features)}")
         else:
-            status_icon = "❌"
+            status_icon = "â�Œ"
             print(f"   {status_icon} {name}: Error - {result.get('error', 'Desconocido')}")
     
     # Estado general
-    print("\n🎯 ESTADO GENERAL DE LA INTERFAZ:")
+    print("\nğŸ�¯ ESTADO GENERAL DE LA INTERFAZ:")
     interface_success = sum(1 for r in interface_results.values() if r.get("status") == "success")
     api_success = sum(1 for r in api_results.values() if r.get("status") == "success")
     features_success = sum(1 for r in features.values() if r.get("status") == "success")
@@ -253,25 +253,25 @@ def generate_interface_report(interface_results, api_results, features):
     total_api = len(api_results)
     total_features = len(features)
     
-    print(f"   🌐 Interfaz: {interface_success}/{total_interface} endpoints funcionando")
-    print(f"   🔌 API: {api_success}/{total_api} endpoints disponibles")
-    print(f"   🎨 Características: {features_success}/{total_features} funcionales")
+    print(f"   ğŸŒ� Interfaz: {interface_success}/{total_interface} endpoints funcionando")
+    print(f"   ğŸ”Œ API: {api_success}/{total_api} endpoints disponibles")
+    print(f"   ğŸ�¨ Caracteristicas: {features_success}/{total_features} funcionales")
     
     overall_score = (interface_success + api_success + features_success) / (total_interface + total_api + total_features) * 100
-    print(f"   📊 Puntuación general: {overall_score:.1f}%")
+    print(f"   ğŸ“Š Puntuacion general: {overall_score:.1f}%")
     
     if overall_score >= 90:
-        print("   🎉 ¡Excelente! La interfaz está funcionando perfectamente")
+        print("   ğŸ�‰ Â¡Excelente! La interfaz esta funcionando perfectamente")
     elif overall_score >= 70:
-        print("   ✅ Bueno! La interfaz está funcionando correctamente")
+        print("   âœ… Bueno! La interfaz esta funcionando correctamente")
     elif overall_score >= 50:
-        print("   ⚠️ Aceptable, pero hay algunos problemas")
+        print("   âš ï¸� Aceptable, pero hay algunos problemas")
     else:
-        print("   ❌ Problemas significativos en la interfaz")
+        print("   â�Œ Problemas significativos en la interfaz")
 
 def main():
-    """Función principal"""
-    print("🌐 Verificando funcionalidad completa de la interfaz web")
+    """Funcion principal"""
+    print("ğŸŒ� Verificando funcionalidad completa de la interfaz web")
     print("=" * 70)
     
     # Verificar endpoints de interfaz
@@ -280,13 +280,13 @@ def main():
     # Verificar endpoints de API
     api_results = check_api_endpoints_for_interface()
     
-    # Verificar características específicas
+    # Verificar caracteristicas especificas
     features = check_interface_features()
     
     # Generar reporte
     generate_interface_report(interface_results, api_results, features)
     
-    print(f"\n🕐 Verificación completada: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"\nğŸ•� Verificacion completada: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 if __name__ == "__main__":
     main()

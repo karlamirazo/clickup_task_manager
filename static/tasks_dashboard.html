@@ -104,20 +104,17 @@
             letter-spacing: 0.5px;
         }
         
-        .tasks-section {
+        .tasks-container {
             background: white;
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             overflow: hidden;
         }
         
-        .section-header {
+        .tasks-header {
             background: #f8f9fa;
             padding: 20px;
             border-bottom: 1px solid #dee2e6;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
         
         .tasks-list {
@@ -126,11 +123,11 @@
         }
         
         .task-item {
-            padding: 15px 20px;
+            padding: 20px;
             border-bottom: 1px solid #f1f3f4;
             display: grid;
-            grid-template-columns: 1fr 100px 120px 100px 80px;
-            gap: 15px;
+            grid-template-columns: 1fr auto auto auto;
+            gap: 20px;
             align-items: center;
             transition: background-color 0.2s ease;
         }
@@ -139,51 +136,88 @@
             background-color: #f8f9fa;
         }
         
-        .task-info h4 {
-            margin: 0 0 5px 0;
+        .task-item:last-child {
+            border-bottom: none;
+        }
+        
+        .task-info h3 {
+            margin: 0 0 8px 0;
             color: #2c3e50;
+            font-size: 1.1rem;
         }
         
         .task-description {
             color: #6c757d;
-            font-size: 0.9rem;
             margin: 0;
+            font-size: 0.9rem;
         }
         
-        .priority-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            text-align: center;
-        }
-        
-        .priority-1 { background-color: #f8d7da; color: #721c24; }
-        .priority-2 { background-color: #fff3cd; color: #856404; }
-        .priority-3 { background-color: #d1ecf1; color: #0c5460; }
-        .priority-4 { background-color: #d4edda; color: #155724; }
-        
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            text-align: center;
-        }
-        
-        .status-todo { background-color: #e2e3e5; color: #383d41; }
-        .status-inprogress { background-color: #cce5ff; color: #004085; }
-        .status-review { background-color: #fff3cd; color: #856404; }
-        .status-complete { background-color: #d4edda; color: #155724; }
-        
-        .sync-status {
-            text-align: center;
+        .task-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
             font-size: 0.8rem;
             color: #6c757d;
         }
         
-        .sync-status.synced { color: #28a745; }
-        .sync-status.not-synced { color: #dc3545; }
+        .task-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-align: center;
+            min-width: 100px;
+        }
+        
+        .status-todo {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-progress {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .status-complete {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-review {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .task-priority {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-align: center;
+            min-width: 80px;
+        }
+        
+        .priority-1 {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .priority-2 {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .priority-3 {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .priority-4 {
+            background-color: #d4edda;
+            color: #155724;
+        }
         
         .loading {
             text-align: center;
@@ -221,41 +255,45 @@
         .modal-content {
             background-color: white;
             margin: 15% auto;
-            padding: 30px;
+            padding: 20px;
             border-radius: 15px;
             width: 80%;
             max-width: 500px;
             text-align: center;
         }
         
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background-color: #e9ecef;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 20px 0;
+        .modal h4 {
+            margin-top: 0;
+            color: #2c3e50;
         }
         
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            width: 0%;
-            transition: width 0.3s ease;
+        .modal p {
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        
+        .modal button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .modal button:hover {
+            background: #5a6fd8;
         }
         
         @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
             .task-item {
                 grid-template-columns: 1fr;
-                gap: 10px;
+                gap: 15px;
             }
             
-            .sync-controls {
-                flex-direction: column;
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
@@ -270,46 +308,46 @@
 
         <!-- Controles de sincronización -->
         <div class="sync-controls">
-            <button id="syncBtn" class="sync-btn">
+            <button id="sync-btn" class="sync-btn" onclick="startSync()">
                 <i class="fas fa-sync-alt"></i>
-                🔄 Sincronizar con ClickUp
+                Sincronizar Tareas
             </button>
-            <button id="refreshBtn" class="refresh-btn">
+            <button class="refresh-btn" onclick="loadTasks()">
                 <i class="fas fa-refresh"></i>
                 Actualizar
             </button>
         </div>
 
         <!-- Estadísticas -->
-        <div class="stats-grid" id="statsGrid">
+        <div class="stats-grid" id="stats-grid">
             <div class="stat-card">
-                <div class="stat-number" id="totalTasks">0</div>
+                <div class="stat-number" id="total-tasks">-</div>
                 <div class="stat-label">Total Tareas</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="syncedTasks">0</div>
-                <div class="stat-label">Sincronizadas</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="pendingTasks">0</div>
+                <div class="stat-number" id="pending-tasks">-</div>
                 <div class="stat-label">Pendientes</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="completedTasks">0</div>
+                <div class="stat-number" id="in-progress-tasks">-</div>
+                <div class="stat-label">En Progreso</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completed-tasks">-</div>
                 <div class="stat-label">Completadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="review-tasks">-</div>
+                <div class="stat-label">En Revisión</div>
             </div>
         </div>
 
         <!-- Lista de tareas -->
-        <div class="tasks-section">
-            <div class="section-header">
+        <div class="tasks-container">
+            <div class="tasks-header">
                 <h3><i class="fas fa-list"></i> Lista de Tareas</h3>
-                <div class="task-count">
-                    <span id="taskCount">0</span> tareas
-                </div>
             </div>
-            
-            <div class="tasks-list" id="tasksList">
+            <div class="tasks-list" id="tasks-list">
                 <div class="loading">
                     <i class="fas fa-spinner fa-spin"></i> Cargando tareas...
                 </div>
@@ -318,253 +356,165 @@
     </div>
 
     <!-- Modal de sincronización -->
-    <div id="syncModal" class="modal">
+    <div id="sync-modal" class="modal">
         <div class="modal-content">
-            <h3><i class="fas fa-sync-alt"></i> Sincronizando con ClickUp</h3>
-            <div id="syncProgress">
-                <p>Iniciando sincronización...</p>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-                <p id="syncStatus">Conectando con ClickUp...</p>
-            </div>
-            <div id="syncResults" style="display: none;">
-                <h4>✅ Sincronización Completada</h4>
-                <div id="syncStats"></div>
-                <button id="closeModal" class="sync-btn" style="margin-top: 20px;">
-                    Cerrar
-                </button>
+            <h4><i class="fas fa-sync-alt"></i> Sincronizando...</h4>
+            <p>Iniciando sincronización...</p>
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i>
             </div>
         </div>
     </div>
 
-    <script>
-        let currentWorkspaceId = null;
+    <!-- Modal de éxito -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <h4>✅ Sincronización Completada</h4>
+            <p>Las tareas se han sincronizado exitosamente con ClickUp.</p>
+            <button onclick="closeModal('success-modal')">Cerrar</button>
+        </div>
+    </div>
 
-        // Inicializar dashboard
+    <script>
+        // Cargar tareas al iniciar
         document.addEventListener('DOMContentLoaded', function() {
             loadTasks();
-            setupEventListeners();
-            
-            // Actualizar cada 30 segundos
-            setInterval(loadTasks, 30000);
         });
-
-        function setupEventListeners() {
-            // Botón de sincronización
-            document.getElementById('syncBtn').addEventListener('click', function() {
-                if (!currentWorkspaceId) {
-                    showError('No se ha detectado el workspace ID. Por favor, crea una tarea primero.');
-                    return;
-                }
-                syncTasksWithClickUp(currentWorkspaceId);
-            });
-
-            // Botón de actualizar
-            document.getElementById('refreshBtn').addEventListener('click', function() {
-                loadTasks();
-            });
-
-            // Cerrar modal
-            document.getElementById('closeModal').addEventListener('click', function() {
-                document.getElementById('syncModal').style.display = 'none';
-            });
-        }
 
         async function loadTasks() {
             try {
-                const response = await fetch('/api/v1/tasks/');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                const response = await fetch('/api/tasks');
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
                 }
-                
-                const tasks = await response.json();
-                renderTasks(tasks);
-                updateStats(tasks);
-                
-                // Extraer workspace_id de la primera tarea si existe
-                if (tasks.length > 0 && tasks[0].workspace_id) {
-                    currentWorkspaceId = tasks[0].workspace_id;
-                }
-                
+
+                renderTasks(data.tasks);
+                updateStats(data.tasks);
             } catch (error) {
                 console.error('Error cargando tareas:', error);
                 showError('Error cargando las tareas: ' + error.message);
-                document.getElementById('tasksList').innerHTML = `
-                    <div class="error">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        Error cargando tareas: ${error.message}
-                    </div>
-                `;
             }
         }
 
         function renderTasks(tasks) {
-            const container = document.getElementById('tasksList');
+            const container = document.getElementById('tasks-list');
             
             if (tasks.length === 0) {
-                container.innerHTML = `
-                    <div class="loading">
-                        <i class="fas fa-info-circle"></i>
-                        No hay tareas para mostrar. 
-                        <br><br>
-                        <button onclick="createSampleTask()" class="sync-btn">
-                            <i class="fas fa-plus"></i> Crear Tarea de Prueba
-                        </button>
-                    </div>
-                `;
+                container.innerHTML = '<div class="loading">No hay tareas para mostrar</div>';
                 return;
             }
 
             container.innerHTML = tasks.map(task => `
                 <div class="task-item">
                     <div class="task-info">
-                        <h4>${task.name || 'Sin nombre'}</h4>
+                        <h3>${task.name}</h3>
                         <p class="task-description">${task.description || 'Sin descripción'}</p>
-                        <div class="sync-status ${task.is_synced ? 'synced' : 'not-synced'}">
-                            <i class="fas fa-${task.is_synced ? 'check' : 'times'}"></i>
-                            ${task.is_synced ? 'Sincronizada' : 'No sincronizada'}
+                        <div class="task-meta">
+                            <span><strong>ID:</strong> ${task.id}</span>
+                            <span><strong>Lista:</strong> ${task.list_name || 'N/A'}</span>
+                            <span><strong>Workspace:</strong> ${task.workspace_name || 'N/A'}</span>
                         </div>
                     </div>
-                    <span class="priority-badge priority-${task.priority || 3}">
-                        ${getPriorityText(task.priority)}
-                    </span>
-                    <span class="status-badge status-${task.status || 'todo'}">
-                        ${getStatusText(task.status)}
-                    </span>
-                    <div class="task-dates">
-                        <div style="font-size: 0.8rem; color: #6c757d;">
-                            ${task.due_date ? new Date(task.due_date).toLocaleDateString() : 'Sin fecha'}
-                        </div>
+                    <span class="task-status status-${getStatusClass(task.status)}">${getStatusText(task.status)}</span>
+                    <span class="task-priority priority-${task.priority || 3}">${getPriorityText(task.priority)}</span>
+                    <div class="task-meta">
+                        <span><strong>Asignado:</strong> ${task.assignee || 'Sin asignar'}</span>
+                        <span><strong>Creado:</strong> ${new Date(task.created_at).toLocaleDateString()}</span>
                     </div>
                 </div>
             `).join('');
         }
 
-        function updateStats(tasks) {
-            const total = tasks.length;
-            const synced = tasks.filter(t => t.is_synced).length;
-            const pending = tasks.filter(t => t.status !== 'complete').length;
-            const completed = tasks.filter(t => t.status === 'complete').length;
+        function getStatusClass(status) {
+            const statusMap = {
+                'to do': 'todo',
+                'in progress': 'progress',
+                'complete': 'complete',
+                'review': 'review'
+            };
+            return statusMap[status] || 'todo';
+        }
 
-            document.getElementById('totalTasks').textContent = total;
-            document.getElementById('syncedTasks').textContent = synced;
-            document.getElementById('pendingTasks').textContent = pending;
-            document.getElementById('completedTasks').textContent = completed;
-            document.getElementById('taskCount').textContent = total;
+        function getStatusText(status) {
+            const statusMap = {
+                'to do': 'To Do',
+                'in progress': 'En Progreso',
+                'complete': 'Completada',
+                'review': 'En Revisión'
+            };
+            return statusMap[status] || 'To Do';
         }
 
         function getPriorityText(priority) {
-            const priorities = {
+            const priorityMap = {
                 1: 'Urgente',
                 2: 'Alta',
                 3: 'Normal',
                 4: 'Baja'
             };
-            return priorities[priority] || 'Normal';
+            return priorityMap[priority] || 'Normal';
         }
 
-        function getStatusText(status) {
-            const statuses = {
-                'todo': 'Pendiente',
-                'inprogress': 'En Progreso',
-                'review': 'En Revisión',
-                'complete': 'Completada'
+        function updateStats(tasks) {
+            const stats = {
+                total: tasks.length,
+                pending: tasks.filter(t => t.status === 'to do').length,
+                inProgress: tasks.filter(t => t.status === 'in progress').length,
+                completed: tasks.filter(t => t.status === 'complete').length,
+                review: tasks.filter(t => t.status === 'review').length
             };
-            return statuses[status] || 'Pendiente';
+
+            document.getElementById('total-tasks').textContent = stats.total;
+            document.getElementById('pending-tasks').textContent = stats.pending;
+            document.getElementById('in-progress-tasks').textContent = stats.inProgress;
+            document.getElementById('completed-tasks').textContent = stats.completed;
+            document.getElementById('review-tasks').textContent = stats.review;
         }
 
-        async function syncTasksWithClickUp(workspaceId) {
-            const syncBtn = document.getElementById('syncBtn');
-            const modal = document.getElementById('syncModal');
-            const progressFill = document.getElementById('progressFill');
-            const syncStatus = document.getElementById('syncStatus');
-            
+        async function startSync() {
             // Mostrar modal y deshabilitar botón
-            modal.style.display = 'block';
+            document.getElementById('sync-modal').style.display = 'block';
+            const syncBtn = document.getElementById('sync-btn');
             syncBtn.disabled = true;
             syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
-            
-            try {
-                // Simular progreso
-                let progress = 0;
-                const progressInterval = setInterval(() => {
-                    progress += 10;
-                    progressFill.style.width = progress + '%';
-                    if (progress >= 100) clearInterval(progressInterval);
-                }, 200);
 
-                syncStatus.textContent = 'Conectando con ClickUp...';
-                
+            try {
                 // Llamar al endpoint de sincronización
-                const response = await fetch(`/api/v1/tasks/sync?workspace_id=${workspaceId}`, {
-                    method: 'POST'
+                const response = await fetch('/api/tasks/sync', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
                 }
-                
-                const result = await response.json();
-                
-                // Mostrar resultados
-                document.getElementById('syncProgress').style.display = 'none';
-                document.getElementById('syncResults').style.display = 'block';
-                
-                document.getElementById('syncStats').innerHTML = `
-                    <div style="text-align: left; margin: 20px 0;">
-                        <p><strong>Total tareas procesadas:</strong> ${result.total_tasks_synced}</p>
-                        <p><strong>Nuevas tareas creadas:</strong> ${result.new_tasks_created}</p>
-                        <p><strong>Tareas actualizadas:</strong> ${result.tasks_updated}</p>
-                    </div>
-                `;
-                
+
                 // Recargar tareas después de la sincronización
-                setTimeout(() => {
-                    loadTasks();
-                }, 1000);
+                await loadTasks();
+                
+                // Mostrar modal de éxito
+                document.getElementById('sync-modal').style.display = 'none';
+                document.getElementById('success-modal').style.display = 'block';
                 
             } catch (error) {
                 console.error('Error en sincronización:', error);
                 showError('Error en sincronización: ' + error.message);
-                
-                // Ocultar modal en caso de error
-                modal.style.display = 'none';
             } finally {
                 // Restaurar botón
                 syncBtn.disabled = false;
-                syncBtn.innerHTML = '<i class="fas fa-sync-alt"></i> 🔄 Sincronizar con ClickUp';
+                syncBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Sincronizar Tareas';
+                document.getElementById('sync-modal').style.display = 'none';
             }
         }
 
-        function createSampleTask() {
-            // Crear una tarea de prueba para obtener el workspace_id
-            const sampleTask = {
-                name: "Tarea de Prueba - Sincronización",
-                description: "Esta tarea se crea para probar la sincronización",
-                list_id: "901411770471", // ID de lista por defecto
-                workspace_id: "9014943317", // ID de workspace por defecto
-                status: "todo",
-                priority: 3
-            };
-            
-            fetch('/api/v1/tasks/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(sampleTask)
-            })
-            .then(response => response.json())
-            .then(data => {
-                showSuccess('Tarea de prueba creada exitosamente');
-                currentWorkspaceId = data.workspace_id;
-                loadTasks();
-            })
-            .catch(error => {
-                showError('Error creando tarea de prueba: ' + error.message);
-            });
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
         }
 
         function showError(message) {
@@ -589,6 +539,36 @@
             setTimeout(() => {
                 successDiv.remove();
             }, 5000);
+        }
+
+        // Función para crear tarea de prueba
+        async function createTestTask() {
+            try {
+                const response = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: "Tarea de Prueba - Sincronización",
+                        description: "Esta tarea se crea para probar la sincronización",
+                        status: "to do",
+                        priority: 3
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                showSuccess('Tarea de prueba creada exitosamente');
+                loadTasks();
+            } catch (error) {
+                console.error('Error creando tarea de prueba:', error);
+                showError('Error creando tarea de prueba: ' + error.message);
+            }
         }
     </script>
 </body>

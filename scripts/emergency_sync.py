@@ -9,7 +9,7 @@ import sys
 import os
 from datetime import datetime
 
-# Agregar el directorio raíz al path
+# Agregar el directorio raiz al path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.clickup_client import ClickUpClient
@@ -18,72 +18,72 @@ from models.task import Task
 from sqlalchemy.orm import Session
 
 async def emergency_sync_tasks():
-    """Sincronización de emergencia de tareas desde ClickUp"""
+    """Sincronizacion de emergencia de tareas desde ClickUp"""
     
-    print("🚨 INICIANDO SINCRONIZACIÓN DE EMERGENCIA")
+    print("üö® INICIANDO SINCRONIZACION DE EMERGENCIA")
     print("=" * 60)
     
     try:
-        # Crear cliente de ClickUp
+        # Create cliente de ClickUp
         client = ClickUpClient()
         
         if not client.api_token:
-            print("❌ ERROR: No hay token de ClickUp configurado")
+            print("‚ùå ERROR: No hay token de ClickUp configured")
             return False
         
-        print(f"✅ Cliente ClickUp creado con token: {client.api_token[:10]}...")
+        print(f"‚úÖ Cliente ClickUp creado con token: {client.api_token[:10]}...")
         
-        # Obtener workspaces
-        print("🔍 Obteniendo workspaces...")
+        # Get workspaces
+        print("üîç Obteniendo workspaces...")
         workspaces = await client.get_workspaces()
         
         if not workspaces:
-            print("❌ No se encontraron workspaces")
+            print("‚ùå No se encontraron workspaces")
             return False
         
         workspace = workspaces[0]  # Usar el primero
         workspace_id = workspace["id"]
-        print(f"✅ Workspace encontrado: {workspace['name']} (ID: {workspace_id})")
+        print(f"‚úÖ Workspace encontrado: {workspace['name']} (ID: {workspace_id})")
         
-        # Obtener espacios
-        print("🔍 Obteniendo espacios...")
+        # Get espacios
+        print("üîç Obteniendo espacios...")
         spaces = await client.get_spaces(workspace_id)
         
         if not spaces:
-            print("❌ No se encontraron espacios")
+            print("‚ùå No se encontraron espacios")
             return False
         
         space = spaces[0]  # Usar el primero
         space_id = space["id"]
-        print(f"✅ Espacio encontrado: {space['name']} (ID: {space_id})")
+        print(f"‚úÖ Espacio encontrado: {space['name']} (ID: {space_id})")
         
-        # Obtener listas
-        print("🔍 Obteniendo listas...")
+        # Get listas
+        print("üîç Obteniendo listas...")
         lists = await client.get_lists(space_id)
         
         if not lists:
-            print("❌ No se encontraron listas")
+            print("‚ùå No se encontraron listas")
             return False
         
-        print(f"✅ {len(lists)} listas encontradas")
+        print(f"‚úÖ {len(lists)} listas encontradas")
         
-        # Sincronizar tareas de cada lista
+        # Sync tareas de cada lista
         total_tasks = 0
         for list_info in lists:
             list_id = list_info["id"]
             list_name = list_info["name"]
             
-            print(f"📋 Sincronizando lista: {list_name} (ID: {list_id})")
+            print(f"üìã Sincronizando lista: {list_name} (ID: {list_id})")
             
             try:
-                # Obtener tareas de la lista
+                # Get tareas de la lista
                 tasks = await client.get_tasks(list_id)
                 
                 if not tasks:
-                    print(f"   ⚠️ No hay tareas en esta lista")
+                    print(f"   ‚ö†Ô∏è No hay tareas en esta lista")
                     continue
                 
-                print(f"   📝 {len(tasks)} tareas encontradas")
+                print(f"   üìù {len(tasks)} tareas encontradas")
                 
                 # Procesar cada tarea
                 for task_data in tasks:
@@ -92,37 +92,37 @@ async def emergency_sync_tasks():
                         existing_task = await check_task_exists(task_data["id"])
                         
                         if existing_task:
-                            print(f"      ✅ Tarea ya existe: {task_data['name']}")
+                            print(f"      ‚úÖ Tarea ya existe: {task_data['name']}")
                             continue
                         
-                        # Crear nueva tarea en BD local
+                        # Create nueva tarea en BD local
                         success = await create_local_task(task_data, workspace_id, list_id)
                         
                         if success:
                             total_tasks += 1
-                            print(f"      ➕ Nueva tarea creada: {task_data['name']}")
+                            print(f"      ‚ûï Nueva tarea creada: {task_data['name']}")
                         else:
-                            print(f"      ❌ Error creando tarea: {task_data['name']}")
+                            print(f"      ‚ùå Error creating tarea: {task_data['name']}")
                             
                     except Exception as e:
-                        print(f"      ❌ Error procesando tarea: {str(e)}")
+                        print(f"      ‚ùå Error procesando tarea: {str(e)}")
                         continue
                         
             except Exception as e:
-                print(f"   ❌ Error obteniendo tareas de lista {list_name}: {str(e)}")
+                print(f"   ‚ùå Error getting tareas de lista {list_name}: {str(e)}")
                 continue
         
         print("=" * 60)
-        print(f"🎉 SINCRONIZACIÓN COMPLETADA")
-        print(f"   📊 Total de tareas sincronizadas: {total_tasks}")
-        print(f"   ⏰ Timestamp: {datetime.now().isoformat()}")
+        print(f"üéâ SINCRONIZACION COMPLETADA")
+        print(f"   üìä Total de tareas sincronizadas: {total_tasks}")
+        print(f"   ‚è∞ Timestamp: {datetime.now().isoformat()}")
         
         return True
         
     except Exception as e:
-        print(f"❌ ERROR CRÍTICO: {str(e)}")
+        print(f"‚ùå ERROR CRITICO: {str(e)}")
         import traceback
-        print(f"❌ Traceback: {traceback.format_exc()}")
+        print(f"‚ùå Traceback: {traceback.format_exc()}")
         return False
 
 async def check_task_exists(clickup_id: str) -> bool:
@@ -138,7 +138,7 @@ async def check_task_exists(clickup_id: str) -> bool:
         return False
 
 async def create_local_task(task_data: dict, workspace_id: str, list_id: str) -> bool:
-    """Crear una tarea en la BD local"""
+    """Create una tarea en la BD local"""
     try:
         from core.database import get_db
         db = next(get_db())
@@ -150,7 +150,7 @@ async def create_local_task(task_data: dict, workspace_id: str, list_id: str) ->
         else:
             priority_value = int(priority_data) if priority_data else 3
         
-        # Crear nueva tarea
+        # Create nueva tarea
         new_task = Task(
             clickup_id=task_data["id"],
             name=task_data.get("name", "Sin nombre"),
@@ -173,7 +173,7 @@ async def create_local_task(task_data: dict, workspace_id: str, list_id: str) ->
         return True
         
     except Exception as e:
-        print(f"      ❌ Error en BD: {str(e)}")
+        print(f"      ‚ùå Error en BD: {str(e)}")
         return False
 
 def parse_timestamp(timestamp_value):
@@ -196,19 +196,19 @@ def parse_timestamp(timestamp_value):
         return None
 
 async def main():
-    """Función principal"""
-    print("🚀 Script de Sincronización de Emergencia")
+    """Funcion principal"""
+    print("üöÄ Script de Sincronizacion de Emergencia")
     print("   ClickUp Task Manager - Railway Deployment")
     print("=" * 60)
     
     success = await emergency_sync_tasks()
     
     if success:
-        print("\n✅ Sincronización completada exitosamente")
-        print("🔍 Verifica las tareas en la interfaz web")
+        print("\n‚úÖ Sincronizacion completada exitosamente")
+        print("üîç Verifica las tareas en la interfaz web")
     else:
-        print("\n❌ Sincronización falló")
-        print("🔍 Revisa los errores arriba")
+        print("\n‚ùå Sincronizacion fallo")
+        print("üîç Revisa los errores arriba")
     
     print("=" * 60)
 

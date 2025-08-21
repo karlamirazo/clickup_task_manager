@@ -1,5 +1,5 @@
 """
-Dashboard para monitoreo de notificaciones y estadísticas del sistema
+Dashboard for monitoring notifications and system statistics
 """
 
 from datetime import datetime, timedelta
@@ -25,14 +25,14 @@ router = APIRouter()
 
 @router.get("/stats", status_code=http_status.HTTP_200_OK)
 async def get_dashboard_stats(
-    period: str = Query("24h", description="Período de tiempo: 1h, 24h, 7d, 30d"),
+    period: str = Query("24h", description="Time period: 1h, 24h, 7d, 30d"),
     db: Session = Depends(get_db)
 ):
     """
-    Obtener estadísticas del dashboard
+    Get dashboard statistics
     """
     try:
-        # Calcular período
+        # Calcular periodo
         now = datetime.now()
         period_delta = {
             "1h": timedelta(hours=1),
@@ -43,27 +43,27 @@ async def get_dashboard_stats(
         
         since = now - period_delta
         
-        # Estadísticas de notificaciones
+        # Statistics for notificaciones
         notification_stats = await _get_notification_stats(db, since)
         
-        # Estadísticas de tareas
+        # Statistics for tareas
         task_stats = await _get_task_stats(db, since)
         
-        # Estadísticas de sincronización (con fallback)
+        # Sync statistics (with fallback)
         try:
             sync_stats = sync_service.get_sync_stats()
         except Exception as e:
             dashboard_logger.warning(f"Servicio de sync no disponible: {e}")
             sync_stats = {"total_syncs": 0, "success_rate": 100}
         
-        # Estadísticas del servicio de notificaciones (con fallback)
+        # Statistics forl servicio de notificaciones (con fallback)
         try:
             service_stats = notification_service.get_stats()
         except Exception as e:
             dashboard_logger.warning(f"Servicio de notificaciones no disponible: {e}")
             service_stats = {"total_sent": 0, "success_rate": 100}
         
-        # Estadísticas de usuarios
+        # Statistics for usuarios
         user_stats = await _get_user_stats(db)
         
         return {
@@ -78,7 +78,7 @@ async def get_dashboard_stats(
         }
         
     except Exception as e:
-        dashboard_logger.error(f"Error obteniendo estadísticas del dashboard: {e}")
+        dashboard_logger.error(f"Error getting dashboard statistics: {e}")
         return {
             "error": str(e),
             "timestamp": datetime.now().isoformat()
@@ -87,14 +87,14 @@ async def get_dashboard_stats(
 
 @router.get("/notifications", status_code=http_status.HTTP_200_OK)
 async def get_notification_history(
-    limit: int = Query(100, description="Límite de notificaciones"),
-    offset: int = Query(0, description="Offset para paginación"),
-    status: Optional[str] = Query(None, description="Filtrar por estado: sent, failed, pending"),
-    notification_type: Optional[str] = Query(None, description="Filtrar por tipo: email, sms, telegram"),
+    limit: int = Query(100, description="Notification limit"),
+    offset: int = Query(0, description="Offset for pagination"),
+    status: Optional[str] = Query(None, description="Filter by status: sent, failed, pending"),
+    notification_type: Optional[str] = Query(None, description="Filter by type: email, sms, telegram"),
     db: Session = Depends(get_db)
 ):
     """
-    Obtener historial de notificaciones
+    Get historial de notificaciones
     """
     try:
         query = db.query(NotificationLog)
@@ -106,13 +106,13 @@ async def get_notification_history(
         if notification_type:
             query = query.filter(NotificationLog.notification_type == notification_type)
         
-        # Ordenar por fecha de creación (más recientes primero)
+        # Sort by date de creacion (most recent first)
         query = query.order_by(desc(NotificationLog.created_at))
         
         # Contar total
         total = query.count()
         
-        # Aplicar paginación
+        # Apply pagination
         notifications = query.offset(offset).limit(limit).all()
         
         # Formatear resultados
@@ -144,20 +144,20 @@ async def get_notification_history(
         }
         
     except Exception as e:
-        dashboard_logger.error(f"Error obteniendo historial de notificaciones: {e}")
+        dashboard_logger.error(f"Error getting historial de notificaciones: {e}")
         return {"error": str(e)}
 
 
 @router.get("/charts/notifications", status_code=http_status.HTTP_200_OK)
 async def get_notification_charts(
-    period: str = Query("24h", description="Período: 1h, 24h, 7d, 30d"),
+    period: str = Query("24h", description="Periodo: 1h, 24h, 7d, 30d"),
     db: Session = Depends(get_db)
 ):
     """
-    Obtener datos para gráficos de notificaciones
+    Get datos para graficos de notificaciones
     """
     try:
-        # Calcular período
+        # Calcular periodo
         now = datetime.now()
         period_delta = {
             "1h": timedelta(hours=1),
@@ -168,21 +168,21 @@ async def get_notification_charts(
         
         since = now - period_delta
         
-        # Determinar intervalo de agrupación
+        # Determine interval de agrupacion
         if period in ["1h", "24h"]:
-            # Agrupar por hora
+            # Group by hora
             interval = "hour"
             group_by = func.date_trunc('hour', NotificationLog.created_at)
         elif period == "7d":
-            # Agrupar por día
+            # Group by dia
             interval = "day"
             group_by = func.date_trunc('day', NotificationLog.created_at)
         else:
-            # Agrupar por día
+            # Group by dia
             interval = "day"
             group_by = func.date_trunc('day', NotificationLog.created_at)
         
-        # Gráfico de notificaciones por tiempo
+        # Grafico de notificaciones por tiempo
         time_series = db.query(
             group_by.label('period'),
             NotificationLog.notification_type,
@@ -196,7 +196,7 @@ async def get_notification_charts(
             NotificationLog.status
         ).order_by(group_by).all()
         
-        # Gráfico de distribución por tipo
+        # Distribution chart por tipo
         type_distribution = db.query(
             NotificationLog.notification_type,
             func.count().label('count')
@@ -204,7 +204,7 @@ async def get_notification_charts(
             NotificationLog.created_at >= since
         ).group_by(NotificationLog.notification_type).all()
         
-        # Gráfico de tasa de éxito
+        # Grafico de tasa de exito
         success_rate = db.query(
             NotificationLog.status,
             func.count().label('count')
@@ -259,14 +259,14 @@ async def get_notification_charts(
         }
         
     except Exception as e:
-        dashboard_logger.error(f"Error obteniendo datos de gráficos: {e}")
+        dashboard_logger.error(f"Error getting datos de graficos: {e}")
         return {"error": str(e)}
 
 
 @router.get("/health", status_code=http_status.HTTP_200_OK)
 async def get_system_health():
     """
-    Obtener estado de salud del sistema
+    Get system health status
     """
     try:
         health_status = {
@@ -277,10 +277,11 @@ async def get_system_health():
         
         # Verificar base de datos
         try:
+            from sqlalchemy import text
             db = next(get_db())
-            db.execute("SELECT 1")
+            db.execute(text("SELECT 1"))
             db.close()
-            health_status["services"]["database"] = {"status": "healthy", "message": "Conexión exitosa"}
+            health_status["services"]["database"] = {"status": "healthy", "message": "Connection successful"}
         except Exception as e:
             health_status["services"]["database"] = {"status": "unhealthy", "message": str(e)}
             health_status["status"] = "degraded"
@@ -293,7 +294,7 @@ async def get_system_health():
             health_status["services"]["notifications"] = {"status": "degraded", "success_rate": notif_stats.get("success_rate")}
             health_status["status"] = "degraded"
         
-        # Verificar sincronización
+        # Check synchronization
         sync_stats = sync_service.get_sync_stats()
         if not sync_stats.get("no_syncs") and sync_stats.get("success_rate", 0) > 70:
             health_status["services"]["sync"] = {"status": "healthy", "success_rate": sync_stats.get("success_rate")}
@@ -302,7 +303,7 @@ async def get_system_health():
             if health_status["status"] == "healthy":
                 health_status["status"] = "degraded"
         
-        # Si todos los servicios están mal, marcar como unhealthy
+        # Si todos los servicios estan mal, marcar como unhealthy
         unhealthy_count = sum(1 for service in health_status["services"].values() if service["status"] == "unhealthy")
         if unhealthy_count > 0:
             health_status["status"] = "unhealthy"
@@ -319,7 +320,7 @@ async def get_system_health():
 
 @router.post("/clear-logs", status_code=http_status.HTTP_200_OK)
 async def clear_notification_logs(
-    older_than_days: int = Query(30, description="Eliminar logs más antiguos que X días"),
+    older_than_days: int = Query(30, description="Delete older logs que X dias"),
     db: Session = Depends(get_db)
 ):
     """
@@ -338,16 +339,16 @@ async def clear_notification_logs(
             "success": True,
             "deleted_count": deleted_count,
             "cutoff_date": cutoff_date.isoformat(),
-            "message": f"Eliminados {deleted_count} logs más antiguos que {older_than_days} días"
+            "message": f"Deleted {deleted_count} older logs que {older_than_days} dias"
         }
         
     except Exception as e:
-        dashboard_logger.error(f"Error limpiando logs: {e}")
+        dashboard_logger.error(f"Error cleaning logs: {e}")
         return {"error": str(e)}
 
 
 async def _get_notification_stats(db: Session, since: datetime) -> Dict[str, Any]:
-    """Obtener estadísticas de notificaciones"""
+    """Get estadisticas de notificaciones"""
     
     # Total de notificaciones
     total = db.query(NotificationLog).filter(NotificationLog.created_at >= since).count()
@@ -368,7 +369,7 @@ async def _get_notification_stats(db: Session, since: datetime) -> Dict[str, Any
         NotificationLog.created_at >= since
     ).group_by(NotificationLog.notification_type).all()
     
-    # Tiempo promedio de entrega
+    # Average time de entrega
     avg_delivery_time = db.query(
         func.avg(NotificationLog.delivery_time)
     ).filter(
@@ -379,7 +380,7 @@ async def _get_notification_stats(db: Session, since: datetime) -> Dict[str, Any
         )
     ).scalar()
     
-    # Tasa de reintento
+    # Retry rate
     retry_stats = db.query(
         func.avg(NotificationLog.retry_count),
         func.max(NotificationLog.retry_count)
@@ -398,7 +399,7 @@ async def _get_notification_stats(db: Session, since: datetime) -> Dict[str, Any
 
 
 async def _get_task_stats(db: Session, since: datetime) -> Dict[str, Any]:
-    """Obtener estadísticas de tareas"""
+    """Get estadisticas de tareas"""
     
     # Total de tareas
     total = db.query(Task).count()
@@ -418,7 +419,7 @@ async def _get_task_stats(db: Session, since: datetime) -> Dict[str, Any]:
         func.count().label('count')
     ).group_by(Task.priority).all()
     
-    # Tareas vencidas
+    # Overdue tasks
     overdue = db.query(Task).filter(
         and_(
             Task.due_date < datetime.now(),
@@ -436,17 +437,17 @@ async def _get_task_stats(db: Session, since: datetime) -> Dict[str, Any]:
 
 
 async def _get_user_stats(db: Session) -> Dict[str, Any]:
-    """Obtener estadísticas de usuarios"""
+    """Get estadisticas de usuarios"""
     
     total = db.query(User).count()
     
-    # Usuarios con email configurado
+    # Users with email configured
     with_email = db.query(User).filter(User.email.isnot(None)).count()
     
-    # Usuarios con Telegram configurado
+    # Users with Telegram configured
     with_telegram = db.query(User).filter(User.telegram_id.isnot(None)).count()
     
-    # Usuarios con teléfono configurado
+    # Users with telefono configured
     with_phone = db.query(User).filter(User.phone.isnot(None)).count()
     
     return {

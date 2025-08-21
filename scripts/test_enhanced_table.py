@@ -8,65 +8,65 @@ import json
 import sys
 import os
 
-# Agregar el directorio raíz al path
+# Agregar el directorio raiz al path
 sys.path.insert(0, os.getcwd())
 
 def test_enhanced_table():
-    """Probar la tabla mejorada con datos enriquecidos"""
+    """Test la tabla mejorada con datos enriquecidos"""
     
-    print("🧪 Probando tabla mejorada...")
+    print("ğŸ§ª Probando tabla mejorada...")
     
     try:
-        # Probar endpoint de tareas con datos enriquecidos
+        # Test endpoint de tareas con datos enriquecidos
         response = requests.get("http://localhost:8000/api/v1/tasks/?include_closed=true&limit=10")
         
         if response.status_code == 200:
             data = response.json()
             tasks = data.get('tasks', [])
             
-            print(f"✅ Se obtuvieron {len(tasks)} tareas")
+            print(f"âœ… Se obtuvieron {len(tasks)} tareas")
             
             if tasks:
-                print("\n📋 Detalles de la primera tarea:")
+                print("\nğŸ“‹ Detalles de la primera tarea:")
                 task = tasks[0]
                 
-                print(f"   📝 Nombre: {task.get('name', 'N/A')}")
-                print(f"   📊 Estado: {task.get('status', 'N/A')}")
-                print(f"   ⚡ Prioridad: {task.get('priority', 'N/A')}")
-                print(f"   👤 Asignado: {task.get('assignee_name', 'N/A')}")
-                print(f"   📅 Fecha Creación: {task.get('created_at', 'N/A')}")
-                print(f"   📋 Lista: {task.get('list_name', 'N/A')}")
-                print(f"   🏢 Workspace: {task.get('workspace_name', 'N/A')}")
-                print(f"   🆔 ID: {task.get('clickup_id', 'N/A')}")
+                print(f"   ğŸ“� Nombre: {task.get('name', 'N/A')}")
+                print(f"   ğŸ“Š Estado: {task.get('status', 'N/A')}")
+                print(f"   âš¡ Prioridad: {task.get('priority', 'N/A')}")
+                print(f"   ğŸ‘¤ Asignado: {task.get('assignee_name', 'N/A')}")
+                print(f"   ğŸ“… Fecha Creacion: {task.get('created_at', 'N/A')}")
+                print(f"   ğŸ“‹ Lista: {task.get('list_name', 'N/A')}")
+                print(f"   ğŸ�¢ Workspace: {task.get('workspace_name', 'N/A')}")
+                print(f"   ğŸ†” ID: {task.get('clickup_id', 'N/A')}")
                 
-                # Verificar que los campos enriquecidos estén presentes
+                # Verificar que los campos enriquecidos esten presentes
                 enriched_fields = ['assignee_name', 'list_name', 'workspace_name']
                 missing_fields = [field for field in enriched_fields if not task.get(field)]
                 
                 if missing_fields:
-                    print(f"⚠️  Campos faltantes: {missing_fields}")
+                    print(f"âš ï¸�  Campos faltantes: {missing_fields}")
                 else:
-                    print("✅ Todos los campos enriquecidos están presentes")
+                    print("âœ… Todos los campos enriquecidos estan presentes")
                 
             else:
-                print("⚠️  No hay tareas para mostrar")
+                print("âš ï¸�  No hay tareas para mostrar")
                 
         else:
-            print(f"❌ Error en la respuesta: {response.status_code}")
+            print(f"â�Œ Error en la respuesta: {response.status_code}")
             print(f"   Detalle: {response.text}")
             
     except requests.exceptions.ConnectionError:
-        print("❌ No se pudo conectar al servidor. Asegúrate de que esté ejecutándose en http://localhost:8000")
+        print("â�Œ No se pudo conectar al servidor. Asegurate de que este ejecutandose en http://localhost:8000")
     except Exception as e:
-        print(f"❌ Error inesperado: {e}")
+        print(f"â�Œ Error inesperado: {e}")
 
 def test_report_generation():
-    """Probar la generación de reportes con la tabla mejorada"""
+    """Test la generacion de reportes con la tabla mejorada"""
     
-    print("\n📊 Probando generación de reportes...")
+    print("\nğŸ“Š Probando generacion de reportes...")
     
     try:
-        # Crear un reporte
+        # Create un reporte
         report_data = {
             "name": "Test Enhanced Table",
             "description": "Reporte para probar la tabla mejorada",
@@ -80,7 +80,7 @@ def test_report_generation():
             report = response.json()
             report_id = report.get('id')
             
-            print(f"✅ Reporte creado con ID: {report_id}")
+            print(f"âœ… Reporte creado con ID: {report_id}")
             
             # Generar el reporte
             generate_response = requests.post(f"http://localhost:8000/api/v1/reports/{report_id}/generate")
@@ -88,37 +88,37 @@ def test_report_generation():
             if generate_response.status_code == 200:
                 report_data = generate_response.json()
                 
-                print("✅ Reporte generado exitosamente")
-                print(f"   📊 Total tareas: {report_data.get('total_tasks', 0)}")
-                print(f"   ✅ Completadas: {report_data.get('completed_tasks', 0)}")
-                print(f"   ⏳ Pendientes: {report_data.get('pending_tasks', 0)}")
+                print("âœ… Reporte generado exitosamente")
+                print(f"   ğŸ“Š Total tareas: {report_data.get('total_tasks', 0)}")
+                print(f"   âœ… Completadas: {report_data.get('completed_tasks', 0)}")
+                print(f"   â�³ Pendientes: {report_data.get('pending_tasks', 0)}")
                 
-                # Verificar que los datos de distribución estén presentes
+                # Verificar que los datos de distribucion esten presentes
                 if 'status_distribution' in report_data:
-                    print(f"   📈 Distribución de estados: {report_data['status_distribution']}")
+                    print(f"   ğŸ“ˆ Distribucion de estados: {report_data['status_distribution']}")
                 
                 if 'priority_distribution' in report_data:
-                    print(f"   ⚡ Distribución de prioridades: {report_data['priority_distribution']}")
+                    print(f"   âš¡ Distribucion de prioridades: {report_data['priority_distribution']}")
                 
                 if 'assignee_distribution' in report_data:
-                    print(f"   👤 Distribución de asignados: {report_data['assignee_distribution']}")
+                    print(f"   ğŸ‘¤ Distribucion de asignados: {report_data['assignee_distribution']}")
                 
             else:
-                print(f"❌ Error generando reporte: {generate_response.status_code}")
+                print(f"â�Œ Error generando reporte: {generate_response.status_code}")
                 print(f"   Detalle: {generate_response.text}")
         else:
-            print(f"❌ Error creando reporte: {response.status_code}")
+            print(f"â�Œ Error creating reporte: {response.status_code}")
             print(f"   Detalle: {response.text}")
             
     except requests.exceptions.ConnectionError:
-        print("❌ No se pudo conectar al servidor")
+        print("â�Œ No se pudo conectar al servidor")
     except Exception as e:
-        print(f"❌ Error inesperado: {e}")
+        print(f"â�Œ Error inesperado: {e}")
 
 if __name__ == "__main__":
-    print("🚀 Iniciando pruebas de tabla mejorada...\n")
+    print("ğŸš€ Iniciando pruebas de tabla mejorada...\n")
     
     test_enhanced_table()
     test_report_generation()
     
-    print("\n✨ Pruebas completadas!")
+    print("\nâœ¨ Pruebas completadas!")

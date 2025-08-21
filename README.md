@@ -1,68 +1,68 @@
 # ClickUp Project Manager - Agente Inteligente
 
-Un módulo completo de gestión de tareas con la API de ClickUp que incluye automatización, reportes e integraciones.
+Un mÃ³dulo completo de gestiÃ³n de tareas con la API de ClickUp que incluye automatizaciÃ³n, reportes e integraciones.
 
-## 🚀 Características
+## ğŸš€ CaracterÃ­sticas
 
-### Gestión de Tareas
-- ✅ Crear, actualizar y eliminar tareas
-- ✅ Gestión de espacios de trabajo, listas y usuarios
-- ✅ Búsqueda y filtrado avanzado
-- ✅ Operaciones masivas (bulk operations)
-- ✅ Sincronización bidireccional con ClickUp
+### GestiÃ³n de Tareas
+- âœ… Crear, actualizar y eliminar tareas
+- âœ… GestiÃ³n de espacios de trabajo, listas y usuarios
+- âœ… BÃºsqueda y filtrado avanzado
+- âœ… Operaciones masivas (bulk operations)
+- âœ… SincronizaciÃ³n bidireccional con ClickUp
 
-### Automatización
-- ✅ Reglas de automatización personalizables
-- ✅ Triggers basados en eventos de tareas
-- ✅ Acciones automáticas (asignaciones, fechas límite, etiquetas)
-- ✅ Ejecución manual y programada
-- ✅ Monitoreo de ejecuciones y errores
+### AutomatizaciÃ³n
+- âœ… Reglas de automatizaciÃ³n personalizables
+- âœ… Triggers basados en eventos de tareas
+- âœ… Acciones automÃ¡ticas (asignaciones, fechas lÃ­mite, etiquetas)
+- âœ… EjecuciÃ³n manual y programada
+- âœ… Monitoreo de ejecuciones y errores
 
 ### Reportes
-- ✅ Resumen de tareas por estado y prioridad
-- ✅ Análisis de rendimiento de usuarios
-- ✅ Línea de tiempo de tareas
-- ✅ Vista general del workspace
-- ✅ Reportes personalizables con filtros
-- ✅ Exportación en formato JSON
+- âœ… Resumen de tareas por estado y prioridad
+- âœ… AnÃ¡lisis de rendimiento de usuarios
+- âœ… LÃ­nea de tiempo de tareas
+- âœ… Vista general del workspace
+- âœ… Reportes personalizables con filtros
+- âœ… ExportaciÃ³n en formato JSON
 
 ### Integraciones
-- ✅ CRMs (Salesforce, HubSpot, Pipedrive)
-- ✅ Bases de datos (PostgreSQL, MySQL, MongoDB)
-- ✅ Herramientas de productividad (Slack, Teams, Google Workspace)
-- ✅ Gestión de proyectos (Jira, Asana, Trello)
-- ✅ Pruebas de conexión y sincronización
+- âœ… CRMs (Salesforce, HubSpot, Pipedrive)
+- âœ… Bases de datos (PostgreSQL, MySQL, MongoDB)
+- âœ… Herramientas de productividad (Slack, Teams, Google Workspace)
+- âœ… GestiÃ³n de proyectos (Jira, Asana, Trello)
+- âœ… Pruebas de conexiÃ³n y sincronizaciÃ³n
 
-## 🏗️ Arquitectura
+## ğŸ�—ï¸� Arquitectura
 
 ```
 ClickUp Project Manager/
-├── api/                    # API REST con FastAPI
-│   ├── routes/            # Endpoints de la API
-│   └── schemas/           # Esquemas Pydantic
-├── core/                  # Configuración y utilidades
-│   ├── config.py         # Configuración de la aplicación
-│   ├── database.py       # Configuración de base de datos
-│   └── clickup_client.py # Cliente de ClickUp API
-├── models/               # Modelos de SQLAlchemy
-├── utils/                # Utilidades y helpers
-├── data/                 # Datos y reportes generados
-├── logs/                 # Archivos de log
-├── static/               # Archivos estáticos
-├── templates/            # Plantillas HTML
-└── tests/                # Tests unitarios y de integración
+â”œâ”€â”€ api/                    # API REST con FastAPI
+â”‚   â”œâ”€â”€ routes/            # Endpoints de la API
+â”‚   â””â”€â”€ schemas/           # Esquemas Pydantic
+â”œâ”€â”€ core/                  # ConfiguraciÃ³n y utilidades
+â”‚   â”œâ”€â”€ config.py         # ConfiguraciÃ³n de la aplicaciÃ³n
+â”‚   â”œâ”€â”€ database.py       # ConfiguraciÃ³n de base de datos
+â”‚   â””â”€â”€ clickup_client.py # Cliente de ClickUp API
+â”œâ”€â”€ models/               # Modelos de SQLAlchemy
+â”œâ”€â”€ utils/                # Utilidades y helpers
+â”œâ”€â”€ data/                 # Datos y reportes generados
+â”œâ”€â”€ logs/                 # Archivos de log
+â”œâ”€â”€ static/               # Archivos estÃ¡ticos
+â”œâ”€â”€ templates/            # Plantillas HTML
+â””â”€â”€ tests/                # Tests unitarios y de integraciÃ³n
 ```
 
-## 🛠️ Tecnologías
+## ğŸ› ï¸� TecnologÃ­as
 
 - **Backend**: FastAPI, SQLAlchemy, Pydantic
-- **Base de datos**: SQLite (desarrollo) / PostgreSQL (producción)
+- **Base de datos**: SQLite (desarrollo) / PostgreSQL (producciÃ³n)
 - **API**: ClickUp API v2
-- **Autenticación**: JWT
-- **Documentación**: OpenAPI/Swagger
+- **AutenticaciÃ³n**: JWT
+- **DocumentaciÃ³n**: OpenAPI/Swagger
 - **Tests**: pytest, pytest-asyncio
 
-## 📦 Instalación
+## ğŸ“¦ InstalaciÃ³n
 
 ### Prerrequisitos
 
@@ -70,7 +70,7 @@ ClickUp Project Manager/
 - pip
 - ClickUp API Token
 
-### Pasos de instalación
+### Pasos de instalaciÃ³n
 
 1. **Clonar el repositorio**
 ```bash
@@ -100,14 +100,14 @@ cp env.example .env
 python -c "from core.database import init_db; import asyncio; asyncio.run(init_db())"
 ```
 
-6. **Ejecutar la aplicación**
+6. **Ejecutar la aplicaciÃ³n**
 ```bash
 python main.py
 ```
 
-La aplicación estará disponible en `http://localhost:8000`
+La aplicaciÃ³n estarÃ¡ disponible en `http://localhost:8000`
 
-## 🔧 Configuración
+## ğŸ”§ ConfiguraciÃ³n
 
 ### Variables de entorno principales
 
@@ -118,7 +118,7 @@ CLICKUP_API_TOKEN=your_clickup_api_token_here
 # Base de datos
 DATABASE_URL=sqlite:///./clickup_manager.db
 
-# Configuración de la aplicación
+# ConfiguraciÃ³n de la aplicaciÃ³n
 DEBUG=True
 HOST=0.0.0.0
 PORT=8000
@@ -127,15 +127,15 @@ PORT=8000
 ### Obtener API Token de ClickUp
 
 1. Ve a [ClickUp Settings](https://app.clickup.com/settings)
-2. Navega a "Apps" → "API Token"
+2. Navega a "Apps" â†’ "API Token"
 3. Crea un nuevo token con los permisos necesarios
 4. Copia el token a tu archivo `.env`
 
-## 📚 Uso de la API
+## ğŸ“š Uso de la API
 
-### Autenticación
+### AutenticaciÃ³n
 
-La API utiliza autenticación basada en tokens. Incluye tu API token de ClickUp en el header:
+La API utiliza autenticaciÃ³n basada en tokens. Incluye tu API token de ClickUp en el header:
 
 ```bash
 Authorization: your_clickup_api_token_here
@@ -149,7 +149,7 @@ Authorization: your_clickup_api_token_here
 POST /api/v1/tasks/
 {
   "name": "Nueva tarea",
-  "description": "Descripción de la tarea",
+  "description": "DescripciÃ³n de la tarea",
   "list_id": "list_id",
   "workspace_id": "workspace_id",
   "assignee_id": "user_id",
@@ -176,7 +176,7 @@ DELETE /api/v1/tasks/{task_id}
 # Obtener workspaces
 GET /api/v1/workspaces/
 
-# Obtener workspace específico
+# Obtener workspace especÃ­fico
 GET /api/v1/workspaces/{workspace_id}
 
 # Sincronizar workspace
@@ -185,7 +185,7 @@ POST /api/v1/workspaces/{workspace_id}/sync
 
 #### Automatizaciones
 ```bash
-# Crear automatización
+# Crear automatizaciÃ³n
 POST /api/v1/automation/
 {
   "name": "Asignar tareas urgentes",
@@ -202,7 +202,7 @@ POST /api/v1/automation/
   "workspace_id": "workspace_id"
 }
 
-# Ejecutar automatización
+# Ejecutar automatizaciÃ³n
 POST /api/v1/automation/{automation_id}/execute
 ```
 
@@ -226,10 +226,10 @@ POST /api/v1/reports/{report_id}/generate
 
 #### Integraciones
 ```bash
-# Crear integración
+# Crear integraciÃ³n
 POST /api/v1/integrations/
 {
-  "name": "Integración Salesforce",
+  "name": "IntegraciÃ³n Salesforce",
   "integration_type": "crm",
   "provider": "salesforce",
   "config": {
@@ -241,21 +241,21 @@ POST /api/v1/integrations/
   "workspace_id": "workspace_id"
 }
 
-# Probar integración
+# Probar integraciÃ³n
 POST /api/v1/integrations/{integration_id}/test
 {
   "test_type": "connection"
 }
 ```
 
-## 🔄 Automatizaciones
+## ğŸ”„ Automatizaciones
 
 ### Tipos de triggers disponibles
 
 - `task_created`: Cuando se crea una nueva tarea
 - `task_updated`: Cuando se actualiza una tarea
 - `task_completed`: Cuando se completa una tarea
-- `due_date_approaching`: Cuando se acerca la fecha límite
+- `due_date_approaching`: Cuando se acerca la fecha lÃ­mite
 - `priority_changed`: Cuando cambia la prioridad
 
 ### Tipos de acciones disponibles
@@ -263,15 +263,15 @@ POST /api/v1/integrations/{integration_id}/test
 - `assign_user`: Asignar usuario a la tarea
 - `set_priority`: Cambiar prioridad
 - `add_tags`: Agregar etiquetas
-- `set_due_date`: Establecer fecha límite
-- `send_notification`: Enviar notificación
+- `set_due_date`: Establecer fecha lÃ­mite
+- `send_notification`: Enviar notificaciÃ³n
 - `create_subtask`: Crear subtarea
 
-### Ejemplo de automatización
+### Ejemplo de automatizaciÃ³n
 
 ```json
 {
-  "name": "Gestión automática de tareas urgentes",
+  "name": "GestiÃ³n automÃ¡tica de tareas urgentes",
   "trigger_type": "task_created",
   "trigger_conditions": {
     "priority": 1,
@@ -284,7 +284,7 @@ POST /api/v1/integrations/{integration_id}/test
     },
     {
       "type": "add_tags",
-      "tags": ["urgente", "automático"]
+      "tags": ["urgente", "automÃ¡tico"]
     },
     {
       "type": "set_due_date",
@@ -294,15 +294,15 @@ POST /api/v1/integrations/{integration_id}/test
 }
 ```
 
-## 📊 Reportes
+## ğŸ“Š Reportes
 
 ### Tipos de reportes disponibles
 
-1. **Resumen de Tareas**: Estadísticas por estado, prioridad y asignación
-2. **Rendimiento de Usuarios**: Análisis de productividad por usuario
-3. **Línea de Tiempo**: Análisis temporal de tareas
-4. **Vista General del Workspace**: Métricas completas del workspace
-5. **Análisis Personalizado**: Reportes con filtros específicos
+1. **Resumen de Tareas**: EstadÃ­sticas por estado, prioridad y asignaciÃ³n
+2. **Rendimiento de Usuarios**: AnÃ¡lisis de productividad por usuario
+3. **LÃ­nea de Tiempo**: AnÃ¡lisis temporal de tareas
+4. **Vista General del Workspace**: MÃ©tricas completas del workspace
+5. **AnÃ¡lisis Personalizado**: Reportes con filtros especÃ­ficos
 
 ### Ejemplo de reporte de rendimiento
 
@@ -315,13 +315,13 @@ POST /api/v1/integrations/{integration_id}/test
   },
   "summary": {
     "total_users": 5,
-    "best_performer": "Juan Pérez",
+    "best_performer": "Juan PÃ©rez",
     "avg_completion_rate": 85.2
   },
   "data": {
     "user_performance": [
       {
-        "user_name": "Juan Pérez",
+        "user_name": "Juan PÃ©rez",
         "total_tasks": 25,
         "completed_tasks": 23,
         "completion_rate": 92.0
@@ -331,27 +331,27 @@ POST /api/v1/integrations/{integration_id}/test
 }
 ```
 
-## 🔌 Integraciones
+## ğŸ”Œ Integraciones
 
 ### CRMs soportados
 
-- **Salesforce**: Sincronización de leads y oportunidades
-- **HubSpot**: Gestión de contactos y deals
+- **Salesforce**: SincronizaciÃ³n de leads y oportunidades
+- **HubSpot**: GestiÃ³n de contactos y deals
 - **Pipedrive**: Pipeline de ventas
 
 ### Bases de datos
 
-- **PostgreSQL**: Almacenamiento de datos históricos
-- **MySQL**: Sincronización de métricas
+- **PostgreSQL**: Almacenamiento de datos histÃ³ricos
+- **MySQL**: SincronizaciÃ³n de mÃ©tricas
 - **MongoDB**: Almacenamiento de documentos
 
 ### Herramientas de productividad
 
-- **Slack**: Notificaciones automáticas
-- **Microsoft Teams**: Integración con canales
-- **Google Workspace**: Sincronización con Calendar y Drive
+- **Slack**: Notificaciones automÃ¡ticas
+- **Microsoft Teams**: IntegraciÃ³n con canales
+- **Google Workspace**: SincronizaciÃ³n con Calendar y Drive
 
-## 🧪 Testing
+## ğŸ§ª Testing
 
 ### Ejecutar tests
 
@@ -359,7 +359,7 @@ POST /api/v1/integrations/{integration_id}/test
 # Tests unitarios
 pytest tests/unit/
 
-# Tests de integración
+# Tests de integraciÃ³n
 pytest tests/integration/
 
 # Todos los tests
@@ -373,19 +373,19 @@ pytest --cov=. tests/
 
 ```
 tests/
-├── unit/                 # Tests unitarios
-│   ├── test_models.py
-│   ├── test_schemas.py
-│   └── test_utils.py
-├── integration/          # Tests de integración
-│   ├── test_api.py
-│   └── test_clickup_client.py
-└── conftest.py          # Configuración de tests
+â”œâ”€â”€ unit/                 # Tests unitarios
+â”‚   â”œâ”€â”€ test_models.py
+â”‚   â”œâ”€â”€ test_schemas.py
+â”‚   â””â”€â”€ test_utils.py
+â”œâ”€â”€ integration/          # Tests de integraciÃ³n
+â”‚   â”œâ”€â”€ test_api.py
+â”‚   â””â”€â”€ test_clickup_client.py
+â””â”€â”€ conftest.py          # ConfiguraciÃ³n de tests
 ```
 
-## 📈 Monitoreo y Logs
+## ğŸ“ˆ Monitoreo y Logs
 
-### Configuración de logs
+### ConfiguraciÃ³n de logs
 
 ```python
 # En core/config.py
@@ -395,13 +395,13 @@ LOG_FILE = "logs/app.log"
 
 ### Niveles de log
 
-- `DEBUG`: Información detallada para desarrollo
-- `INFO`: Información general de la aplicación
-- `WARNING`: Advertencias que no impiden la ejecución
+- `DEBUG`: InformaciÃ³n detallada para desarrollo
+- `INFO`: InformaciÃ³n general de la aplicaciÃ³n
+- `WARNING`: Advertencias que no impiden la ejecuciÃ³n
 - `ERROR`: Errores que afectan la funcionalidad
-- `CRITICAL`: Errores críticos que pueden detener la aplicación
+- `CRITICAL`: Errores crÃ­ticos que pueden detener la aplicaciÃ³n
 
-## 🚀 Despliegue
+## ğŸš€ Despliegue
 
 ### Docker
 
@@ -444,7 +444,7 @@ services:
     image: redis:6-alpine
 ```
 
-## 🤝 Contribución
+## ğŸ¤� ContribuciÃ³n
 
 1. Fork el proyecto
 2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
@@ -452,42 +452,42 @@ services:
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abre un Pull Request
 
-## 📄 Licencia
+## ğŸ“„ Licencia
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+Este proyecto estÃ¡ bajo la Licencia MIT. Ver el archivo `LICENSE` para mÃ¡s detalles.
 
-## 🆘 Soporte
+## ğŸ†˜ Soporte
 
-- **Documentación**: [Wiki del proyecto](link-to-wiki)
+- **DocumentaciÃ³n**: [Wiki del proyecto](link-to-wiki)
 - **Issues**: [GitHub Issues](link-to-issues)
 - **Email**: support@clickup-manager.com
 
-## 🔮 Roadmap
+## ğŸ”® Roadmap
 
-### Próximas características
+### PrÃ³ximas caracterÃ­sticas
 
-- [ ] Dashboard web con gráficos interactivos
+- [ ] Dashboard web con grÃ¡ficos interactivos
 - [ ] Notificaciones push en tiempo real
-- [ ] Integración con más CRMs
+- [ ] IntegraciÃ³n con mÃ¡s CRMs
 - [ ] API GraphQL
 - [ ] Mobile app
 - [ ] Machine Learning para predicciones
 - [ ] Workflows visuales para automatizaciones
-- [ ] Exportación a Excel/PDF
-- [ ] Integración con calendarios
+- [ ] ExportaciÃ³n a Excel/PDF
+- [ ] IntegraciÃ³n con calendarios
 - [ ] Sistema de permisos granular
 
-### Mejoras técnicas
+### Mejoras tÃ©cnicas
 
 - [ ] Cache distribuido con Redis
 - [ ] Background jobs con Celery
-- [ ] Métricas con Prometheus
+- [ ] MÃ©tricas con Prometheus
 - [ ] Logs centralizados
 - [ ] CI/CD pipeline
 - [ ] Tests de carga
-- [ ] Documentación automática
+- [ ] DocumentaciÃ³n automÃ¡tica
 - [ ] Monitoreo de performance
 
 ---
 
-**ClickUp Project Manager** - Potenciando la productividad con automatización inteligente 🚀
+**ClickUp Project Manager** - Potenciando la productividad con automatizaciÃ³n inteligente ğŸš€

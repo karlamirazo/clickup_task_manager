@@ -1,5 +1,5 @@
 """
-Webhooks de ClickUp para recibir notificaciones automáticas de cambios
+Webhooks de ClickUp para recibir notificaciones automaticas de cambios
 """
 
 import hashlib
@@ -32,8 +32,8 @@ class WebhookProcessor:
     def verify_signature(payload: bytes, signature: str, secret: str) -> bool:
         """Verificar firma del webhook para seguridad"""
         if not secret:
-            webhook_logger.warning("⚠️ No hay secreto configurado para webhooks")
-            return True  # Permitir si no hay secreto configurado
+            webhook_logger.warning("‚ö†Ô∏è No hay secreto configured para webhooks")
+            return True  # Permitir si no hay secreto configured
         
         expected_signature = hmac.new(
             secret.encode('utf-8'),
@@ -57,10 +57,10 @@ class WebhookProcessor:
         """Procesar evento de tarea"""
         task_id = task_data.get("id")
         if not task_id:
-            webhook_logger.error("❌ Evento de tarea sin ID")
+            webhook_logger.error("‚ùå Evento de tarea sin ID")
             return
         
-        webhook_logger.info(f"🔔 Procesando evento '{event_type}' para tarea {task_id}")
+        webhook_logger.info(f"üîî Procesando evento '{event_type}' para tarea {task_id}")
         
         try:
             # Buscar o crear tarea en la base de datos
@@ -69,7 +69,7 @@ class WebhookProcessor:
             if event_type == "taskCreated":
                 if not local_task:
                     local_task = await WebhookProcessor._create_task_from_webhook(task_data, db)
-                    webhook_logger.info(f"✅ Tarea {task_id} creada desde webhook")
+                    webhook_logger.info(f"‚úÖ Tarea {task_id} creada desde webhook")
                 
                 # Programar notificaciones en background
                 background_tasks.add_task(
@@ -80,11 +80,11 @@ class WebhookProcessor:
             elif event_type == "taskUpdated":
                 if local_task:
                     await WebhookProcessor._update_task_from_webhook(local_task, task_data, db)
-                    webhook_logger.info(f"✅ Tarea {task_id} actualizada desde webhook")
+                    webhook_logger.info(f"‚úÖ Tarea {task_id} actualizada desde webhook")
                 else:
-                    # Crear tarea si no existe localmente
+                    # Create tarea si no existe localmente
                     local_task = await WebhookProcessor._create_task_from_webhook(task_data, db)
-                    webhook_logger.info(f"✅ Tarea {task_id} creada desde webhook de actualización")
+                    webhook_logger.info(f"‚úÖ Tarea {task_id} creada desde webhook de actualizacion")
                 
                 # Programar notificaciones en background
                 background_tasks.add_task(
@@ -102,28 +102,28 @@ class WebhookProcessor:
                     
                     db.delete(local_task)
                     db.commit()
-                    webhook_logger.info(f"✅ Tarea {task_id} eliminada desde webhook")
+                    webhook_logger.info(f"‚úÖ Tarea {task_id} eliminada desde webhook")
             
             elif event_type in ["taskStatusUpdated", "taskPriorityUpdated", "taskAssigneeUpdated"]:
                 if local_task:
                     await WebhookProcessor._update_task_from_webhook(local_task, task_data, db)
                     
-                    # Enviar notificación específica del cambio
+                    # Enviar notificacion especifica del cambio
                     change_type = event_type.replace("task", "").replace("Updated", "").lower()
                     background_tasks.add_task(
                         WebhookProcessor._send_task_notifications,
                         f"updated_{change_type}", local_task, task_data
                     )
                     
-                    webhook_logger.info(f"✅ {change_type} actualizado para tarea {task_id}")
+                    webhook_logger.info(f"‚úÖ {change_type} actualizado para tarea {task_id}")
         
         except Exception as e:
-            webhook_logger.error(f"❌ Error procesando evento {event_type} para tarea {task_id}: {e}")
+            webhook_logger.error(f"‚ùå Error procesando evento {event_type} para tarea {task_id}: {e}")
             raise
     
     @staticmethod
     async def _create_task_from_webhook(task_data: Dict[str, Any], db: Session) -> Task:
-        """Crear tarea desde datos del webhook"""
+        """Create tarea desde datos del webhook"""
         from api.routes.tasks import _priority_to_int
         
         # Extraer datos del webhook
@@ -169,10 +169,10 @@ class WebhookProcessor:
     
     @staticmethod
     async def _update_task_from_webhook(local_task: Task, task_data: Dict[str, Any], db: Session):
-        """Actualizar tarea desde datos del webhook"""
+        """Update tarea desde datos del webhook"""
         from api.routes.tasks import _priority_to_int
         
-        # Actualizar campos
+        # Update campos
         local_task.name = task_data.get("name", local_task.name)
         local_task.description = task_data.get("description", local_task.description)
         
@@ -225,9 +225,9 @@ class WebhookProcessor:
     async def _send_task_notifications(action: str, task: Task, task_data: Dict[str, Any]):
         """Enviar notificaciones de tarea en background"""
         try:
-            webhook_logger.info(f"📤 Enviando notificaciones para acción '{action}' en tarea {task.clickup_id}")
+            webhook_logger.info(f"üì§ Enviando notificaciones para accion '{action}' en tarea {task.clickup_id}")
             
-            # Obtener participantes del workspace
+            # Get participantes del workspace
             from core.database import get_db
             from models.user import User
             
@@ -255,7 +255,7 @@ class WebhookProcessor:
                     recipient_telegrams.extend(extra_telegrams)
                     recipient_sms.extend(extra_sms)
                 
-                # Obtener nombre del asignado
+                # Get nombre del asignado
                 assignee_name = None
                 if task_data.get("assignees"):
                     assignee_name = task_data["assignees"][0].get("username", "Usuario")
@@ -281,13 +281,13 @@ class WebhookProcessor:
                 )
                 
                 summary = result.get_summary()
-                webhook_logger.info(f"📊 Notificaciones enviadas: {summary['successful']['total']} exitosas, {summary['failed']} fallidas")
+                webhook_logger.info(f"üìä Notificaciones enviadas: {summary['successful']['total']} exitosas, {summary['failed']} fallidas")
                 
             finally:
                 db.close()
                 
         except Exception as e:
-            webhook_logger.error(f"❌ Error enviando notificaciones para tarea {task.clickup_id}: {e}")
+            webhook_logger.error(f"‚ùå Error enviando notificaciones para tarea {task.clickup_id}: {e}")
 
 
 @router.post("/clickup", status_code=http_status.HTTP_200_OK)
@@ -299,65 +299,65 @@ async def clickup_webhook(
     """
     Endpoint para recibir webhooks de ClickUp
     
-    ClickUp enviará eventos cuando ocurran cambios en tareas, espacios, etc.
+    ClickUp enviara eventos cuando ocurran cambios en tareas, espacios, etc.
     """
     try:
-        # Obtener el payload
+        # Get el payload
         payload = await request.body()
         
-        # Verificar firma si está configurada
+        # Verificar firma si esta configurada
         signature = request.headers.get("X-Signature", "")
         if settings.CLICKUP_WEBHOOK_SECRET:
             if not WebhookProcessor.verify_signature(payload, signature, settings.CLICKUP_WEBHOOK_SECRET):
-                webhook_logger.warning(f"⚠️ Firma de webhook inválida: {signature}")
+                webhook_logger.warning(f"‚ö†Ô∏è Firma de webhook invalida: {signature}")
                 raise HTTPException(
                     status_code=http_status.HTTP_401_UNAUTHORIZED,
-                    detail="Firma de webhook inválida"
+                    detail="Firma de webhook invalida"
                 )
         
         # Parsear JSON
         try:
             data = json.loads(payload.decode('utf-8'))
         except json.JSONDecodeError as e:
-            webhook_logger.error(f"❌ Error parseando JSON del webhook: {e}")
+            webhook_logger.error(f"‚ùå Error parseando JSON del webhook: {e}")
             raise HTTPException(
                 status_code=http_status.HTTP_400_BAD_REQUEST,
-                detail="JSON inválido"
+                detail="JSON invalido"
             )
         
         # Log del evento recibido
         event_type = data.get("event")
-        webhook_logger.info(f"📥 Webhook recibido: {event_type}")
+        webhook_logger.info(f"üì• Webhook recibido: {event_type}")
         webhook_logger.debug(f"Datos del webhook: {json.dumps(data, indent=2)}")
         
-        # Procesar según el tipo de evento
+        # Procesar segun el tipo de evento
         if event_type and event_type.startswith("task"):
             task_data = data.get("task_id") or data.get("task")
             if task_data:
                 await WebhookProcessor.process_task_event(event_type, task_data, db, background_tasks)
             else:
-                webhook_logger.warning(f"⚠️ Evento de tarea sin datos: {event_type}")
+                webhook_logger.warning(f"‚ö†Ô∏è Evento de tarea sin datos: {event_type}")
         
         elif event_type in ["spaceCreated", "spaceUpdated", "spaceDeleted"]:
-            webhook_logger.info(f"📁 Evento de espacio: {event_type}")
-            # Aquí podrías procesar eventos de espacios si es necesario
+            webhook_logger.info(f"üìÅ Evento de espacio: {event_type}")
+            # Aqui podrias procesar eventos de espacios si es necesario
         
         elif event_type in ["listCreated", "listUpdated", "listDeleted"]:
-            webhook_logger.info(f"📋 Evento de lista: {event_type}")
-            # Aquí podrías procesar eventos de listas si es necesario
+            webhook_logger.info(f"üìã Evento de lista: {event_type}")
+            # Aqui podrias procesar eventos de listas si es necesario
         
         elif event_type == "ping":
-            webhook_logger.info("🏓 Ping recibido de ClickUp")
+            webhook_logger.info("üèì Ping recibido de ClickUp")
         
         else:
-            webhook_logger.info(f"❓ Evento no manejado: {event_type}")
+            webhook_logger.info(f"‚ùì Evento no manejado: {event_type}")
         
         return {"status": "success", "message": "Webhook procesado"}
     
     except HTTPException:
         raise
     except Exception as e:
-        webhook_logger.error(f"❌ Error procesando webhook: {e}")
+        webhook_logger.error(f"‚ùå Error procesando webhook: {e}")
         raise HTTPException(
             status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error interno del servidor: {str(e)}"
@@ -382,7 +382,7 @@ async def test_notification(background_tasks: BackgroundTasks):
     """
     Endpoint para probar el sistema de notificaciones
     """
-    # Crear una notificación de prueba
+    # Create una notificacion de prueba
     background_tasks.add_task(
         notification_service.send_task_notification,
         action="created",
@@ -394,12 +394,12 @@ async def test_notification(background_tasks: BackgroundTasks):
         status="in progress",
         priority=2,
         assignee_name="Usuario de Prueba",
-        description="Esta es una notificación de prueba para verificar que el sistema funciona correctamente."
+        description="Esta es una notificacion de prueba para verificar que el sistema funciona correctamente."
     )
     
     return {
         "status": "success",
-        "message": "Notificación de prueba programada",
+        "message": "Notificacion de prueba programada",
         "timestamp": datetime.now().isoformat()
     }
 

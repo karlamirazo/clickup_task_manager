@@ -1,5 +1,5 @@
 """
-Rutas para gestión de espacios de trabajo
+Routes for gestion de espacios de trabajo
 """
 
 from typing import List, Optional
@@ -17,13 +17,13 @@ clickup_client = ClickUpClient()
 
 @router.get("/test-connection")
 async def test_clickup_connection():
-    """Probar la conexión con ClickUp API"""
+    """Test la conexion con ClickUp API"""
     try:
         # Verificar que tenemos token
         if not clickup_client.api_token:
             return {
                 "status": "error",
-                "message": "No se encontró CLICKUP_API_TOKEN en las variables de entorno",
+                "message": "No se encontro CLICKUP_API_TOKEN en las variables de entorno",
                 "token_configured": False,
                 "error_type": "missing_token"
             }
@@ -33,7 +33,7 @@ async def test_clickup_connection():
         
         return {
             "status": "success",
-            "message": "Conexión exitosa con ClickUp API",
+            "message": "Connection successful con ClickUp API",
             "token_configured": True,
             "workspaces_count": len(workspaces),
             "workspaces": workspaces[:3] if workspaces else []  # Solo los primeros 3 para no sobrecargar
@@ -49,24 +49,24 @@ async def test_clickup_connection():
     except Exception as e:
         return {
             "status": "error",
-            "message": f"Error al conectar con ClickUp API: {str(e)}",
+            "message": f"Error conectar con ClickUp API: {str(e)}",
             "token_configured": bool(clickup_client.api_token),
             "error_type": "api_error"
         }
 
 @router.get("/status")
 async def get_clickup_status():
-    """Obtener el estado de la conexión con ClickUp"""
+    """Get el estado de la conexion con ClickUp"""
     try:
         if not clickup_client.api_token:
             return {
                 "status": "disconnected",
-                "message": "CLICKUP_API_TOKEN no configurado",
+                "message": "CLICKUP_API_TOKEN no configured",
                 "token_configured": False,
                 "can_connect": False
             }
         
-        # Hacer una petición simple para verificar conectividad
+        # Hacer una peticion simple para verificar conectividad
         await clickup_client.get_workspaces()
         
         return {
@@ -79,7 +79,7 @@ async def get_clickup_status():
     except Exception as e:
         return {
             "status": "error",
-            "message": f"Error de conexión: {str(e)}",
+            "message": f"Error de conexion: {str(e)}",
             "token_configured": bool(clickup_client.api_token),
             "can_connect": False
         }
@@ -88,16 +88,16 @@ async def get_clickup_status():
 async def get_workspaces(
     db: Session = Depends(get_db)
 ):
-    """Obtener todos los espacios de trabajo"""
+    """Get todos los espacios de trabajo"""
     try:
         # Verificar que tenemos token
         if not clickup_client.api_token:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="CLICKUP_API_TOKEN no está configurado. Por favor, configura la variable de entorno en Railway."
+                detail="CLICKUP_API_TOKEN no esta configured. Por favor, configura la variable de entorno en Railway."
             )
         
-        # Obtener de ClickUp directamente y devolver formato simple
+        # Get de ClickUp directamente y devolver formato simple
         clickup_workspaces = await clickup_client.get_workspaces()
         
         # Convertir a formato simple para el frontend
@@ -119,16 +119,16 @@ async def get_workspaces(
         }
         
     except ValueError as e:
-        # Error de configuración (token faltante)
+        # Error de configuracion (token faltante)
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Error de configuración: {str(e)}"
+            detail=f"Error de configuracion: {str(e)}"
         )
     except Exception as e:
         # Error de ClickUp API o base de datos
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al obtener los espacios de trabajo: {str(e)}"
+            detail=f"Error obtener los espacios de trabajo: {str(e)}"
         )
 
 @router.get("/{workspace_id}", response_model=WorkspaceResponse)
@@ -136,7 +136,7 @@ async def get_workspace(
     workspace_id: str,
     db: Session = Depends(get_db)
 ):
-    """Obtener un espacio de trabajo específico"""
+    """Get un espacio de trabajo especifico"""
     try:
         # Buscar en base de datos local
         db_workspace = db.query(Workspace).filter(
@@ -144,10 +144,10 @@ async def get_workspace(
         ).first()
         
         if not db_workspace:
-            # Obtener de ClickUp
+            # Get de ClickUp
             clickup_workspace = await clickup_client.get_workspace(workspace_id)
             
-            # Crear registro local
+            # Create registro local
             db_workspace = Workspace(
                 clickup_id=clickup_workspace["id"],
                 name=clickup_workspace["name"],
@@ -180,9 +180,9 @@ async def sync_workspace(
     workspace_id: str,
     db: Session = Depends(get_db)
 ):
-    """Sincronizar un espacio de trabajo con ClickUp"""
+    """Sync un espacio de trabajo con ClickUp"""
     try:
-        # Obtener datos actualizados de ClickUp
+        # Get datos actualizados de ClickUp
         clickup_workspace = await clickup_client.get_workspace(workspace_id)
         
         # Buscar o crear workspace local
@@ -194,7 +194,7 @@ async def sync_workspace(
             db_workspace = Workspace(clickup_id=workspace_id)
             db.add(db_workspace)
         
-        # Actualizar datos
+        # Update datos
         db_workspace.name = clickup_workspace["name"]
         db_workspace.color = clickup_workspace.get("color", "")
         db_workspace.is_synced = True
@@ -208,7 +208,7 @@ async def sync_workspace(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al sincronizar el espacio de trabajo: {str(e)}"
+            detail=f"Error sincronizar el espacio de trabajo: {str(e)}"
         )
 
 @router.get("/{workspace_id}/spaces")
@@ -216,7 +216,7 @@ async def get_workspace_spaces(
     workspace_id: str,
     db: Session = Depends(get_db)
 ):
-    """Obtener todos los spaces de un workspace"""
+    """Get todos los spaces de un workspace"""
     try:
         spaces = await clickup_client.get_spaces(workspace_id)
         return {"spaces": spaces, "total": len(spaces)}
@@ -224,7 +224,7 @@ async def get_workspace_spaces(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al obtener los spaces: {str(e)}"
+            detail=f"Error obtener los spaces: {str(e)}"
         )
 
 @router.get("/{workspace_id}/users")
@@ -232,7 +232,7 @@ async def get_workspace_users(
     workspace_id: str,
     db: Session = Depends(get_db)
 ):
-    """Obtener usuarios de un workspace"""
+    """Get usuarios de un workspace"""
     try:
         users = await clickup_client.get_users(workspace_id)
         return {"users": users, "total": len(users)}
@@ -240,5 +240,5 @@ async def get_workspace_users(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al obtener los usuarios: {str(e)}"
+            detail=f"Error obtener los usuarios: {str(e)}"
         )

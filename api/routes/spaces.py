@@ -1,5 +1,5 @@
 """
-Rutas para gestión de spaces y lists
+Routes for gestion de spaces y lists
 """
 
 from typing import List
@@ -17,7 +17,7 @@ async def get_space_lists(
     space_id: str,
     db: Session = Depends(get_db)
 ):
-    """Obtener todas las listas de un space"""
+    """Get todas las listas de un space"""
     try:
         lists = await clickup_client.get_lists(space_id)
         return {"lists": lists, "total": len(lists)}
@@ -25,7 +25,7 @@ async def get_space_lists(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al obtener las listas: {str(e)}"
+            detail=f"Error obtener las listas: {str(e)}"
         )
 
 @router.get("/{space_id}")
@@ -33,7 +33,7 @@ async def get_space(
     space_id: str,
     db: Session = Depends(get_db)
 ):
-    """Obtener un space específico"""
+    """Get un space especifico"""
     try:
         space = await clickup_client.get_space(space_id)
         return space

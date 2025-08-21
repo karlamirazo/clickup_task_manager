@@ -1,5 +1,5 @@
 """
-Configuración del proyecto ClickUp Project Manager
+Configuracion del proyecto ClickUp Project Manager
 """
 
 import os
@@ -9,72 +9,74 @@ from pydantic_settings import BaseSettings
 # load_dotenv()
 
 class Settings(BaseSettings):
-    """Configuraciones de la aplicación"""
+    """Configuraciones de la aplicacion"""
     
-    # Configuración de la aplicación
+    # Configuracion de la aplicacion
     APP_NAME: str = "ClickUp Project Manager"
     VERSION: str = "1.0.0"
-    DEBUG: bool = os.getenv("DEBUG", "True").lower() == "true"
-    HOST: str = os.getenv("HOST", "0.0.0.0")
-    PORT: int = int(os.getenv("PORT", "3000"))
+    DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
+    HOST: str = os.getenv("HOST", "127.0.0.1")
+    PORT: int = int(os.getenv("PORT", "8000"))  # Puerto principal con Waitress
     
-    # Configuración de ClickUp API
-    CLICKUP_API_TOKEN: str = os.getenv("CLICKUP_API_TOKEN", "")
+    # Configuracion de ClickUp API
+    CLICKUP_API_TOKEN: str = os.getenv("CLICKUP_API_TOKEN", "pk_156221125_GI1OKEUEW57LFWA8RYWHGIC54TL6XVVZ")
     CLICKUP_WEBHOOK_SECRET: str = os.getenv("CLICKUP_WEBHOOK_SECRET", "")
     
-    # Configuración de autenticación
+    # Configuracion de autenticacion
     JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "your-secret-key-here-change-in-production")
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 horas
     CLICKUP_API_BASE_URL: str = "https://api.clickup.com/api/v2"
     
-    # Configuración de base de datos
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./clickup_manager.db")
-    # Para PostgreSQL: postgresql://user:password@localhost/clickup_manager
-    # Railway automáticamente proporciona DATABASE_URL para PostgreSQL
+    # Configuracion de base de datos - POSTGRESQL
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://postgres:admin123@localhost:5432/clickup_project_manager")
+    # Para PostgreSQL: postgresql://user:password@localhost/clickup_project_manager
+    # Railway automaticamente proporciona DATABASE_URL para PostgreSQL
     
-    # Configuración específica de PostgreSQL
-    POSTGRES_ENABLED: bool = os.getenv("POSTGRES_ENABLED", "False").lower() == "true"
+    # Configuracion especifica de PostgreSQL
+    POSTGRES_ENABLED: bool = os.getenv("POSTGRES_ENABLED", "True").lower() == "true"
     POSTGRES_HOST: str = os.getenv("POSTGRES_HOST", "localhost")
     POSTGRES_PORT: int = int(os.getenv("POSTGRES_PORT", "5432"))
-    POSTGRES_DB: str = os.getenv("POSTGRES_DB", "clickup_manager")
+    POSTGRES_DB: str = os.getenv("POSTGRES_DB", "clickup_project_manager")
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
-    POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "")
+    POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "admin123")
     
-    # Configuración de Redis
+    # Configuracion de Redis
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
     
-    # Configuración de CORS
+    # Configuracion de CORS
     ALLOWED_ORIGINS: List[str] = [
-        "http://localhost:3000",
-        "http://localhost:8000",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:8000",
+        "http://localhost:8000",  # Puerto unificado principal
+        "http://127.0.0.1:8000",  # Puerto unificado principal
+        "http://localhost:8001",  # Puerto alternativo
+        "http://127.0.0.1:8001",  # Puerto alternativo
+        "http://localhost:3000",   # Puerto alternativo
+        "http://127.0.0.1:3000",  # Puerto alternativo
         "https://clickuptaskmanager-production.up.railway.app",
         "https://*.up.railway.app",
-        "*"  # Temporal para debugging - remover en producción
+        "*"  # Temporal para debugging - remover en produccion
     ]
     
-    # Configuración de seguridad
+    # Configuracion de seguridad
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-here")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
     
-    # Configuración de logs
+    # Configuracion de logs
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     LOG_FILE: str = os.getenv("LOG_FILE", "logs/app.log")
     
-    # Configuración de automatización
+    # Configuracion de automatizacion
     AUTOMATION_ENABLED: bool = os.getenv("AUTOMATION_ENABLED", "True").lower() == "true"
     AUTOMATION_INTERVAL: int = int(os.getenv("AUTOMATION_INTERVAL", "300"))  # 5 minutos
     
-    # Configuración de reportes
+    # Configuracion de reportes
     REPORTS_ENABLED: bool = os.getenv("REPORTS_ENABLED", "True").lower() == "true"
     REPORTS_STORAGE_PATH: str = os.getenv("REPORTS_STORAGE_PATH", "data/reports")
     
-    # Configuración de integraciones
+    # Configuracion de integraciones
     INTEGRATIONS_ENABLED: bool = os.getenv("INTEGRATIONS_ENABLED", "True").lower() == "true"
 
-    # Configuración de Email (SMTP)
+    # Configuracion de Email (SMTP)
     SMTP_HOST: str = os.getenv("SMTP_HOST", "smtp.gmail.com")
     SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
     SMTP_USER: str = os.getenv("SMTP_USER", "karlamirazo@gmail.com")
@@ -83,12 +85,12 @@ class Settings(BaseSettings):
     SMTP_USE_TLS: bool = os.getenv("SMTP_USE_TLS", "True").lower() == "true"
     SMTP_USE_SSL: bool = os.getenv("SMTP_USE_SSL", "False").lower() == "true"
 
-    # Configuración de Telegram Bot (DESHABILITADO)
+    # Configuracion de Telegram Bot (DESHABILITADO)
     TELEGRAM_ENABLED: bool = os.getenv("TELEGRAM_ENABLED", "False").lower() == "true"
     TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
     TELEGRAM_CHAT_ID: str = os.getenv("TELEGRAM_CHAT_ID", "")  # Chat ID por defecto (opcional)
 
-    # Configuración de SMS (Twilio) - ELIMINADO
+    # Configuracion de SMS (Twilio) - ELIMINADO
     SMS_ENABLED: bool = os.getenv("SMS_ENABLED", "False").lower() == "true"
     # TWILIO_ACCOUNT_SID: str = os.getenv("TWILIO_ACCOUNT_SID", "") # Eliminado
     # TWILIO_AUTH_TOKEN: str = os.getenv("TWILIO_AUTH_TOKEN", "") # Eliminado
@@ -100,8 +102,8 @@ class Settings(BaseSettings):
     TASK_TELEGRAM_FIELDS: str = os.getenv("TASK_TELEGRAM_FIELDS", "")  # CAMPO ELIMINADO - Telegram deshabilitado
     TASK_SMS_FIELDS: str = os.getenv("TASK_SMS_FIELDS", "")  # Campo eliminado - SMS deshabilitado
     
-    # Configuración del motor de búsqueda RAG
-    SEARCH_ENGINE_ENABLED: bool = os.getenv("SEARCH_ENGINE_ENABLED", "False").lower() == "true"
+    # Configuracion del motor de busqueda RAG
+    SEARCH_ENGINE_ENABLED: bool = os.getenv("SEARCH_ENGINE_ENABLED", "True").lower() == "true"
     
     class Config:
         env_file = ".env"

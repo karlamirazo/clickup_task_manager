@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📊 Dashboard de Notificaciones - ClickUp Manager</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>📊 Dashboard Principal - ClickUp Manager</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="dashboard-config.js"></script>
     <style>
         .dashboard-container {
             max-width: 95%;
@@ -27,226 +31,243 @@
         
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
             margin-bottom: 30px;
         }
         
         .stat-card {
             background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
             text-align: center;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e9ecef;
         }
         
         .stat-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
         }
         
         .stat-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            color: #667eea;
         }
         
         .stat-number {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            color: #2c3e50;
         }
         
         .stat-label {
             color: #6c757d;
-            font-size: 1rem;
+            font-size: 0.9rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+            font-weight: 500;
         }
         
         .charts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 15px;
             margin-bottom: 30px;
         }
         
         .chart-card {
             background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
         }
         
         .chart-title {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: center;
             color: #2c3e50;
         }
         
         .chart-canvas {
-            max-height: 300px;
+            max-height: 250px;
         }
         
         .notifications-table {
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
             overflow: hidden;
+            border: 1px solid #e9ecef;
         }
         
         .table-header {
             background: #f8f9fa;
-            padding: 20px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        
-        .table-content {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .notification-item {
             padding: 15px 20px;
-            border-bottom: 1px solid #f1f3f4;
-            display: grid;
-            grid-template-columns: auto 100px 150px 100px 1fr;
-            gap: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .table-title {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+        
+        .controls-row {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         
-        .notification-item:hover {
-            background-color: #f8f9fa;
-        }
-        
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        
-        .status-sent {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        
-        .status-failed {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        
-        .status-pending {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        
-        .type-badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: bold;
-        }
-        
-        .type-email {
-            background-color: #e3f2fd;
-            color: #1565c0;
-        }
-        
-        .type-sms {
-            background-color: #f3e5f5;
-            color: #7b1fa2;
-        }
-        
-        .type-telegram {
-            background-color: #e8f5e8;
-            color: #2e7d32;
-        }
-        
-        .filters {
+        .filters-group {
             display: flex;
             gap: 15px;
-            margin-bottom: 20px;
             align-items: center;
         }
         
         .filter-select {
             padding: 8px 12px;
             border: 1px solid #ddd;
-            border-radius: 8px;
+            border-radius: 6px;
             background: white;
+            font-size: 0.9rem;
         }
         
         .refresh-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #667eea;
             color: white;
             border: none;
             padding: 10px 20px;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
         }
         
         .refresh-btn:hover {
-            opacity: 0.9;
+            background: #5a6fd8;
         }
         
-        .health-indicator {
-            display: inline-flex;
+        .sync-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .sync-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .sync-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+            display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 500;
         }
         
-        .health-healthy {
-            background-color: #d4edda;
-            color: #155724;
+        .sync-btn:hover {
+            background: #218838;
         }
         
-        .health-degraded {
-            background-color: #fff3cd;
-            color: #856404;
+        .sync-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
         }
         
-        .health-unhealthy {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        
-        .loading {
+        .sync-status {
             text-align: center;
-            padding: 40px;
-            color: #6c757d;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
         }
         
-        .error {
-            background-color: #f8d7da;
+        .sync-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .sync-status.error {
+            background: #f8d7da;
             color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .sync-status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .period-selector {
+            text-align: center;
             margin-bottom: 20px;
         }
         
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .notification-item {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
+        .period-btn {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .period-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .period-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .period-btn.active:hover {
+            background: #5a6fd8;
+        }
+        
+        /* Estilos para los botones de navegación */
+        .dashboard-header button {
+            transition: all 0.3s ease;
+        }
+        
+        .dashboard-header button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .dashboard-header button:first-child:hover {
+            background: #5a3d8f !important;
+        }
+        
+        .dashboard-header button:last-child:hover {
+            background: #138496 !important;
         }
     </style>
 </head>
@@ -254,111 +275,130 @@
     <div class="dashboard-container">
         <!-- Header -->
         <div class="dashboard-header">
-            <h1><i class="fas fa-chart-line"></i> Dashboard de Notificaciones</h1>
-            <p>Monitoreo en tiempo real del sistema de gestión de tareas ClickUp</p>
-            <div class="health-status">
-                <span id="health-indicator" class="health-indicator">
-                    <i class="fas fa-heartbeat"></i>
-                    <span id="health-text">Verificando estado...</span>
-                </span>
+            <div style="text-align: center; width: 100%;">
+                <h1><i class="fas fa-tachometer-alt"></i> Dashboard Principal</h1>
+                <p>Visión general del sistema y estadísticas en tiempo real</p>
+                <div style="margin-top: 15px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                    <button onclick="window.location.href='/users-tasks'" style="background: #6f42c1; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-tasks"></i> Ver Lista de Tareas
+                    </button>
+                    <button onclick="window.location.href='/index#tasks'" style="background: #17a2b8; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-plus"></i> Crear Nueva Tarea
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Controles -->
-        <div class="filters">
-            <select id="period-select" class="filter-select">
-                <option value="1h">Última hora</option>
-                <option value="24h" selected>Últimas 24 horas</option>
-                <option value="7d">Últimos 7 días</option>
-                <option value="30d">Últimos 30 días</option>
-            </select>
-            
-            <button id="refresh-btn" class="refresh-btn">
-                <i class="fas fa-sync-alt"></i>
-                Actualizar
-            </button>
+
+
+        <!-- Contadores de Tareas -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="stat-number" id="total-tasks">-</div>
+                <div class="stat-label">Tareas Totales</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-number" id="pending-tasks">-</div>
+                <div class="stat-label">Pendientes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-number" id="completed-tasks">-</div>
+                <div class="stat-label">Completadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-number" id="overdue-tasks">-</div>
+                <div class="stat-label">Vencidas</div>
+            </div>
         </div>
 
-        <!-- Estadísticas principales -->
-        <div class="stats-grid" id="stats-grid">
-            <!-- Se llena dinámicamente -->
+        <!-- Controles de Sincronización -->
+        <div class="sync-section">
+            <h3 style="text-align: center; margin-bottom: 20px; color: #2c3e50;">
+                <i class="fas fa-sync-alt"></i> Control de Sincronización
+            </h3>
+            <div class="sync-controls">
+                <button class="sync-btn" onclick="manualSync()" id="sync-btn">
+                    <i class="fas fa-sync-alt"></i> Sincronizar Ahora
+                </button>
+                <button class="sync-btn" onclick="createTask()" style="background: #17a2b8;">
+                    <i class="fas fa-plus"></i> Crear Tarea
+                </button>
+                <button class="sync-btn" onclick="deleteTask()" style="background: #dc3545;">
+                    <i class="fas fa-trash"></i> Eliminar Tarea
+                </button>
+            </div>
+            <div id="sync-status" class="sync-status" style="display: none;"></div>
+        </div>
+
+        <!-- Selector de Período -->
+        <div class="period-selector">
+            <button class="period-btn active" data-period="1h">1 Hora</button>
+            <button class="period-btn" data-period="24h">24 Horas</button>
+            <button class="period-btn" data-period="7d">7 Días</button>
+            <button class="period-btn" data-period="30d">30 Días</button>
         </div>
 
         <!-- Gráficos -->
         <div class="charts-grid">
             <div class="chart-card">
-                <div class="chart-title">📈 Notificaciones por Tiempo</div>
-                <canvas id="timeChart" class="chart-canvas"></canvas>
+                <div class="chart-title">Estado de Tareas</div>
+                <canvas id="tasks-status-chart" class="chart-canvas"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Prioridades</div>
+                <canvas id="tasks-priority-chart" class="chart-canvas"></canvas>
+            </div>
             </div>
             
-            <div class="chart-card">
-                <div class="chart-title">📊 Distribución por Tipo</div>
-                <canvas id="typeChart" class="chart-canvas"></canvas>
-            </div>
-            
-            <div class="chart-card">
-                <div class="chart-title">✅ Tasa de Éxito</div>
-                <canvas id="successChart" class="chart-canvas"></canvas>
-            </div>
-            
-            <div class="chart-card">
-                <div class="chart-title">❌ Principales Errores</div>
-                <canvas id="errorChart" class="chart-canvas"></canvas>
-            </div>
-        </div>
 
-        <!-- Historial de notificaciones -->
-        <div class="notifications-table">
-            <div class="table-header">
-                <h3><i class="fas fa-bell"></i> Historial de Notificaciones</h3>
-                <div class="filters">
-                    <select id="status-filter" class="filter-select">
-                        <option value="">Todos los estados</option>
-                        <option value="sent">Enviadas</option>
-                        <option value="failed">Fallidas</option>
-                        <option value="pending">Pendientes</option>
-                    </select>
-                    
-                    <select id="type-filter" class="filter-select">
-                        <option value="">Todos los tipos</option>
-                        <option value="email">Email</option>
-                        <option value="sms">SMS</option>
-                        <option value="telegram">Telegram</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="table-content" id="notifications-list">
-                <div class="loading">
-                    <i class="fas fa-spinner fa-spin"></i> Cargando notificaciones...
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
         let charts = {};
-        let currentPeriod = '24h';
+        let currentPeriod = '1h';
 
         // Inicializar dashboard
         document.addEventListener('DOMContentLoaded', function() {
             loadDashboard();
             setupEventListeners();
-            
-            // Actualizar cada 30 segundos
-            setInterval(loadDashboard, 30000);
+            // ELIMINADO: setInterval(loadDashboard, 30000);
+        });
+
+        // Forzar recarga cuando se regrese a la pestaña
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                console.log('🔄 Pestaña visible - Recargando dashboard...');
+                loadDashboard();
+            }
+        });
+
+        // Forzar recarga cuando se regrese a la ventana
+        window.addEventListener('focus', function() {
+            console.log('🔄 Ventana enfocada - Recargando dashboard...');
+            loadDashboard();
         });
 
         function setupEventListeners() {
             // Cambio de período
-            document.getElementById('period-select').addEventListener('change', function(e) {
-                currentPeriod = e.target.value;
+            document.querySelectorAll('.period-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentPeriod = this.dataset.period;
                 loadDashboard();
             });
-
-            // Botón de actualizar
-            document.getElementById('refresh-btn').addEventListener('click', function() {
-                loadDashboard();
             });
 
             // Filtros de notificaciones
@@ -368,26 +408,46 @@
 
         async function loadDashboard() {
             try {
+                // Agregar timestamp para evitar caché
+                const timestamp = Date.now();
+                console.log(`🔄 Cargando dashboard - Timestamp: ${timestamp}`);
+                
                 // Cargar en paralelo
                 await Promise.all([
-                    loadStats(),
-                    loadCharts(),
-                    loadNotifications(),
-                    loadHealth()
+                    loadTaskStats(timestamp),
+                    loadCharts(timestamp),
+                    loadNotifications(timestamp),
+                    loadHealth(timestamp)
                 ]);
+
+                // Cargar tabla de tareas
+                refreshTaskTable();
             } catch (error) {
                 console.error('Error cargando dashboard:', error);
                 showError('Error cargando el dashboard');
             }
         }
 
-        async function loadStats() {
+        async function loadTaskStats(timestamp) {
             try {
-                const response = await fetch(`/api/v1/dashboard/stats?period=${currentPeriod}`);
+                const response = await fetch(`/api/v1/dashboard/stats?period=${currentPeriod}&_t=${timestamp}`);
                 const data = await response.json();
 
                 if (data.error) {
                     throw new Error(data.error);
+                }
+
+                // Actualizar contadores de tareas
+                if (data.tasks) {
+                    document.getElementById('total-tasks').textContent = data.tasks.total || 0;
+                    
+                    const byStatus = data.tasks.by_status || {};
+                    document.getElementById('pending-tasks').textContent = 
+                        (byStatus['in progress'] || 0) + (byStatus['to do'] || 0) + (byStatus['open'] || 0);
+                    document.getElementById('completed-tasks').textContent = 
+                        byStatus['complete'] || byStatus['done'] || 0;
+                    document.getElementById('overdue-tasks').textContent = 
+                        data.tasks.overdue || 0;
                 }
 
                 renderStats(data);
@@ -396,29 +456,30 @@
             }
         }
 
-        async function loadCharts() {
+        async function loadCharts(timestamp) {
             try {
-                const response = await fetch(`/api/v1/dashboard/charts/notifications?period=${currentPeriod}`);
+                const response = await fetch(`/api/v1/dashboard/stats?period=${currentPeriod}&_t=${timestamp}`);
                 const data = await response.json();
 
                 if (data.error) {
                     throw new Error(data.error);
                 }
 
-                renderCharts(data.charts);
+                renderCharts(data);
             } catch (error) {
                 console.error('Error cargando gráficos:', error);
             }
         }
 
-        async function loadNotifications() {
+        async function loadNotifications(timestamp) {
             try {
                 const statusFilter = document.getElementById('status-filter').value;
                 const typeFilter = document.getElementById('type-filter').value;
                 
                 const params = new URLSearchParams({
                     limit: '50',
-                    offset: '0'
+                    offset: '0',
+                    _t: timestamp
                 });
                 
                 if (statusFilter) params.append('status', statusFilter);
@@ -437,154 +498,95 @@
             }
         }
 
-        async function loadHealth() {
+        async function loadHealth(timestamp) {
             try {
-                const response = await fetch('/api/v1/dashboard/health');
+                const response = await fetch(`/api/v1/dashboard/health?_t=${timestamp}`);
                 const data = await response.json();
 
-                renderHealth(data);
+                // Aquí podrías mostrar el estado de salud del sistema
+                console.log('Estado de salud del sistema:', data);
             } catch (error) {
                 console.error('Error cargando estado de salud:', error);
             }
         }
 
         function renderStats(data) {
-            const statsGrid = document.getElementById('stats-grid');
-            
-            const stats = [
-                {
-                    icon: 'fas fa-paper-plane',
-                    number: data.notifications.total || 0,
-                    label: 'Total Notificaciones',
-                    color: '#667eea'
-                },
-                {
-                    icon: 'fas fa-check-circle',
-                    number: data.notifications.by_status?.sent || 0,
-                    label: 'Enviadas',
-                    color: '#28a745'
-                },
-                {
-                    icon: 'fas fa-times-circle',
-                    number: data.notifications.by_status?.failed || 0,
-                    label: 'Fallidas',
-                    color: '#dc3545'
-                },
-                {
-                    icon: 'fas fa-clock',
-                    number: data.notifications.avg_delivery_time ? `${data.notifications.avg_delivery_time.toFixed(2)}s` : 'N/A',
-                    label: 'Tiempo Promedio',
-                    color: '#ffc107'
-                },
-                {
-                    icon: 'fas fa-tasks',
-                    number: data.tasks.total || 0,
-                    label: 'Total Tareas',
-                    color: '#17a2b8'
-                },
-                {
-                    icon: 'fas fa-users',
-                    number: data.users.total || 0,
-                    label: 'Usuarios',
-                    color: '#6f42c1'
-                }
-            ];
-
-            statsGrid.innerHTML = stats.map(stat => `
-                <div class="stat-card">
-                    <div class="stat-icon" style="color: ${stat.color}">
-                        <i class="${stat.icon}"></i>
-                    </div>
-                    <div class="stat-number" style="color: ${stat.color}">${stat.number}</div>
-                    <div class="stat-label">${stat.label}</div>
-                </div>
-            `).join('');
+            // Esta función se mantiene para compatibilidad
+            console.log('Estadísticas cargadas:', data);
         }
 
-        function renderCharts(chartData) {
-            // Destruir gráficos existentes
-            Object.values(charts).forEach(chart => {
-                if (chart) chart.destroy();
-            });
+        function renderCharts(data) {
+            if (!data.tasks) return;
 
-            // Gráfico de tiempo
-            const timeCtx = document.getElementById('timeChart').getContext('2d');
-            charts.time = new Chart(timeCtx, {
-                type: 'line',
+            // Gráfico de estado de tareas
+            renderTasksStatusChart(data.tasks.by_status || {});
+            
+            // Gráfico de prioridades
+            renderTasksPriorityChart(data.tasks.by_priority || {});
+        }
+
+        function renderTasksStatusChart(statusData) {
+            const ctx = document.getElementById('tasks-status-chart');
+            if (!ctx) return;
+
+            // Destruir gráfico existente si existe
+            if (charts.tasksStatus) {
+                charts.tasksStatus.destroy();
+            }
+
+            const labels = Object.keys(statusData);
+            const values = Object.values(statusData);
+
+            charts.tasksStatus = new Chart(ctx, {
+                type: 'doughnut',
                 data: {
-                    labels: [...new Set(chartData.time_series.map(item => new Date(item.period).toLocaleString()))],
-                    datasets: [
-                        {
-                            label: 'Enviadas',
-                            data: chartData.time_series.filter(item => item.status === 'sent').map(item => item.count),
-                            borderColor: '#28a745',
-                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                            tension: 0.4
-                        },
-                        {
-                            label: 'Fallidas',
-                            data: chartData.time_series.filter(item => item.status === 'failed').map(item => item.count),
-                            borderColor: '#dc3545',
-                            backgroundColor: 'rgba(220, 53, 69, 0.1)',
-                            tension: 0.4
-                        }
-                    ]
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: [
+                            '#28a745', // Verde para completadas
+                            '#ffc107', // Amarillo para en progreso
+                            '#17a2b8', // Azul para pendientes
+                            '#dc3545'  // Rojo para otras
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
                         }
                     }
                 }
             });
+        }
 
-            // Gráfico de tipos
-            const typeCtx = document.getElementById('typeChart').getContext('2d');
-            charts.type = new Chart(typeCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: chartData.type_distribution.map(item => item.type),
-                    datasets: [{
-                        data: chartData.type_distribution.map(item => item.count),
-                        backgroundColor: ['#667eea', '#764ba2', '#f093fb']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
+        function renderTasksPriorityChart(priorityData) {
+            const ctx = document.getElementById('tasks-priority-chart');
+            if (!ctx) return;
 
-            // Gráfico de éxito
-            const successCtx = document.getElementById('successChart').getContext('2d');
-            charts.success = new Chart(successCtx, {
-                type: 'pie',
-                data: {
-                    labels: chartData.success_rate.map(item => item.status),
-                    datasets: [{
-                        data: chartData.success_rate.map(item => item.count),
-                        backgroundColor: ['#28a745', '#dc3545', '#ffc107']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
+            // Destruir gráfico existente si existe
+            if (charts.tasksPriority) {
+                charts.tasksPriority.destroy();
+            }
 
-            // Gráfico de errores
-            const errorCtx = document.getElementById('errorChart').getContext('2d');
-            charts.error = new Chart(errorCtx, {
+            const labels = Object.keys(priorityData);
+            const values = Object.values(priorityData);
+
+            charts.tasksPriority = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: chartData.top_errors.map(item => item.error.substring(0, 30) + '...'),
+                    labels: labels,
                     datasets: [{
-                        label: 'Cantidad',
-                        data: chartData.top_errors.map(item => item.count),
-                        backgroundColor: '#dc3545'
+                        label: 'Cantidad de Tareas',
+                        data: values,
+                        backgroundColor: '#667eea',
+                        borderColor: '#5a6fd8',
+                        borderWidth: 1
                     }]
                 },
                 options: {
@@ -592,7 +594,15 @@
                     maintainAspectRatio: false,
                     scales: {
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
                         }
                     }
                 }
@@ -600,58 +610,269 @@
         }
 
         function renderNotifications(notifications) {
-            const container = document.getElementById('notifications-list');
-            
-            if (notifications.length === 0) {
-                container.innerHTML = '<div class="loading">No hay notificaciones para mostrar</div>';
+            const container = document.getElementById('notifications-container');
+            if (!container) return;
+
+            if (!notifications || notifications.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #6c757d;">
+                        <i class="fas fa-inbox" style="font-size: 2rem;"></i>
+                        <p>No hay notificaciones para mostrar</p>
+                    </div>
+                `;
                 return;
             }
 
-            container.innerHTML = notifications.map(notif => `
-                <div class="notification-item">
-                    <div>
-                        <div><strong>${notif.task_name}</strong></div>
-                        <div style="font-size: 0.8rem; color: #6c757d;">${notif.task_id}</div>
-                    </div>
-                    <span class="type-badge type-${notif.type}">${notif.type}</span>
-                    <div>
-                        <div style="font-size: 0.9rem;">${notif.recipient}</div>
-                        <div style="font-size: 0.7rem; color: #6c757d;">${notif.recipient_type}</div>
-                    </div>
-                    <span class="status-badge status-${notif.status}">${notif.status}</span>
-                    <div style="font-size: 0.8rem; color: #6c757d;">
-                        ${new Date(notif.created_at).toLocaleString()}
-                        ${notif.error_message ? `<br><span style="color: #dc3545;">${notif.error_message.substring(0, 50)}...</span>` : ''}
-                    </div>
-                </div>
-            `).join('');
+            const table = `
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f8f9fa;">
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Tipo</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Acción</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Tarea</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Destinatario</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Estado</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${notifications.map(notif => `
+                            <tr style="border-bottom: 1px solid #f1f3f4;">
+                                <td style="padding: 12px;">
+                                    <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; background: #e9ecef;">
+                                        ${notif.type}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px;">${notif.action || '-'}</td>
+                                <td style="padding: 12px;">${notif.task_name || '-'}</td>
+                                <td style="padding: 12px;">${notif.recipient || '-'}</td>
+                                <td style="padding: 12px;">
+                                    <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; 
+                                        background: ${notif.status === 'sent' ? '#d4edda' : 
+                                                   notif.status === 'failed' ? '#f8d7da' : '#fff3cd'};
+                                        color: ${notif.status === 'sent' ? '#155724' : 
+                                               notif.status === 'failed' ? '#721c24' : '#856404'};">
+                                        ${notif.status}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px; font-size: 0.9rem; color: #6c757d;">
+                                    ${new Date(notif.created_at).toLocaleString('es-ES')}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = table;
         }
 
-        function renderHealth(health) {
-            const indicator = document.getElementById('health-indicator');
-            const text = document.getElementById('health-text');
+        // Funciones de sincronización manual
+        async function manualSync() {
+            const syncBtn = document.getElementById('sync-btn');
+            const syncStatus = document.getElementById('sync-status');
             
-            indicator.className = `health-indicator health-${health.status}`;
-            
-            const statusText = {
-                'healthy': 'Sistema Saludable',
-                'degraded': 'Sistema Degradado',
-                'unhealthy': 'Sistema No Saludable'
-            };
-            
-            text.textContent = statusText[health.status] || 'Estado Desconocido';
+            syncBtn.disabled = true;
+            syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
+            syncStatus.style.display = 'block';
+            syncStatus.className = 'sync-status info';
+            syncStatus.textContent = 'Iniciando sincronización...';
+
+            try {
+                const response = await fetch('/api/v1/tasks/sync', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    syncStatus.className = 'sync-status success';
+                    syncStatus.textContent = `Sincronización exitosa: ${data.message}`;
+                    
+                    // Recargar dashboard después de sincronizar
+                    setTimeout(() => {
+                        loadDashboard();
+                    }, 1000);
+                } else {
+                    throw new Error(data.error || 'Error en la sincronización');
+                }
+            } catch (error) {
+                console.error('Error en sincronización:', error);
+                syncStatus.className = 'sync-status error';
+                syncStatus.textContent = `Error: ${error.message}`;
+            } finally {
+                syncBtn.disabled = false;
+                syncBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Sincronizar Ahora';
+                
+                // Ocultar mensaje después de 5 segundos
+                setTimeout(() => {
+                    syncStatus.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function createTask() {
+            // Redirigir a la página de creación de tareas
+            window.location.href = '/index#tasks';
+        }
+
+        function deleteTask() {
+            // Redirigir a la página de tareas para eliminar
+            window.location.href = '/index#tasks';
+        }
+
+        function goToTasks() {
+            // Confirmar navegación a tareas
+            if (confirm('¿Ir a la lista de tareas? El dashboard se mantendrá disponible en la ruta principal.')) {
+                window.location.href = '/index#tasks';
+            }
         }
 
         function showError(message) {
-            const container = document.querySelector('.dashboard-container');
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error';
-            errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
-            container.insertBefore(errorDiv, container.firstChild);
+            console.error(message);
+            // Aquí podrías mostrar un toast o notificación de error
+        }
+
+        // Función para forzar recarga completa
+        function forceReload() {
+            console.log('🔄 Forzando recarga completa del dashboard...');
+            const timestamp = Date.now();
+            
+            // Limpiar contadores
+            document.getElementById('total-tasks').textContent = '-';
+            document.getElementById('pending-tasks').textContent = '-';
+            document.getElementById('completed-tasks').textContent = '-';
+            document.getElementById('overdue-tasks').textContent = '-';
+            
+            // Recargar dashboard con timestamp único
+            loadDashboard();
+            
+            // Mostrar mensaje de recarga
+            const refreshBtn = document.querySelector('.refresh-btn');
+            const originalText = refreshBtn.innerHTML;
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Recargando...';
+            refreshBtn.disabled = true;
             
             setTimeout(() => {
-                errorDiv.remove();
-            }, 5000);
+                refreshBtn.innerHTML = originalText;
+                refreshBtn.disabled = false;
+            }, 2000);
+        }
+
+        // Función para actualizar la tabla de tareas
+        function refreshTaskTable() {
+            console.log('Actualizando tabla de tareas...');
+
+            // Mostrar estado de carga
+            const tableBody = document.getElementById('task-table-body');
+            if (tableBody) {
+                tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Cargando tareas...</td></tr>';
+            }
+
+            // Cargar tareas desde la API
+            fetch('/api/v1/tasks/?include_closed=true&page=0&limit=100')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.tasks && data.tasks.length > 0) {
+                        displayTaskTable(data.tasks);
+                    } else {
+                        if (tableBody) {
+                            tableBody.innerHTML = '<tr><td colspan="4" class="text-center">No se encontraron tareas</td></tr>';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar tareas:', error);
+                    if (tableBody) {
+                        tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error al cargar tareas</td></tr>';
+                    }
+                });
+        }
+
+        // Función para mostrar tareas en la tabla
+        function displayTaskTable(tasks) {
+            const tableBody = document.getElementById('task-table-body');
+            if (!tableBody) return;
+
+            tableBody.innerHTML = '';
+
+            tasks.forEach(task => {
+                const row = document.createElement('tr');
+
+                // Nombre de la tarea
+                const nameCell = document.createElement('td');
+                nameCell.textContent = task.name || 'Sin nombre';
+                nameCell.style.maxWidth = '200px';
+                nameCell.style.overflow = 'hidden';
+                nameCell.style.textOverflow = 'ellipsis';
+                nameCell.style.whiteSpace = 'nowrap';
+                row.appendChild(nameCell);
+
+                // Usuario asignado
+                const userCell = document.createElement('td');
+                userCell.textContent = task.assignee || 'Sin asignar';
+                row.appendChild(userCell);
+
+                // Prioridad
+                const priorityCell = document.createElement('td');
+                const priority = task.priority || 3;
+                const priorityText = getPriorityText(priority);
+                const priorityClass = getPriorityClass(priority);
+                priorityCell.innerHTML = `<span class="priority-badge ${priorityClass}">${priorityText}</span>`;
+                row.appendChild(priorityCell);
+
+                // Estado
+                const statusCell = document.createElement('td');
+                const status = task.status || 'to do';
+                const statusText = getStatusText(status);
+                const statusClass = getStatusClass(status);
+                statusCell.innerHTML = `<span class="status-badge ${statusClass}">${statusText}</span>`;
+                row.appendChild(statusCell);
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Función para obtener texto de prioridad
+        function getPriorityText(priority) {
+            const priorities = {
+                1: 'Urgente',
+                2: 'Alta',
+                3: 'Normal',
+                4: 'Baja'
+            };
+            return priorities[priority] || 'Normal';
+        }
+
+        // Función para obtener clase CSS de prioridad
+        function getPriorityClass(priority) {
+            const classes = {
+                1: 'priority-urgent',
+                2: 'priority-high',
+                3: 'priority-normal',
+                4: 'priority-low'
+            };
+            return classes[priority] || 'priority-normal';
+        }
+
+        // Función para obtener texto de estado
+        function getStatusText(status) {
+            const statuses = {
+                'to do': 'Pendiente',
+                'in progress': 'En Progreso',
+                'complete': 'Completada'
+            };
+            return statuses[status] || status;
+        }
+
+        // Función para obtener clase CSS de estado
+        function getStatusClass(status) {
+            const classes = {
+                'to do': 'status-pending',
+                'in progress': 'status-progress',
+                'complete': 'status-complete'
+            };
+            return classes[status] || 'status-pending';
         }
     </script>
 </body>

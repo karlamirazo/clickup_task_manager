@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Workflow de LangGraph para logging automático de errores de deployment
+Workflow de LangGraph para logging automatico de errores de deployment
 Integra con el sistema de logging para documentar problemas y soluciones
 """
 
@@ -10,7 +10,7 @@ from typing import Dict, Any, TypedDict
 import os
 import sys
 
-# Agregar el directorio raíz al path para importar utils
+# Agregar el directorio raiz al path para importar utils
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils.deployment_logger import log_error_sync
@@ -33,11 +33,11 @@ class ErrorLoggingState(TypedDict):
 def validate_error_inputs(state: ErrorLoggingState) -> ErrorLoggingState:
     """Validar y normalizar los inputs del error"""
     
-    print("🔍 Validando inputs del error...")
+    print("ðŸ”� Validando inputs del error...")
     
     # Valores por defecto
     state["error_description"] = state.get("error_description", "Error no especificado")
-    state["solution_description"] = state.get("solution_description", "Solución no documentada")
+    state["solution_description"] = state.get("solution_description", "Solucion no documentada")
     state["context_info"] = state.get("context_info", "Sin contexto")
     state["deployment_id"] = state.get("deployment_id", "unknown")
     state["environment"] = state.get("environment", "production")
@@ -51,13 +51,13 @@ def validate_error_inputs(state: ErrorLoggingState) -> ErrorLoggingState:
         state["logging_result"] = {"error": "error_description es obligatorio"}
         return state
     
-    if not state["solution_description"] or state["solution_description"] == "Solución no documentada":
+    if not state["solution_description"] or state["solution_description"] == "Solucion no documentada":
         state["workflow_status"] = "warning"
-        print("⚠️ Advertencia: solution_description no especificada")
+        print("âš ï¸� Advertencia: solution_description no especificada")
     
-    print(f"✅ Inputs validados:")
+    print(f"âœ… Inputs validados:")
     print(f"   - Error: {state['error_description'][:50]}...")
-    print(f"   - Solución: {state['solution_description'][:50]}...")
+    print(f"   - Solucion: {state['solution_description'][:50]}...")
     print(f"   - Entorno: {state['environment']}")
     print(f"   - Severidad: {state['severity']}")
     
@@ -67,7 +67,7 @@ def validate_error_inputs(state: ErrorLoggingState) -> ErrorLoggingState:
 def log_error_to_postgres_and_summary(state: ErrorLoggingState) -> ErrorLoggingState:
     """Registrar el error en PostgreSQL y DEPLOYMENT_SUMMARY.txt"""
     
-    print("🚨 Registrando error en sistema de logging...")
+    print("ðŸš¨ Registrando error en sistema de logging...")
     
     try:
         # Preparar datos para logging
@@ -87,15 +87,15 @@ def log_error_to_postgres_and_summary(state: ErrorLoggingState) -> ErrorLoggingS
         if result["status"] == "documentado":
             state["logging_result"] = result
             state["workflow_status"] = "completed"
-            print("✅ Error registrado exitosamente en ambos sistemas")
+            print("âœ… Error registrado exitosamente en ambos sistemas")
         else:
             state["logging_result"] = result
             state["workflow_status"] = "error"
-            print(f"❌ Error en logging: {result.get('message', 'Error desconocido')}")
+            print(f"â�Œ Error en logging: {result.get('message', 'Error desconocido')}")
             
     except Exception as e:
         error_msg = f"Error en logging: {str(e)}"
-        print(f"❌ {error_msg}")
+        print(f"â�Œ {error_msg}")
         state["logging_result"] = {"status": "error", "message": error_msg}
         state["workflow_status"] = "error"
     
@@ -104,10 +104,10 @@ def log_error_to_postgres_and_summary(state: ErrorLoggingState) -> ErrorLoggingS
 def generate_summary_report(state: ErrorLoggingState) -> ErrorLoggingState:
     """Generar reporte de resumen del error"""
     
-    print("📊 Generando reporte de resumen...")
+    print("ðŸ“Š Generando reporte de resumen...")
     
     try:
-        # Crear reporte estructurado
+        # Create reporte estructurado
         report = {
             "timestamp": state["timestamp"],
             "error_summary": state["error_description"][:100] + "..." if len(state["error_description"]) > 100 else state["error_description"],
@@ -122,13 +122,13 @@ def generate_summary_report(state: ErrorLoggingState) -> ErrorLoggingState:
         state["summary_report"] = report
         state["workflow_status"] = "completed"
         
-        print("✅ Reporte generado exitosamente")
+        print("âœ… Reporte generado exitosamente")
         print(f"   - Resumen: {report['error_summary']}")
         print(f"   - Estado: {report['status']}")
-        print(f"   - Logging: {'✅ Exitoso' if report['logging_success'] else '❌ Fallido'}")
+        print(f"   - Logging: {'âœ… Exitoso' if report['logging_success'] else 'â�Œ Fallido'}")
         
     except Exception as e:
-        print(f"❌ Error generando reporte: {e}")
+        print(f"â�Œ Error generando reporte: {e}")
         state["workflow_status"] = "error"
     
     return state
@@ -136,13 +136,13 @@ def generate_summary_report(state: ErrorLoggingState) -> ErrorLoggingState:
 def handle_workflow_error(state: ErrorLoggingState) -> ErrorLoggingState:
     """Manejar errores del workflow"""
     
-    print("🚨 Manejando error del workflow...")
+    print("ðŸš¨ Manejando error del workflow...")
     
-    # Crear entrada de error del workflow
+    # Create entrada de error del workflow
     workflow_error = {
         "error_description": f"Error en workflow de logging: {state.get('logging_result', {}).get('message', 'Error desconocido')}",
-        "solution_description": "Revisar logs del sistema y verificar configuración",
-        "context_info": f"Workflow falló para error: {state.get('error_description', 'N/A')}",
+        "solution_description": "Revisar logs del sistema y verificar configuracion",
+        "context_info": f"Workflow fallo para error: {state.get('error_description', 'N/A')}",
         "environment": state.get("environment", "unknown"),
         "severity": "high",
         "status": "pending"
@@ -151,13 +151,13 @@ def handle_workflow_error(state: ErrorLoggingState) -> ErrorLoggingState:
     try:
         # Intentar logging del error del workflow
         log_error_sync(workflow_error)
-        print("✅ Error del workflow registrado en sistema de logging")
+        print("âœ… Error del workflow registrado en sistema de logging")
     except Exception as e:
-        print(f"❌ No se pudo registrar error del workflow: {e}")
+        print(f"â�Œ No se pudo registrar error del workflow: {e}")
     
     return state
 
-# Función de enrutamiento
+# Funcion de enrutamiento
 def route_workflow(state: ErrorLoggingState) -> str:
     """Determinar el siguiente nodo basado en el estado"""
     
@@ -170,11 +170,11 @@ def route_workflow(state: ErrorLoggingState) -> str:
     else:
         return "validate_error_inputs"
 
-# Crear el workflow
+# Create el workflow
 def create_error_logging_workflow() -> StateGraph:
-    """Crear el workflow de logging de errores"""
+    """Create el workflow de logging de errores"""
     
-    # Crear grafo
+    # Create grafo
     workflow = StateGraph(ErrorLoggingState)
     
     # Agregar nodos
@@ -223,23 +223,23 @@ def create_error_logging_workflow() -> StateGraph:
     
     return workflow
 
-# Función de conveniencia para uso directo
+# Funcion de conveniencia para uso directo
 def log_error_with_workflow(error_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Función de conveniencia para usar el workflow de logging
+    Funcion de conveniencia para usar el workflow de logging
     
     Args:
-        error_data: Diccionario con información del error
+        error_data: Diccionario con informacion del error
         
     Returns:
         Dict con resultado del workflow
     """
     try:
-        # Crear workflow
+        # Create workflow
         workflow = create_error_logging_workflow()
         app = workflow.compile()
         
-        # Ejecutar workflow
+        # Execute workflow
         result = app.invoke(error_data)
         
         return {
@@ -257,11 +257,11 @@ def log_error_with_workflow(error_data: Dict[str, Any]) -> Dict[str, Any]:
 
 # Ejemplo de uso
 if __name__ == "__main__":
-    print("🧪 Probando workflow de logging de errores...")
+    print("ðŸ§ª Probando workflow de logging de errores...")
     
     # Datos de ejemplo
     sample_error = {
-        "error_description": "Error de conexión a base de datos PostgreSQL",
+        "error_description": "Error de conexion a base de datos PostgreSQL",
         "solution_description": "Verificar variables de entorno DATABASE_URL y reiniciar servicio",
         "context_info": "Problema durante deployment en Railway - base de datos no accesible",
         "deployment_id": "railway-deploy-123",
@@ -270,10 +270,10 @@ if __name__ == "__main__":
         "status": "resolved"
     }
     
-    # Ejecutar workflow
+    # Execute workflow
     result = log_error_with_workflow(sample_error)
     
-    print(f"\n📋 Resultado del workflow:")
+    print(f"\nðŸ“‹ Resultado del workflow:")
     print(f"   - Status: {result['status']}")
     print(f"   - Estado final: {result.get('final_status', 'N/A')}")
     

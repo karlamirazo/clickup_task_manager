@@ -4,7 +4,7 @@
 ================================================================================
 
 FECHA: 17 de Agosto de 2025
-VERSIÓN: 1.0.0
+VERSI√ìN: 1.0.0
 PLATAFORMA: Railway
 BASE DE DATOS: PostgreSQL (migrado desde SQLite)
 
@@ -12,107 +12,107 @@ BASE DE DATOS: PostgreSQL (migrado desde SQLite)
                                 PROBLEMAS RESUELTOS
 ================================================================================
 
-1. ERROR 500 INICIAL EN CREACIÓN DE TAREAS
-   - Descripción: Frontend reportaba error 500 al crear tareas
+1. ERROR 500 INICIAL EN CREACI√ìN DE TAREAS
+   - Descripci√≥n: Frontend reportaba error 500 al crear tareas
    - Causa: Conflicto de rutas en main.py (prefix incorrecto)
-   - Solución: Cambiar prefix de tasks.router de /api/v1 a /api/v1/tasks
-   - Estado: ✅ RESUELTO
+   - Soluci√≥n: Cambiar prefix de tasks.router de /api/v1 a /api/v1/tasks
+   - Estado: ‚úÖ RESUELTO
 
 2. CLICKUP_API_TOKEN NO CONFIGURADO
-   - Descripción: Token de ClickUp no estaba configurado en Railway
+   - Descripci√≥n: Token de ClickUp no estaba configurado en Railway
    - Causa: Variable de entorno faltante
-   - Solución: Configurar CLICKUP_API_TOKEN en Railway
-   - Estado: ✅ RESUELTO
+   - Soluci√≥n: Configurar CLICKUP_API_TOKEN en Railway
+   - Estado: ‚úÖ RESUELTO
 
 3. ERROR DE SINTAXIS EN DEPLOYMENT
-   - Descripción: Múltiples fallos de deployment por SyntaxError
+   - Descripci√≥n: M√∫ltiples fallos de deployment por SyntaxError
    - Causa: Estructura incorrecta de try-except en api/routes/tasks.py
-   - Solución: Reescribir completamente la función create_task
-   - Estado: ✅ RESUELTO
+   - Soluci√≥n: Reescribir completamente la funci√≥n create_task
+   - Estado: ‚úÖ RESUELTO
 
-4. ERROR DE VALIDACIÓN EN BASE DE DATOS
-   - Descripción: workspace_id y list_id eran None al guardar en PostgreSQL
-   - Causa: Extracción incorrecta de datos de respuesta de ClickUp API
-   - Solución: Extraer team_id y list.id de la respuesta de ClickUp
-   - Estado: ✅ RESUELTO
+4. ERROR DE VALIDACI√ìN EN BASE DE DATOS
+   - Descripci√≥n: workspace_id y list_id eran None al guardar en PostgreSQL
+   - Causa: Extracci√≥n incorrecta de datos de respuesta de ClickUp API
+   - Soluci√≥n: Extraer team_id y list.id de la respuesta de ClickUp
+   - Estado: ‚úÖ RESUELTO
 
 5. CACHE PERSISTENTE DE RAILWAY
-   - Descripción: Railway ejecutaba código anterior a pesar de deploys exitosos
+   - Descripci√≥n: Railway ejecutaba c√≥digo anterior a pesar de deploys exitosos
    - Causa: Cache profundo del sistema de Railway
-   - Solución: Restart completo del servicio clickup_task_manager
-   - Estado: ✅ RESUELTO
+   - Soluci√≥n: Restart completo del servicio clickup_task_manager
+   - Estado: ‚úÖ RESUELTO
 
-6. FUNCIÓN AUXILIAR FALTANTE
-   - Descripción: safe_timestamp_to_datetime no estaba definida
-   - Causa: Función eliminada accidentalmente durante reescritura
-   - Solución: Re-agregar la función auxiliar
-   - Estado: ✅ RESUELTO
+6. FUNCI√ìN AUXILIAR FALTANTE
+   - Descripci√≥n: safe_timestamp_to_datetime no estaba definida
+   - Causa: Funci√≥n eliminada accidentalmente durante reescritura
+   - Soluci√≥n: Re-agregar la funci√≥n auxiliar
+   - Estado: ‚úÖ RESUELTO
 
 ================================================================================
                                 PROBLEMA PENDIENTE
 ================================================================================
 
-7. SINCRONIZACIÓN ENTRE INTERFAZ Y CLICKUP
-   - Descripción: Las tareas se crean en ClickUp pero no se muestran en la interfaz
-   - Causa: No hay sincronización bidireccional entre ClickUp y base de datos local
-   - Estado: 🔄 EN PROCESO DE SOLUCIÓN
+7. SINCRONIZACI√ìN ENTRE INTERFAZ Y CLICKUP
+   - Descripci√≥n: Las tareas se crean en ClickUp pero no se muestran en la interfaz
+   - Causa: No hay sincronizaci√≥n bidireccional entre ClickUp y base de datos local
+   - Estado: üîÑ EN PROCESO DE SOLUCI√ìN
 
 ================================================================================
-                                SOLUCIÓN IMPLEMENTADA
+                                SOLUCI√ìN IMPLEMENTADA
 ================================================================================
 
 FECHA: 17 de Agosto de 2025 - 3:15 AM
 
 PROBLEMA: Las tareas se crean exitosamente en ClickUp pero no aparecen en la interfaz
-web porque no hay sincronización entre la base de datos local y ClickUp.
+web porque no hay sincronizaci√≥n entre la base de datos local y ClickUp.
 
-SOLUCIÓN IMPLEMENTADA:
+SOLUCI√ìN IMPLEMENTADA:
 
-1. ✅ NUEVO ENDPOINT DE SINCRONIZACIÓN
+1. ‚úÖ NUEVO ENDPOINT DE SINCRONIZACI√ìN
    - Archivo: api/routes/tasks.py
    - Endpoint: POST /api/v1/tasks/sync
-   - Función: sync_tasks_from_clickup()
+   - Funci√≥n: sync_tasks_from_clickup()
    - Funcionalidad: Sincroniza todas las tareas de ClickUp a la base de datos local
 
-2. ✅ NUEVO DASHBOARD DE TAREAS
+2. ‚úÖ NUEVO DASHBOARD DE TAREAS
    - Archivo: static/tasks_dashboard.html
    - Funcionalidades:
-     * Visualización de tareas locales
-     * Botón de sincronización manual
-     * Estadísticas de tareas (total, sincronizadas, pendientes, completadas)
-     * Estado de sincronización por tarea
-     * Modal de progreso de sincronización
+     * Visualizaci√≥n de tareas locales
+     * Bot√≥n de sincronizaci√≥n manual
+     * Estad√≠sticas de tareas (total, sincronizadas, pendientes, completadas)
+     * Estado de sincronizaci√≥n por tarea
+     * Modal de progreso de sincronizaci√≥n
 
-3. ✅ RUTA AGREGADA EN MAIN.PY
+3. ‚úÖ RUTA AGREGADA EN MAIN.PY
    - Nueva ruta: /tasks-dashboard
    - Sirve el dashboard de tareas
 
-4. ✅ FUNCIONALIDADES DEL DASHBOARD:
-   - Carga automática de tareas cada 30 segundos
-   - Botón de sincronización manual con ClickUp
-   - Visualización de estado de sincronización
-   - Creación de tarea de prueba para obtener workspace_id
-   - Manejo de errores y mensajes de éxito
+4. ‚úÖ FUNCIONALIDADES DEL DASHBOARD:
+   - Carga autom√°tica de tareas cada 30 segundos
+   - Bot√≥n de sincronizaci√≥n manual con ClickUp
+   - Visualizaci√≥n de estado de sincronizaci√≥n
+   - Creaci√≥n de tarea de prueba para obtener workspace_id
+   - Manejo de errores y mensajes de √©xito
 
 ================================================================================
-                                CÓMO USAR LA SINCRONIZACIÓN
+                                C√ìMO USAR LA SINCRONIZACI√ìN
 ================================================================================
 
 1. ACCEDER AL DASHBOARD:
    - URL: https://clickuptaskmanager-production.up.railway.app/tasks-dashboard
 
 2. SINCRONIZAR TAREAS:
-   - Hacer clic en "🔄 Sincronizar con ClickUp"
-   - El sistema obtendrá todas las tareas de ClickUp
-   - Las guardará en la base de datos local
-   - Actualizará la interfaz automáticamente
+   - Hacer clic en "üîÑ Sincronizar con ClickUp"
+   - El sistema obtendr√° todas las tareas de ClickUp
+   - Las guardar√° en la base de datos local
+   - Actualizar√° la interfaz autom√°ticamente
 
 3. VER TAREAS:
-   - Las tareas se mostrarán con su estado de sincronización
+   - Las tareas se mostrar√°n con su estado de sincronizaci√≥n
    - Verde: Sincronizada con ClickUp
    - Rojo: No sincronizada
 
-4. ESTADÍSTICAS:
+4. ESTAD√çSTICAS:
    - Total de tareas
    - Tareas sincronizadas
    - Tareas pendientes
@@ -123,36 +123,36 @@ SOLUCIÓN IMPLEMENTADA:
 ================================================================================
 
 1. api/routes/tasks.py
-   - ✅ Agregado endpoint /sync para sincronización
-   - ✅ Función sync_tasks_from_clickup() implementada
-   - ✅ Lógica de sincronización bidireccional
+   - ‚úÖ Agregado endpoint /sync para sincronizaci√≥n
+   - ‚úÖ Funci√≥n sync_tasks_from_clickup() implementada
+   - ‚úÖ L√≥gica de sincronizaci√≥n bidireccional
 
 2. static/tasks_dashboard.html
-   - ✅ Nuevo archivo creado
-   - ✅ Dashboard completo para gestión de tareas
-   - ✅ Botones de sincronización y actualización
-   - ✅ Visualización de estadísticas y lista de tareas
+   - ‚úÖ Nuevo archivo creado
+   - ‚úÖ Dashboard completo para gesti√≥n de tareas
+   - ‚úÖ Botones de sincronizaci√≥n y actualizaci√≥n
+   - ‚úÖ Visualizaci√≥n de estad√≠sticas y lista de tareas
 
 3. main.py
-   - ✅ Nueva ruta /tasks-dashboard agregada
-   - ✅ Importación de HTMLResponse
+   - ‚úÖ Nueva ruta /tasks-dashboard agregada
+   - ‚úÖ Importaci√≥n de HTMLResponse
 
 ================================================================================
-                                PRÓXIMOS PASOS
+                                PR√ìXIMOS PASOS
 ================================================================================
 
-1. TESTING DE SINCRONIZACIÓN:
+1. TESTING DE SINCRONIZACI√ìN:
    - Probar el endpoint /api/v1/tasks/sync
    - Verificar que las tareas se sincronicen correctamente
    - Confirmar que aparezcan en la interfaz
 
 2. OPTIMIZACIONES:
-   - Implementar sincronización automática programada
+   - Implementar sincronizaci√≥n autom√°tica programada
    - Agregar filtros por workspace, lista, estado
-   - Implementar búsqueda de tareas
+   - Implementar b√∫squeda de tareas
 
 3. MONITOREO:
-   - Verificar logs de sincronización
+   - Verificar logs de sincronizaci√≥n
    - Monitorear rendimiento de la API
    - Implementar alertas de fallos
 
@@ -161,35 +161,35 @@ SOLUCIÓN IMPLEMENTADA:
 ================================================================================
 
 1. RAILWAY CACHE:
-   - Los restarts son necesarios después de cambios importantes
+   - Los restarts son necesarios despu√©s de cambios importantes
    - El cache puede persistir a pesar de deploys exitosos
-   - Siempre verificar logs después de cambios
+   - Siempre verificar logs despu√©s de cambios
 
-2. SINCRONIZACIÓN:
-   - Es crucial implementar sincronización bidireccional
+2. SINCRONIZACI√ìN:
+   - Es crucial implementar sincronizaci√≥n bidireccional
    - Las APIs externas pueden tener estructuras de respuesta complejas
    - Es necesario manejar casos edge (campos faltantes, valores nulos)
 
 3. DEBUGGING:
    - Los logs detallados son esenciales para troubleshooting
-   - Los endpoints de debug son muy útiles en producción
+   - Los endpoints de debug son muy √∫tiles en producci√≥n
    - Es importante probar localmente antes de deploy
 
 ================================================================================
                                 ESTADO ACTUAL
 ================================================================================
 
-✅ SISTEMA FUNCIONANDO:
-   - Creación de tareas en ClickUp: FUNCIONANDO
+‚úÖ SISTEMA FUNCIONANDO:
+   - Creaci√≥n de tareas en ClickUp: FUNCIONANDO
    - Base de datos PostgreSQL: FUNCIONANDO
    - Deployment en Railway: FUNCIONANDO
    - API endpoints: FUNCIONANDO
 
-🔄 EN PROCESO:
-   - Sincronización de tareas: IMPLEMENTADA, PENDIENTE TESTING
+üîÑ EN PROCESO:
+   - Sincronizaci√≥n de tareas: IMPLEMENTADA, PENDIENTE TESTING
 
-❌ PENDIENTE:
-   - Verificación de funcionamiento de sincronización
+‚ùå PENDIENTE:
+   - Verificaci√≥n de funcionamiento de sincronizaci√≥n
    - Testing completo del nuevo dashboard
 
 ================================================================================
@@ -197,10 +197,10 @@ SOLUCIÓN IMPLEMENTADA:
 ================================================================================
 
 El sistema ha evolucionado significativamente desde su estado inicial. 
-La migración a PostgreSQL y la implementación de sincronización 
+La migraci√≥n a PostgreSQL y la implementaci√≥n de sincronizaci√≥n 
 representan mejoras importantes en la arquitectura.
 
-La solución de sincronización implementada debería resolver el problema
+La soluci√≥n de sincronizaci√≥n implementada deber√≠a resolver el problema
 de que las tareas no aparezcan en la interfaz, proporcionando una
 experiencia de usuario completa y funcional.
 
@@ -210,65 +210,65 @@ experiencia de usuario completa y funcional.
 
 FECHA: 17 de Agosto de 2025 - 12:30 PM
 
-SISTEMA DE LOGGING AUTOMÁTICO CON LANGGRAPH:
+SISTEMA DE LOGGING AUTOM√ÅTICO CON LANGGRAPH:
 
-1. ✅ TABLA DEPLOYMENT_LOGS
+1. ‚úÖ TABLA DEPLOYMENT_LOGS
    - Archivo: scripts/create_deployment_logs_table.py
    - Funcionalidad: Almacena historial completo de problemas y soluciones
    - Estructura: timestamp, error_description, solution_description, context_info, 
                  deployment_id, environment, severity, status
-   - Índices: Optimizados para consultas por timestamp, severidad, estado
+   - √çndices: Optimizados para consultas por timestamp, severidad, estado
 
-2. ✅ UTILIDAD DE LOGGING
+2. ‚úÖ UTILIDAD DE LOGGING
    - Archivo: utils/deployment_logger.py
-   - Clase: DeploymentLogger para logging automático
+   - Clase: DeploymentLogger para logging autom√°tico
    - Funciones: log_error_sync(), log_error_to_postgres_and_summary()
-   - Características: Logging dual (PostgreSQL + DEPLOYMENT_SUMMARY.txt)
-   - Soporte: PostgreSQL y SQLite automático
+   - Caracter√≠sticas: Logging dual (PostgreSQL + DEPLOYMENT_SUMMARY.txt)
+   - Soporte: PostgreSQL y SQLite autom√°tico
 
-3. ✅ WORKFLOWS DE LANGGRAPH
+3. ‚úÖ WORKFLOWS DE LANGGRAPH
    - Archivo: langgraph_tools/simple_error_logging.py
      * Grafo simple de un nodo para logging directo
-     * Patrón: log_error → END
+     * Patr√≥n: log_error ‚Üí END
    
    - Archivo: langgraph_tools/advanced_error_workflow.py
-     * Workflow completo: error_handler → log_error → notify_team → resolve_error → END
-     * Clasificación automática por severidad
-     * Notificaciones automáticas al equipo
+     * Workflow completo: error_handler ‚Üí log_error ‚Üí notify_team ‚Üí resolve_error ‚Üí END
+     * Clasificaci√≥n autom√°tica por severidad
+     * Notificaciones autom√°ticas al equipo
    
    - Archivo: langgraph_tools/error_logging_workflow.py
-     * Workflow con validación, logging y reportes
+     * Workflow con validaci√≥n, logging y reportes
      * Manejo de errores del workflow
-     * Generación de reportes estructurados
+     * Generaci√≥n de reportes estructurados
 
-4. ✅ DOCUMENTACIÓN COMPLETA
+4. ‚úÖ DOCUMENTACI√ìN COMPLETA
    - Archivo: langgraph_tools/README.md
-   - Contenido: Guía completa de uso, casos de uso, configuración
-   - Ejemplos: Código de integración y patrones de uso
+   - Contenido: Gu√≠a completa de uso, casos de uso, configuraci√≥n
+   - Ejemplos: C√≥digo de integraci√≥n y patrones de uso
 
 ================================================================================
                                 BENEFICIOS DEL NUEVO SISTEMA
 ================================================================================
 
-1. AUTOMATIZACIÓN:
-   - Logging automático de todos los errores
-   - Documentación automática de problemas y soluciones
+1. AUTOMATIZACI√ìN:
+   - Logging autom√°tico de todos los errores
+   - Documentaci√≥n autom√°tica de problemas y soluciones
    - Flujos de trabajo estructurados y reproducibles
 
-2. INTEGRACIÓN:
-   - Fácil integración con workflows de LangGraph existentes
-   - Múltiples patrones para diferentes necesidades
+2. INTEGRACI√ìN:
+   - F√°cil integraci√≥n con workflows de LangGraph existentes
+   - M√∫ltiples patrones para diferentes necesidades
    - API consistente y bien documentada
 
 3. MONITOREO:
    - Historial completo de problemas en base de datos
-   - Archivo de texto para revisión rápida
-   - Filtrado y búsqueda por severidad, estado, entorno
+   - Archivo de texto para revisi√≥n r√°pida
+   - Filtrado y b√∫squeda por severidad, estado, entorno
 
 4. ROBUSTEZ:
-   - Fallback automático entre PostgreSQL y SQLite
+   - Fallback autom√°tico entre PostgreSQL y SQLite
    - Manejo de errores del sistema de logging
-   - Validación automática de campos obligatorios
+   - Validaci√≥n autom√°tica de campos obligatorios
 
 ================================================================================
                                 CASOS DE USO IMPLEMENTADOS
@@ -286,7 +286,7 @@ SISTEMA DE LOGGING AUTOMÁTICO CON LANGGRAPH:
    result = run_error_workflow(error_data)
    ```
 
-3. INTEGRACIÓN EN WORKFLOWS EXISTENTES:
+3. INTEGRACI√ìN EN WORKFLOWS EXISTENTES:
    ```python
    graph.add_node("log_error", log_error_to_postgres_and_summary)
    graph.add_edge("process_data", "log_error")
@@ -297,40 +297,40 @@ SISTEMA DE LOGGING AUTOMÁTICO CON LANGGRAPH:
                                 ESTADO ACTUAL DEL SISTEMA
 ================================================================================
 
-✅ SISTEMA FUNCIONANDO:
-   - Creación de tareas en ClickUp: FUNCIONANDO
+‚úÖ SISTEMA FUNCIONANDO:
+   - Creaci√≥n de tareas en ClickUp: FUNCIONANDO
    - Base de datos PostgreSQL: FUNCIONANDO
    - Deployment en Railway: FUNCIONANDO
    - API endpoints: FUNCIONANDO
-   - Sincronización de tareas: IMPLEMENTADA
-   - Sistema de logging automático: IMPLEMENTADO Y FUNCIONANDO
+   - Sincronizaci√≥n de tareas: IMPLEMENTADA
+   - Sistema de logging autom√°tico: IMPLEMENTADO Y FUNCIONANDO
 
-🔄 EN PROCESO:
-   - Testing de sincronización en Railway
-   - Verificación de funcionamiento del nuevo sistema
+üîÑ EN PROCESO:
+   - Testing de sincronizaci√≥n en Railway
+   - Verificaci√≥n de funcionamiento del nuevo sistema
 
-❌ PENDIENTE:
+‚ùå PENDIENTE:
    - Testing completo del sistema de logging en Railway
-   - Integración del logging en endpoints de la API
+   - Integraci√≥n del logging en endpoints de la API
 
 ================================================================================
-                                PRÓXIMOS PASOS RECOMENDADOS
+                                PR√ìXIMOS PASOS RECOMENDADOS
 ================================================================================
 
 1. COMMIT Y PUSH:
    - Subir toda la nueva funcionalidad a GitHub
-   - Trigger deployment automático en Railway
+   - Trigger deployment autom√°tico en Railway
 
 2. TESTING EN RAILWAY:
-   - Verificar que el sistema de logging funcione en producción
+   - Verificar que el sistema de logging funcione en producci√≥n
    - Probar workflows de LangGraph en el entorno de Railway
 
-3. INTEGRACIÓN EN API:
-   - Integrar logging automático en endpoints críticos
+3. INTEGRACI√ìN EN API:
+   - Integrar logging autom√°tico en endpoints cr√≠ticos
    - Implementar logging de errores en tiempo real
 
 4. MONITOREO:
-   - Verificar logs automáticos en deployment_logs
+   - Verificar logs autom√°ticos en deployment_logs
    - Monitorear actualizaciones de DEPLOYMENT_SUMMARY.txt
 
 ================================================================================
@@ -338,57 +338,197 @@ SISTEMA DE LOGGING AUTOMÁTICO CON LANGGRAPH:
 ================================================================================
 
 ## [2025-08-17 12:17:37] Error detectado
-**Descripción del problema**: Error de conexión a base de datos
-**Solución implementada**: Reiniciar servicio de base de datos
+**Descripci√≥n del problema**: Error de conexi√≥n a base de datos
+**Soluci√≥n implementada**: Reiniciar servicio de base de datos
 **Contexto**: Problema durante deployment en Railway
 **Timestamp**: 2025-08-17T12:17:37.835723
 ---
 
 ## [2025-08-17 12:21:36] Error detectado
-**Descripción del problema**: Error de conexión a base de datos PostgreSQL
-**Solución implementada**: Verificar variables de entorno DATABASE_URL y reiniciar servicio
+**Descripci√≥n del problema**: Error de conexi√≥n a base de datos PostgreSQL
+**Soluci√≥n implementada**: Verificar variables de entorno DATABASE_URL y reiniciar servicio
 **Contexto**: Problema durante deployment en Railway - base de datos no accesible
 **Timestamp**: 2025-08-17T12:21:36.449706
 ---
 
 ## [2025-08-17 12:24:36] Error detectado
-**Descripción del problema**: Error de sintaxis en archivo Python
-**Solución implementada**: Corregir indentación y verificar sintaxis
+**Descripci√≥n del problema**: Error de sintaxis en archivo Python
+**Soluci√≥n implementada**: Corregir indentaci√≥n y verificar sintaxis
 **Contexto**: Problema durante desarrollo local - archivo main.py
 **Timestamp**: 2025-08-17T12:24:36.763026
 ---
 
 ## [2025-08-17 12:25:50] Error detectado
-**Descripción del problema**: Error crítico en endpoint de autenticación
-**Solución implementada**: Reiniciar servicio de autenticación y verificar tokens
-**Contexto**: Problema en producción - usuarios no pueden iniciar sesión
+**Descripci√≥n del problema**: Error cr√≠tico en endpoint de autenticaci√≥n
+**Soluci√≥n implementada**: Reiniciar servicio de autenticaci√≥n y verificar tokens
+**Contexto**: Problema en producci√≥n - usuarios no pueden iniciar sesi√≥n
 **Timestamp**: 2025-08-17T12:25:50.534212
 ---
 
 ## [2025-08-17 12:28:27] Error detectado
-**Descripción del problema**: Falló la conexión con ClickUp API
-**Solución implementada**: Se regeneró el token y se actualizó la variable de entorno
+**Descripci√≥n del problema**: Fall√≥ la conexi√≥n con ClickUp API
+**Soluci√≥n implementada**: Se regener√≥ el token y se actualiz√≥ la variable de entorno
 **Contexto**: Nodo: sync_clickup_data
 **Timestamp**: 2025-08-17T12:28:27.881730
 ---
 
-## [2025-08-17 15:30:00] Sistema de Logging Automático Implementado
-**Descripción del problema**: Necesidad de logging automático de errores en Railway
-**Solución implementada**: Sistema completo de logging con LangGraph + PostgreSQL
-**Contexto**: Implementación de 4 workflows de LangGraph para logging automático
+## [2025-08-17 15:30:00] Sistema de Logging Autom√°tico Implementado
+**Descripci√≥n del problema**: Necesidad de logging autom√°tico de errores en Railway
+**Soluci√≥n implementada**: Sistema completo de logging con LangGraph + PostgreSQL
+**Contexto**: Implementaci√≥n de 4 workflows de LangGraph para logging autom√°tico
 **Timestamp**: 2025-08-17T15:30:00.000000
 ---
 
-## [2025-08-17 15:35:00] Integración en Endpoints de API
-**Descripción del problema**: Logging manual de errores en endpoints
-**Solución implementada**: Integración automática en todos los endpoints críticos
+## [2025-08-17 15:35:00] Integraci√≥n en Endpoints de API
+**Descripci√≥n del problema**: Logging manual de errores en endpoints
+**Soluci√≥n implementada**: Integraci√≥n autom√°tica en todos los endpoints cr√≠ticos
 **Contexto**: Endpoints: /api/v1/tasks/, /api/v1/tasks/sync, /debug, /test-logging
 **Timestamp**: 2025-08-17T15:35:00.000000
 ---
 
-## [2025-08-17 15:40:00] Configuración PostgreSQL para Logging
-**Descripción del problema**: Sistema de logging necesita soporte PostgreSQL
-**Solución implementada**: Configuración dual PostgreSQL + SQLite fallback
-**Contexto**: Tabla deployment_logs con índices optimizados
+## [2025-08-17 15:40:00] Configuraci√≥n PostgreSQL para Logging
+**Descripci√≥n del problema**: Sistema de logging necesita soporte PostgreSQL
+**Soluci√≥n implementada**: Configuraci√≥n dual PostgreSQL + SQLite fallback
+**Contexto**: Tabla deployment_logs con √≠ndices optimizados
 **Timestamp**: 2025-08-17T15:40:00.000000
+---
+
+## [2025-08-20 13:20:08] Error detectado
+**Descripcion del problema**: Errores en sincronización: Error general en sincronización: 'coroutine' object has no attribute 'get'
+**Solucion implementada**: Revisar logs y configuración de ClickUp
+**Contexto**: Workspace: 9014943317, Tareas sincronizadas: 0
+**Timestamp**: 2025-08-20T13:20:08.508693
+---
+
+## [2025-08-20 13:20:58] Error detectado
+**Descripcion del problema**: Errores en sincronización: Error general en sincronización: 'coroutine' object has no attribute 'get'
+**Solucion implementada**: Revisar logs y configuración de ClickUp
+**Contexto**: Workspace: 9014943317, Tareas sincronizadas: 0
+**Timestamp**: 2025-08-20T13:20:58.268340
+---
+
+## [2025-08-20 13:21:32] Error detectado
+**Descripcion del problema**: Errores en sincronización: Error general en sincronización: 'list' object has no attribute 'get'
+**Solucion implementada**: Revisar logs y configuración de ClickUp
+**Contexto**: Workspace: 9014943317, Tareas sincronizadas: 0
+**Timestamp**: 2025-08-20T13:21:32.220379
+---
+
+## [2025-08-20 13:25:50] Error detectado
+**Descripcion del problema**: Errores en búsqueda RAG: Error inicializando índice: 'Task' object has no attribute 'assignee_name'
+**Solucion implementada**: Revisar logs y reconstruir índice de búsqueda
+**Contexto**: Query: test, Estado: error
+**Timestamp**: 2025-08-20T13:25:50.326617
+---
+
+## [2025-08-20 13:30:09] Error detectado
+**Descripcion del problema**: Errores en sincronización: Error obteniendo espacios: 400, message='Bad Request', url=URL('https://api.clickup.com/api/v2/team//space')
+**Solucion implementada**: Revisar logs y configuración de ClickUp
+**Contexto**: Workspace: , Tareas sincronizadas: 0
+**Timestamp**: 2025-08-20T13:30:09.355660
+---
+
+## [2025-08-20 13:30:16] Error detectado
+**Descripcion del problema**: Errores en sincronización: Error obteniendo espacios: 400, message='Bad Request', url=URL('https://api.clickup.com/api/v2/team//space')
+**Solucion implementada**: Revisar logs y configuración de ClickUp
+**Contexto**: Workspace: , Tareas sincronizadas: 0
+**Timestamp**: 2025-08-20T13:30:16.515042
+---
+
+## [2025-08-20 13:38:36] Error detectado
+**Descripcion del problema**: Errores en sincronización: Error obteniendo espacios: 400, message='Bad Request', url=URL('https://api.clickup.com/api/v2/team//space')
+**Solucion implementada**: Revisar logs y configuración de ClickUp
+**Contexto**: Workspace: , Tareas sincronizadas: 0
+**Timestamp**: 2025-08-20T13:38:36.768844
+---
+
+## [2025-08-20 13:41:21] Error detectado
+**Descripcion del problema**: Errores en sincronización: Error obteniendo espacios: 400, message='Bad Request', url=URL('https://api.clickup.com/api/v2/team//space')
+**Solucion implementada**: Revisar logs y configuración de ClickUp
+**Contexto**: Workspace: , Tareas sincronizadas: 0
+**Timestamp**: 2025-08-20T13:41:21.316673
+---
+
+## [2025-08-20 13:43:30] Error detectado
+**Descripcion del problema**: Errores en sincronización: Error obteniendo espacios: 400, message='Bad Request', url=URL('https://api.clickup.com/api/v2/team//space')
+**Solucion implementada**: Revisar logs y configuración de ClickUp
+**Contexto**: Workspace: , Tareas sincronizadas: 0
+**Timestamp**: 2025-08-20T13:43:30.223238
+---
+
+## [2025-08-20 14:18:13] Error detectado
+**Descripcion del problema**: Errores en sincronización: Error obteniendo espacios: 400, message='Bad Request', url=URL('https://api.clickup.com/api/v2/team//space')
+**Solucion implementada**: Revisar logs y configuración de ClickUp
+**Contexto**: Workspace: , Tareas sincronizadas: 0
+**Timestamp**: 2025-08-20T14:18:13.513173
+---
+
+## [2025-08-20 20:12:59] Error detectado
+**Descripcion del problema**: Errores en sincronización: Error procesando tarea 86b698xvk: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698v98: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698tgf: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6brrea: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6b6rjf: 'assignee_name' is an invalid keyword argument for Task
+**Solucion implementada**: Revisar logs y configuración de ClickUp
+**Contexto**: Workspace: 9014943317, Tareas sincronizadas: 0
+**Timestamp**: 2025-08-20T20:12:59.782640
+---
+
+## [2025-08-20 20:13:32] Error detectado
+**Descripcion del problema**: Errores en sincronización: Error procesando tarea 86b698xvk: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698v98: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698tgf: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6brrea: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6b6rjf: 'assignee_name' is an invalid keyword argument for Task
+**Solucion implementada**: Revisar logs y configuración de ClickUp
+**Contexto**: Workspace: 9014943317, Tareas sincronizadas: 0
+**Timestamp**: 2025-08-20T20:13:32.551635
+---
+
+## [2025-08-20 20:26:12] Error detectado
+**Descripcion del problema**: Errores en sincronización: Error procesando tarea 86b698xvk: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698v98: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698tgf: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6brrea: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6b6rjf: 'assignee_name' is an invalid keyword argument for Task
+**Solucion implementada**: Revisar logs y configuración de ClickUp
+**Contexto**: Workspace: 9014943317, Tareas sincronizadas: 0
+**Timestamp**: 2025-08-20T20:26:12.696930
+---
+
+## [2025-08-20 20:26:54] Error detectado
+**Descripcion del problema**: Errores en sincronización: Error procesando tarea 86b698xvk: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698v98: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698tgf: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6brrea: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6b6rjf: 'assignee_name' is an invalid keyword argument for Task
+**Solucion implementada**: Revisar logs y configuración de ClickUp
+**Contexto**: Workspace: 9014943317, Tareas sincronizadas: 0
+**Timestamp**: 2025-08-20T20:26:54.576550
+---
+
+## [2025-08-20 20:28:04] Error detectado
+**Descripcion del problema**: Errores en sincronización: Error procesando tarea 86b698xvk: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698v98: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698tgf: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6brrea: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6b6rjf: 'assignee_name' is an invalid keyword argument for Task
+**Solucion implementada**: Revisar logs y configuración de ClickUp
+**Contexto**: Workspace: 9014943317, Tareas sincronizadas: 0
+**Timestamp**: 2025-08-20T20:28:04.921810
+---
+
+## [2025-08-20 20:29:36] Error detectado
+**Descripcion del problema**: Errores en sincronización: Error procesando tarea 86b698xvk: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698v98: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698tgf: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6brrea: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6b6rjf: 'assignee_name' is an invalid keyword argument for Task
+**Solucion implementada**: Revisar logs y configuración de ClickUp
+**Contexto**: Workspace: 9014943317, Tareas sincronizadas: 0
+**Timestamp**: 2025-08-20T20:29:36.094300
+---
+
+## [2025-08-20 20:30:02] Error detectado
+**Descripcion del problema**: Errores en sincronización: Error procesando tarea 86b698xvk: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698v98: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698tgf: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6brrea: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6b6rjf: 'assignee_name' is an invalid keyword argument for Task
+**Solucion implementada**: Revisar logs y configuración de ClickUp
+**Contexto**: Workspace: 9014943317, Tareas sincronizadas: 0
+**Timestamp**: 2025-08-20T20:30:02.496654
+---
+
+## [2025-08-20 20:30:19] Error detectado
+**Descripcion del problema**: Errores en sincronización: Error procesando tarea 86b698xvk: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698v98: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698tgf: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6brrea: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6b6rjf: 'assignee_name' is an invalid keyword argument for Task
+**Solucion implementada**: Revisar logs y configuración de ClickUp
+**Contexto**: Workspace: 9014943317, Tareas sincronizadas: 0
+**Timestamp**: 2025-08-20T20:30:19.476536
+---
+
+## [2025-08-20 20:32:00] Error detectado
+**Descripcion del problema**: Errores en sincronización: Error procesando tarea 86b698xvk: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698v98: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698tgf: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6brrea: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6b6rjf: 'assignee_name' is an invalid keyword argument for Task
+**Solucion implementada**: Revisar logs y configuración de ClickUp
+**Contexto**: Workspace: 9014943317, Tareas sincronizadas: 0
+**Timestamp**: 2025-08-20T20:32:00.505737
+---
+
+## [2025-08-20 20:35:16] Error detectado
+**Descripcion del problema**: Errores en sincronización: Error procesando tarea 86b698xvk: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698v98: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b698tgf: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6brrea: 'assignee_name' is an invalid keyword argument for Task; Error procesando tarea 86b6b6rjf: 'assignee_name' is an invalid keyword argument for Task
+**Solucion implementada**: Revisar logs y configuración de ClickUp
+**Contexto**: Workspace: 9014943317, Tareas sincronizadas: 0
+**Timestamp**: 2025-08-20T20:35:16.161103
 ---

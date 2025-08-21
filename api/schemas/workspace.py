@@ -1,31 +1,35 @@
 """
-Esquemas Pydantic para espacios de trabajo
+Pydantic schemas for workspaces
 """
 
-from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field
+from datetime import datetime
 
 class WorkspaceResponse(BaseModel):
-    """Esquema de respuesta para espacios de trabajo"""
-    id: int
-    clickup_id: str
+    """Response schema for workspaces"""
+    id: str
     name: str
     description: Optional[str] = None
-    color: Optional[str] = None
-    private: bool
-    multiple_assignees: bool
-    created_at: datetime
-    updated_at: datetime
+    owner_id: Optional[str] = None
+    owner_name: Optional[str] = None
+    members_count: Optional[int] = None
+    tasks_count: Optional[int] = None
+    lists_count: Optional[int] = None
+    folders_count: Optional[int] = None
+    is_private: bool = False
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
     settings: Optional[Dict[str, Any]] = None
-    features: Optional[Dict[str, Any]] = None
-    is_synced: bool
-    last_sync: Optional[datetime] = None
+    custom_fields: Optional[Dict[str, Any]] = None
     
     class Config:
         from_attributes = True
 
 class WorkspaceList(BaseModel):
-    """Esquema para lista de espacios de trabajo"""
-    workspaces: list[WorkspaceResponse]
+    """Schema for workspace list"""
+    workspaces: List[WorkspaceResponse]
     total: int
+    page: int
+    limit: int
+    has_more: bool

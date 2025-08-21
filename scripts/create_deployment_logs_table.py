@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script para crear la tabla deployment_logs en PostgreSQL
-Esta tabla almacenará el historial completo de problemas y soluciones de deployment
+Esta tabla almacenara el historial completo de problemas y soluciones de deployment
 """
 
 import asyncio
@@ -10,29 +10,29 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-# Configuración de la base de datos
+# Configuracion de la base de datos
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./clickup_tasks.db")
 
 async def create_deployment_logs_table():
-    """Crear la tabla deployment_logs en PostgreSQL"""
+    """Create la tabla deployment_logs en PostgreSQL"""
     
-    print("🚀 Creando tabla deployment_logs...")
+    print("üöÄ Creando tabla deployment_logs...")
     engine = None
     
     try:
-        # Crear engine asíncrono
+        # Create engine asincrono
         if DATABASE_URL.startswith("postgresql"):
             # Convertir URL de PostgreSQL a formato asyncio
             async_database_url = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
             engine = create_async_engine(async_database_url, echo=True)
-            print("✅ Conectando a PostgreSQL...")
+            print("‚úÖ Conectando a PostgreSQL...")
         else:
-            print("⚠️ No se detectó PostgreSQL, usando SQLite para desarrollo local")
+            print("‚ö†Ô∏è No se detecto PostgreSQL, usando SQLite para desarrollo local")
             engine = create_async_engine("sqlite+aiosqlite:///./clickup_tasks.db", echo=True)
-            print("✅ Conectando a SQLite...")
+            print("‚úÖ Conectando a SQLite...")
         
         async with engine.begin() as conn:
-            # Crear tabla deployment_logs
+            # Create tabla deployment_logs
             create_table_sql = """
             CREATE TABLE IF NOT EXISTS deployment_logs (
                 id SERIAL PRIMARY KEY,
@@ -49,7 +49,7 @@ async def create_deployment_logs_table():
             
             await conn.execute(text(create_table_sql))
             
-            # Crear índices para mejor rendimiento
+            # Create indices para mejor rendimiento
             create_indexes_sql = [
                 "CREATE INDEX IF NOT EXISTS idx_deployment_logs_timestamp ON deployment_logs(timestamp);",
                 "CREATE INDEX IF NOT EXISTS idx_deployment_logs_severity ON deployment_logs(severity);",
@@ -60,10 +60,10 @@ async def create_deployment_logs_table():
             for index_sql in create_indexes_sql:
                 await conn.execute(text(index_sql))
             
-            print("✅ Tabla deployment_logs creada exitosamente")
-            print("✅ Índices creados para optimizar consultas")
+            print("‚úÖ Tabla deployment_logs creada exitosamente")
+            print("‚úÖ Indices creados para optimizar consultas")
             
-            # Insertar registro inicial de creación
+            # Insertar registro inicial de creacion
             insert_initial_sql = """
             INSERT INTO deployment_logs (
                 error_description, 
@@ -73,7 +73,7 @@ async def create_deployment_logs_table():
                 severity, 
                 status
             ) VALUES (
-                'Creación inicial de la tabla deployment_logs',
+                'Creacion inicial de la tabla deployment_logs',
                 'Script de Python ejecutado para crear la estructura de logging',
                 'Setup inicial del sistema de logs para deployment',
                 'development',
@@ -83,12 +83,12 @@ async def create_deployment_logs_table():
             """
             
             await conn.execute(text(insert_initial_sql))
-            print("✅ Registro inicial insertado")
+            print("‚úÖ Registro inicial insertado")
             
     except Exception as e:
-        print(f"❌ Error creando tabla: {e}")
+        print(f"‚ùå Error creating tabla: {e}")
         import traceback
-        print(f"❌ Traceback: {traceback.format_exc()}")
+        print(f"‚ùå Traceback: {traceback.format_exc()}")
         return False
     
     finally:
@@ -100,7 +100,7 @@ async def create_deployment_logs_table():
 async def insert_sample_logs():
     """Insertar algunos logs de ejemplo basados en problemas reales resueltos"""
     
-    print("\n📝 Insertando logs de ejemplo...")
+    print("\nüìù Insertando logs de ejemplo...")
     engine = None
     
     try:
@@ -114,33 +114,33 @@ async def insert_sample_logs():
             # Logs de ejemplo basados en problemas reales
             sample_logs = [
                 {
-                    "error_description": "Error 500 en creación de tareas - workspace_id y list_id eran None",
-                    "solution_description": "Corregir extracción de datos de respuesta de ClickUp API - usar team_id y list.id",
-                    "context_info": "Problema en api/routes/tasks.py - validación de modelo fallaba al guardar en PostgreSQL",
+                    "error_description": "Error 500 en creacion de tareas - workspace_id y list_id eran None",
+                    "solution_description": "Corregir extraccion de datos de respuesta de ClickUp API - usar team_id y list.id",
+                    "context_info": "Problema en api/routes/tasks.py - validacion de modelo fallaba al guardar en PostgreSQL",
                     "environment": "production",
                     "severity": "high",
                     "status": "resolved"
                 },
                 {
-                    "error_description": "Cache persistente de Railway - código anterior seguía ejecutándose",
+                    "error_description": "Cache persistente de Railway - codigo anterior seguia ejecutandose",
                     "solution_description": "Restart completo del servicio clickup_task_manager en Railway",
-                    "context_info": "Múltiples deploys exitosos pero código anterior persistía - problema de cache profundo",
+                    "context_info": "Multiples deploys exitosos pero codigo anterior persistia - problema de cache profundo",
                     "environment": "production", 
                     "severity": "medium",
                     "status": "resolved"
                 },
                 {
-                    "error_description": "Función safe_timestamp_to_datetime no definida",
-                    "solution_description": "Re-agregar función auxiliar eliminada accidentalmente durante reescritura",
-                    "context_info": "Función eliminada durante reescritura completa de tasks.py",
+                    "error_description": "Funcion safe_timestamp_to_datetime no definida",
+                    "solution_description": "Re-agregar funcion auxiliar eliminada accidentalmente durante reescritura",
+                    "context_info": "Funcion eliminada durante reescritura completa de tasks.py",
                     "environment": "production",
                     "severity": "medium", 
                     "status": "resolved"
                 },
                 {
-                    "error_description": "Sincronización entre interfaz y ClickUp no funcionaba",
-                    "solution_description": "Implementar endpoint /sync y dashboard de tareas para sincronización bidireccional",
-                    "context_info": "Tareas se creaban en ClickUp pero no aparecían en interfaz - falta de sincronización",
+                    "error_description": "Sincronizacion entre interfaz y ClickUp no funcionaba",
+                    "solution_description": "Implementar endpoint /sync y dashboard de tareas para sincronizacion bidireccional",
+                    "context_info": "Tareas se creaban en ClickUp pero no aparecian en interfaz - falta de sincronizacion",
                     "environment": "production",
                     "severity": "high",
                     "status": "resolved"
@@ -168,10 +168,10 @@ async def insert_sample_logs():
                 
                 await conn.execute(text(insert_sql), log)
             
-            print(f"✅ {len(sample_logs)} logs de ejemplo insertados")
+            print(f"‚úÖ {len(sample_logs)} logs de ejemplo insertados")
             
     except Exception as e:
-        print(f"❌ Error insertando logs de ejemplo: {e}")
+        print(f"‚ùå Error insertando logs de ejemplo: {e}")
         return False
     
     finally:
@@ -181,9 +181,9 @@ async def insert_sample_logs():
     return True
 
 async def verify_table():
-    """Verificar que la tabla se creó correctamente"""
+    """Verificar que la tabla se creo correctamente"""
     
-    print("\n🔍 Verificando tabla deployment_logs...")
+    print("\nüîç Verificando tabla deployment_logs...")
     engine = None
     
     try:
@@ -208,7 +208,7 @@ async def verify_table():
             
             columns = result.fetchall()
             
-            print("📊 Estructura de la tabla deployment_logs:")
+            print("üìä Estructura de la tabla deployment_logs:")
             if DATABASE_URL.startswith("postgresql"):
                 for col in columns:
                     print(f"   - {col[0]}: {col[1]} ({'NULL' if col[2] == 'YES' else 'NOT NULL'})")
@@ -219,9 +219,9 @@ async def verify_table():
             # Contar registros
             result = await conn.execute(text("SELECT COUNT(*) FROM deployment_logs;"))
             count = result.scalar()
-            print(f"\n📈 Total de registros en la tabla: {count}")
+            print(f"\nüìà Total de registros en la tabla: {count}")
             
-            # Mostrar últimos logs
+            # Mostrar ultimos logs
             result = await conn.execute(text("""
                 SELECT timestamp, severity, error_description 
                 FROM deployment_logs 
@@ -230,12 +230,12 @@ async def verify_table():
             """))
             
             logs = result.fetchall()
-            print(f"\n📝 Últimos 5 logs:")
+            print(f"\nüìù Ultimos 5 logs:")
             for log in logs:
                 print(f"   [{log[0]}] {log[1].upper()}: {log[2][:80]}...")
             
     except Exception as e:
-        print(f"❌ Error verificando tabla: {e}")
+        print(f"‚ùå Error verificando tabla: {e}")
         return False
     
     finally:
@@ -245,33 +245,33 @@ async def verify_table():
     return True
 
 async def main():
-    """Función principal"""
+    """Funcion principal"""
     
     print("=================================================================================")
-    print("                    CREACIÓN DE TABLA DEPLOYMENT_LOGS")
+    print("                    CREACION DE TABLA DEPLOYMENT_LOGS")
     print("                    ClickUp Task Manager - Railway")
     print("=================================================================================")
     print()
     
-    # Crear tabla
+    # Create tabla
     if await create_deployment_logs_table():
-        print("\n✅ Tabla creada exitosamente")
+        print("\n‚úÖ Tabla creada exitosamente")
         
         # Insertar logs de ejemplo
         if await insert_sample_logs():
-            print("\n✅ Logs de ejemplo insertados")
+            print("\n‚úÖ Logs de ejemplo insertados")
         
         # Verificar tabla
         await verify_table()
         
-        print("\n🎉 Proceso completado exitosamente!")
-        print("\n📋 La tabla deployment_logs está lista para usar")
+        print("\nüéâ Proceso completado exitosamente!")
+        print("\nüìã La tabla deployment_logs esta lista para usar")
         print("   - Almacena historial de problemas y soluciones")
         print("   - Incluye contexto y severidad de cada problema")
         print("   - Permite rastreo completo de deployments")
         
     else:
-        print("\n❌ Error en el proceso")
+        print("\n‚ùå Error en el proceso")
         return 1
     
     return 0

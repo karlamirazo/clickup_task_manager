@@ -16,7 +16,7 @@ def get_email_template(
     clickup_url: Optional[str] = None
 ) -> tuple[str, str]:
     """
-    Generar plantilla HTML para email de notificación
+    Generar plantilla HTML para email de notificacion
     
     Returns:
         tuple: (subject, html_body)
@@ -24,22 +24,22 @@ def get_email_template(
     
     # Mapear acciones a emojis y colores
     action_config = {
-        "created": {"emoji": "🆕", "color": "#28a745", "text": "Nueva tarea creada"},
-        "updated": {"emoji": "✏️", "color": "#ffc107", "text": "Tarea actualizada"},
-        "deleted": {"emoji": "🗑️", "color": "#dc3545", "text": "Tarea eliminada"},
+        "created": {"emoji": "üÜï", "color": "#28a745", "text": "Nueva tarea creada"},
+        "updated": {"emoji": "‚úèÔ∏è", "color": "#ffc107", "text": "Tarea actualizada"},
+        "deleted": {"emoji": "üóëÔ∏è", "color": "#dc3545", "text": "Tarea eliminada"},
     }
     
-    config = action_config.get(action, {"emoji": "📋", "color": "#6c757d", "text": "Notificación de tarea"})
+    config = action_config.get(action, {"emoji": "üìã", "color": "#6c757d", "text": "Notificacion de tarea"})
     
     # Mapear prioridad a colores
     priority_config = {
-        1: {"text": "Urgente", "color": "#dc3545", "emoji": "🔴"},
-        2: {"text": "Alta", "color": "#fd7e14", "emoji": "🟠"},
-        3: {"text": "Normal", "color": "#ffc107", "emoji": "🟡"},
-        4: {"text": "Baja", "color": "#28a745", "emoji": "🟢"},
+        1: {"text": "Urgente", "color": "#dc3545", "emoji": "üî¥"},
+        2: {"text": "Alta", "color": "#fd7e14", "emoji": "üü†"},
+        3: {"text": "Normal", "color": "#ffc107", "emoji": "üü°"},
+        4: {"text": "Baja", "color": "#28a745", "emoji": "üü¢"},
     }
     
-    priority_info = priority_config.get(priority, {"text": "No especificada", "color": "#6c757d", "emoji": "⚪"})
+    priority_info = priority_config.get(priority, {"text": "No especificada", "color": "#6c757d", "emoji": "‚ö™"})
     
     # Subject
     subject = f"{config['emoji']} {config['text']}: {task_name}"
@@ -192,7 +192,7 @@ def get_email_template(
     if status:
         html_body += f'''
             <div class="metadata-item">
-                <div class="metadata-label">📊 Estado</div>
+                <div class="metadata-label">üìä Estado</div>
                 <div class="metadata-value">{status}</div>
             </div>
         '''
@@ -210,7 +210,7 @@ def get_email_template(
     if assignee_name:
         html_body += f'''
             <div class="metadata-item">
-                <div class="metadata-label">👤 Asignado a</div>
+                <div class="metadata-label">üë§ Asignado a</div>
                 <div class="metadata-value">{assignee_name}</div>
             </div>
         '''
@@ -218,7 +218,7 @@ def get_email_template(
     if due_date:
         html_body += f'''
             <div class="metadata-item">
-                <div class="metadata-label">⏰ Fecha límite</div>
+                <div class="metadata-label">‚è∞ Fecha limite</div>
                 <div class="metadata-value">{due_date}</div>
             </div>
         '''
@@ -229,7 +229,7 @@ def get_email_template(
     if description:
         html_body += f'''
             <div class="description">
-                <div class="metadata-label">📝 Descripción</div>
+                <div class="metadata-label">üìù Descripcion</div>
                 <div style="margin-top: 10px;">{description}</div>
             </div>
         '''
@@ -238,13 +238,13 @@ def get_email_template(
     html_body += f'''
             <div style="text-align: center;">
                 <a href="{clickup_url}" class="cta-button">
-                    🔗 Abrir en ClickUp
+                    üîó Abrir en ClickUp
                 </a>
             </div>
             
             <div class="footer">
-                <p>📱 Notificación automática del Sistema de Gestión de Tareas ClickUp</p>
-                <p>🤖 Este email fue generado automáticamente, no responder.</p>
+                <p>üì± Notificacion automatica del Sistema de Gestion de Tareas ClickUp</p>
+                <p>ü§ñ Este email fue generado automaticamente, no responder.</p>
             </div>
         </div>
     </body>
@@ -260,13 +260,13 @@ def get_summary_email_template(
     successful_sms: int,
     successful_telegram: int,
     failed_notifications: int,
-    time_period: str = "últimas 24 horas"
+    time_period: str = "ultimas 24 horas"
 ) -> tuple[str, str]:
     """
     Plantilla para email de resumen de notificaciones
     """
     
-    subject = f"📊 Resumen de notificaciones - {notifications_sent} enviadas"
+    subject = f"üìä Resumen de notificaciones - {notifications_sent} enviadas"
     
     success_rate = (successful_emails + successful_sms + successful_telegram) / max(notifications_sent, 1) * 100
     
@@ -343,37 +343,37 @@ def get_summary_email_template(
     <body>
         <div class="email-container">
             <div class="header">
-                <h1>📊 Resumen de Notificaciones</h1>
-                <p>Estadísticas de las {time_period}</p>
+                <h1>üìä Resumen de Notificaciones</h1>
+                <p>Statistics for las {time_period}</p>
             </div>
             
             <div class="stats-grid">
                 <div class="stat-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
                     <div class="stat-number">{successful_emails}</div>
-                    <div class="stat-label">📧 Emails</div>
+                    <div class="stat-label">üìß Emails</div>
                 </div>
                 <div class="stat-card" style="background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);">
                     <div class="stat-number">{successful_sms}</div>
-                    <div class="stat-label">📱 SMS</div>
+                    <div class="stat-label">üì± SMS</div>
                 </div>
                 <div class="stat-card" style="background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);">
                     <div class="stat-number">{successful_telegram}</div>
-                    <div class="stat-label">💬 Telegram</div>
+                    <div class="stat-label">üí¨ Telegram</div>
                 </div>
                 <div class="stat-card" style="background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);">
                     <div class="stat-number">{failed_notifications}</div>
-                    <div class="stat-label">❌ Fallos</div>
+                    <div class="stat-label">‚ùå Fallos</div>
                 </div>
             </div>
             
             <div class="success-rate">
-                <h2 style="margin: 0;">✅ Tasa de Éxito</h2>
+                <h2 style="margin: 0;">‚úÖ Tasa de Exito</h2>
                 <div style="font-size: 48px; font-weight: bold; margin: 10px 0;">{success_rate:.1f}%</div>
                 <p style="margin: 0;">De {notifications_sent} notificaciones enviadas</p>
             </div>
             
             <div class="footer">
-                <p>🤖 Resumen automático del Sistema de Gestión de Tareas ClickUp</p>
+                <p>ü§ñ Resumen automatico del Sistema de Gestion de Tareas ClickUp</p>
             </div>
         </div>
     </body>

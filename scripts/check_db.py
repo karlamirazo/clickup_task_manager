@@ -5,11 +5,11 @@ import os
 # Verificar si el archivo de BD existe
 db_path = 'clickup_manager.db'
 if not os.path.exists(db_path):
-    print(f"❌ Base de datos no encontrada: {db_path}")
+    print(f"‚ùå Base de datos not found: {db_path}")
     exit(1)
 
-print(f"✅ Base de datos encontrada: {db_path}")
-print(f"   Tamaño: {os.path.getsize(db_path)} bytes")
+print(f"‚úÖ Base de datos encontrada: {db_path}")
+print(f"   Tamano: {os.path.getsize(db_path)} bytes")
 
 # Conectar a la base de datos
 conn = sqlite3.connect(db_path)
@@ -25,7 +25,7 @@ for table in tables:
 # Verificar estructura de cada tabla
 for table in tables:
     table_name = table[0]
-    print(f"\n📋 Estructura de tabla '{table_name}':")
+    print(f"\nüìã Estructura de tabla '{table_name}':")
     cursor.execute(f"PRAGMA table_info({table_name})")
     columns = cursor.fetchall()
     for col in columns:

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script para probar específicamente la actualización de campos personalizados
+Script para probar especificamente la actualizacion de campos personalizados
 """
 
 import asyncio
@@ -8,16 +8,16 @@ import os
 import sys
 from datetime import datetime
 
-# Agregar el directorio raíz al path para importar módulos
+# Agregar el directorio raiz al path para importar modulos
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.clickup_client import ClickUpClient
 from custom_field_config import get_custom_field_id
 
 async def test_custom_field_update():
-    """Probar la actualización de campos personalizados"""
+    """Test la actualizacion de campos personalizados"""
     
-    print("🧪 PROBANDO ACTUALIZACIÓN DE CAMPOS PERSONALIZADOS")
+    print("üß™ PROBANDO ACTUALIZACION DE CAMPOS PERSONALIZADOS")
     print("=" * 60)
     
     # ID de la tarea que acabamos de crear
@@ -28,52 +28,52 @@ async def test_custom_field_update():
         # Inicializar cliente ClickUp
         client = ClickUpClient()
         
-        print(f"📋 Actualizando campos personalizados para tarea: {task_id}")
+        print(f"üìã Actualizando campos personalizados para tarea: {task_id}")
         
-        # Obtener IDs de campos personalizados
+        # Get IDs de campos personalizados
         email_field_id = get_custom_field_id(list_id, "Email")
         celular_field_id = get_custom_field_id(list_id, "Celular")
         
-        print(f"📧 Email Field ID: {email_field_id}")
-        print(f"📱 Celular Field ID: {celular_field_id}")
+        print(f"üìß Email Field ID: {email_field_id}")
+        print(f"üì± Celular Field ID: {celular_field_id}")
         
-        # Actualizar campo Email
+        # Update campo Email
         if email_field_id:
-            print(f"\n📧 Actualizando campo Email...")
+            print(f"\nüìß Actualizando campo Email...")
             try:
                 result = await client.update_custom_field_value(task_id, email_field_id, "prueba.auto@test.com")
-                print(f"✅ Email actualizado: {result}")
+                print(f"‚úÖ Email actualizado: {result}")
             except Exception as e:
-                print(f"❌ Error actualizando Email: {e}")
+                print(f"‚ùå Error updating Email: {e}")
         
-        # Actualizar campo Celular
+        # Update campo Celular
         if celular_field_id:
-            print(f"\n📱 Actualizando campo Celular...")
+            print(f"\nüì± Actualizando campo Celular...")
             try:
                 result = await client.update_custom_field_value(task_id, celular_field_id, "+52 55 9876 5432")
-                print(f"✅ Celular actualizado: {result}")
+                print(f"‚úÖ Celular actualizado: {result}")
             except Exception as e:
-                print(f"❌ Error actualizando Celular: {e}")
+                print(f"‚ùå Error updating Celular: {e}")
         
         # Esperar un momento
-        print(f"\n⏳ Esperando 3 segundos...")
+        print(f"\n‚è≥ Esperando 3 segundos...")
         await asyncio.sleep(3)
         
         # Verificar el resultado
-        print(f"\n🔍 Verificando resultado...")
+        print(f"\nüîç Verificando resultado...")
         task_details = await client.get_task(task_id)
         
         if task_details:
             custom_fields = task_details.get('custom_fields', [])
-            print(f"📧 Campos personalizados encontrados: {len(custom_fields)}")
+            print(f"üìß Campos personalizados encontrados: {len(custom_fields)}")
             
             for field in custom_fields:
                 field_name = field.get('name')
                 field_value = field.get('value')
-                print(f"   📧 {field_name}: {field_value}")
+                print(f"   üìß {field_name}: {field_value}")
         
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"‚ùå Error: {e}")
 
 if __name__ == "__main__":
     asyncio.run(test_custom_field_update())

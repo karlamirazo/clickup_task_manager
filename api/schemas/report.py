@@ -1,56 +1,58 @@
 """
-Esquemas Pydantic para reportes
+Pydantic schemas for reports
 """
 
-from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field
+from datetime import datetime
 
 class ReportBase(BaseModel):
-    """Esquema base para reportes"""
-    name: str = Field(..., min_length=1, max_length=255, description="Nombre del reporte")
-    description: Optional[str] = Field(None, description="Descripción del reporte")
-    report_type: str = Field(..., description="Tipo de reporte")
-    parameters: Optional[Dict[str, Any]] = Field(None, description="Parámetros del reporte")
-    filters: Optional[Dict[str, Any]] = Field(None, description="Filtros aplicados")
-    date_range: Optional[Dict[str, Any]] = Field(None, description="Rango de fechas")
-    workspace_id: Optional[str] = Field(None, description="ID del workspace")
+    """Base schema for reports"""
+    name: str = Field(..., min_length=1, max_length=255, description="Report name")
+    description: Optional[str] = Field(None, description="Report description")
+    report_type: str = Field(..., description="Report type")
+    config: Dict[str, Any] = Field(default_factory=dict, description="Report configuration")
+    schedule: Optional[str] = Field(None, description="Report schedule (cron expression)")
 
 class ReportCreate(ReportBase):
-    """Esquema para crear un reporte"""
+    """Schema for creating a report"""
     pass
 
+class ReportUpdate(BaseModel):
+    """Response schema for reports"""
+    name: Optional[str] = Field(None, min_length=1, max_length=255, description="Report name")
+    description: Optional[str] = Field(None, description="Report description")
+    report_type: Optional[str] = None
+    config: Optional[Dict[str, Any]] = None
+    schedule: Optional[str] = None
+    is_active: Optional[bool] = None
+
 class ReportResponse(ReportBase):
-    """Esquema de respuesta para reportes"""
+    """Response schema for reports"""
     id: int
-    data: Optional[Dict[str, Any]] = None
-    summary: Optional[Dict[str, Any]] = None
-    status: str
-    generated: bool
+    workspace_id: str
     created_at: datetime
     updated_at: datetime
-    generated_at: Optional[datetime] = None
-    created_by: str
-    file_path: Optional[str] = None
-    file_size: Optional[int] = None
+    last_generated: Optional[datetime] = None
+    generation_count: int = 0
+    is_active: bool = True
     
     class Config:
         from_attributes = True
 
 class ReportList(BaseModel):
-    """Esquema para lista de reportes"""
-    reports: list[ReportResponse]
+    """Schema for report list"""
+    reports: List[ReportResponse]
     total: int
     page: int
     limit: int
     has_more: bool
 
 class ReportFilter(BaseModel):
-    """Esquema para filtros de reportes"""
+    """Schema for report filters"""
     report_type: Optional[str] = None
-    status: Optional[str] = None
-    created_by: Optional[str] = None
-    date_from: Optional[datetime] = None
-    date_to: Optional[datetime] = None
+    is_active: Optional[bool] = None
+    created_after: Optional[datetime] = None
+    created_before: Optional[datetime] = None
     page: int = 0
-    limit: int = 20
+    limit: int = 50

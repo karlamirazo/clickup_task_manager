@@ -7,7 +7,7 @@ from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, JSON
 from core.database import Base
 
 class Integration(Base):
-    """Modelo de integración"""
+    """Modelo de integracion"""
     
     __tablename__ = "integrations"
     
@@ -15,12 +15,12 @@ class Integration(Base):
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     
-    # Configuración de la integración
+    # Configuracion de la integracion
     integration_type = Column(String(100), nullable=False)  # crm, database, productivity, etc.
     provider = Column(String(100), nullable=False)  # salesforce, hubspot, postgresql, etc.
     
-    # Configuración de conexión
-    config = Column(JSON, nullable=False)  # Configuración de la integración
+    # Configuracion de conexion
+    config = Column(JSON, nullable=False)  # Configuracion de la integracion
     credentials = Column(JSON, nullable=True)  # Credenciales (encriptadas)
     
     # Estado
@@ -37,12 +37,12 @@ class Integration(Base):
     workspace_id = Column(String(255), nullable=False)
     created_by = Column(String(255), nullable=False)
     
-    # Estadísticas
+    # Estadisticas
     sync_count = Column(Integer, default=0)
     error_count = Column(Integer, default=0)
     last_error = Column(Text, nullable=True)
     
-    # Configuración de sincronización
+    # Configuracion de sincronizacion
     sync_interval = Column(Integer, default=3600)  # Intervalo en segundos
     auto_sync = Column(Boolean, default=True)
     

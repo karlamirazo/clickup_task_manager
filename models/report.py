@@ -15,11 +15,11 @@ class Report(Base):
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     
-    # Configuración del reporte
+    # Configuracion del reporte
     report_type = Column(String(100), nullable=False)  # task_summary, user_performance, etc.
-    parameters = Column(JSON, nullable=True)  # Parámetros del reporte
+    parameters = Column(JSON, nullable=True)  # Parametros del reporte
     
-    # Filtros y configuración
+    # Filtros y configuracion
     filters = Column(JSON, nullable=True)  # Filtros aplicados
     date_range = Column(JSON, nullable=True)  # Rango de fechas
     
@@ -42,7 +42,7 @@ class Report(Base):
     
     # Archivos
     file_path = Column(String(500), nullable=True)  # Ruta al archivo generado
-    file_size = Column(Integer, nullable=True)  # Tamaño del archivo en bytes
+    file_size = Column(Integer, nullable=True)  # Tamano del archivo en bytes
     
     def __repr__(self):
         return f"<Report(id={self.id}, name='{self.name}', type='{self.report_type}')>"

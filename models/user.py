@@ -18,15 +18,15 @@ class User(Base):
     first_name = Column(String(255), nullable=True)
     last_name = Column(String(255), nullable=True)
     
-    # Información del perfil
+    # Informacion del perfil
     avatar = Column(String(500), nullable=True)  # URL del avatar
-    title = Column(String(255), nullable=True)  # Título/cargo
+    title = Column(String(255), nullable=True)  # Titulo/cargo
     
-    # Autenticación y seguridad
-    password_hash = Column(String(255), nullable=True)  # Hash de contraseña
+    # Autenticacion y seguridad
+    password_hash = Column(String(255), nullable=True)  # Hash de contrasena
     is_active = Column(Boolean, default=True)  # Usuario activo
     role = Column(String(50), default="user")  # admin, manager, user, viewer
-    clickup_role = Column(String(100), nullable=True)  # Rol específico en ClickUp
+    clickup_role = Column(String(100), nullable=True)  # Rol especifico en ClickUp
     
     # API Keys
     api_key = Column(String(255), nullable=True, unique=True)
@@ -34,11 +34,11 @@ class User(Base):
     api_key_active = Column(Boolean, default=False)
     api_key_created_at = Column(DateTime, nullable=True)
     
-    # Información de contacto para notificaciones
+    # Informacion de contacto para notificaciones
     phone = Column(String(20), nullable=True)
     telegram_id = Column(String(100), nullable=True)
     
-    # Configuración
+    # Configuracion
     active = Column(Boolean, default=True)  # Para compatibilidad con ClickUp
     timezone = Column(String(100), nullable=True)
     language = Column(String(10), nullable=True, default="en")
@@ -52,7 +52,7 @@ class User(Base):
     preferences = Column(JSON, nullable=True)  # Preferencias del usuario
     workspaces = Column(JSON, nullable=True)  # Workspaces a los que pertenece
     
-    # Estado de sincronización
+    # Estado de sincronizacion
     is_synced = Column(Boolean, default=False)
     last_sync = Column(DateTime, nullable=True)
     
@@ -85,7 +85,7 @@ class User(Base):
     
     @property
     def full_name(self):
-        """Obtener nombre completo"""
+        """Get nombre completo"""
         if self.first_name and self.last_name:
             return f"{self.first_name} {self.last_name}"
         elif self.first_name:

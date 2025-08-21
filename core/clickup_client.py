@@ -29,22 +29,22 @@ class ClickUpClient:
         data: Optional[Dict] = None,
         params: Optional[Dict] = None
     ) -> Dict[str, Any]:
-        """Realizar petición a la API de ClickUp.
+        """Realizar peticion a la API de ClickUp.
 
-        Nota: algunas rutas (p.ej. DELETE task) devuelven 204 o cuerpo vacío/no JSON.
+        Nota: algunas rutas (p.ej. DELETE task) devuelven 204 o cuerpo vacio/no JSON.
         En esos casos, no se intenta parsear como JSON y se retorna {}.
         """
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
         
         # Validar que tenemos un token
         if not self.api_token:
-            logger.error("❌ No se proporcionó token de ClickUp API")
-            raise ValueError("CLICKUP_API_TOKEN no está configurado")
+            logger.error("â�Œ No ClickUp API token provided")
+            raise ValueError("CLICKUP_API_TOKEN is not configured")
         
-        logger.info(f"🔗 Haciendo petición a ClickUp API: {method} {url}")
-        logger.info(f"🔑 Headers: {self.headers}")
+        logger.info(f"ðŸ”— Making ClickUp API request: {method} {url}")
+        logger.info(f"ðŸ”‘ Headers: {self.headers}")
         if params:
-            logger.info(f"📋 Parámetros: {params}")
+            logger.info(f"ðŸ“‹ Parameters: {params}")
         
         async with aiohttp.ClientSession() as session:
             try:
@@ -56,11 +56,11 @@ class ClickUpClient:
                     params=params,
                     timeout=aiohttp.ClientTimeout(total=30)
                 ) as response:
-                    logger.info(f"📡 Respuesta de ClickUp API: {response.status}")
+                    logger.info(f"ðŸ“¡ ClickUp API response: {response.status}")
                     
                     if response.status >= 400:
                         error_text = await response.text()
-                        logger.error(f"❌ Error en ClickUp API ({response.status}): {error_text}")
+                        logger.error(f"â�Œ ClickUp API error ({response.status}): {error_text}")
                         response.raise_for_status()
                     
                     # Evitar parsear JSON para respuestas sin contenido o no-JSON
@@ -68,7 +68,7 @@ class ClickUpClient:
                     content_type = response.headers.get("Content-Type", "")
                     if response.status == 204 or method_upper == "DELETE":
                         return {}
-                    # Si no hay cuerpo o no es JSON, devolver vacío
+                    # Si no hay cuerpo o no es JSON, devolver vacio
                     if response.content_length in (0, None) and not content_type.startswith("application/json"):
                         return {}
                     if not content_type.startswith("application/json"):
@@ -76,64 +76,64 @@ class ClickUpClient:
                         return {}
                     
                     result = await response.json()
-                    logger.info(f"✅ Petición exitosa a ClickUp API")
+                    logger.info(f"âœ… Successful ClickUp API request")
                     return result
                     
             except aiohttp.ClientError as e:
-                logger.error(f"❌ Error de conexión a ClickUp API: {e}")
+                logger.error(f"â�Œ Connection error to ClickUp API: {e}")
                 raise
             except asyncio.TimeoutError:
-                logger.error(f"❌ Timeout en petición a ClickUp API: {url}")
+                logger.error(f"â�Œ Timeout in ClickUp API request: {url}")
                 raise
             except Exception as e:
-                logger.error(f"❌ Error inesperado en petición a ClickUp API: {e}")
+                logger.error(f"â�Œ Unexpected error in ClickUp API request: {e}")
                 raise
     
-    # Métodos para Workspaces (Teams en ClickUp)
+    # Metodos para Workspaces (Teams en ClickUp)
     async def get_workspaces(self) -> List[Dict]:
-        """Obtener todos los workspaces (teams en ClickUp)"""
+        """Get todos los workspaces (teams en ClickUp)"""
         response = await self._make_request("GET", "team")
         return response.get("teams", [])
     
     async def get_teams(self) -> List[Dict]:
-        """Obtener todos los teams (alias de get_workspaces)"""
+        """Get todos los teams (alias de get_workspaces)"""
         return await self.get_workspaces()
     
-    # Métodos para Usuario
+    # Metodos para Usuario
     async def get_user(self, user_id: str = None) -> Dict:
-        """Obtener información del usuario actual o un usuario específico"""
+        """Get informacion del usuario actual o un usuario especifico"""
         if user_id is not None:
             return await self._make_request("GET", f"user/{user_id}")
         else:
             return await self._make_request("GET", "user")
     
     async def get_workspace(self, workspace_id: str) -> Dict:
-        """Obtener un workspace específico"""
+        """Get un workspace especifico"""
         return await self._make_request("GET", f"team/{workspace_id}")
     
-    # Métodos para Spaces
+    # Metodos para Spaces
     async def get_spaces(self, workspace_id: str) -> List[Dict]:
-        """Obtener todos los spaces de un workspace"""
+        """Get todos los spaces de un workspace"""
         response = await self._make_request("GET", f"team/{workspace_id}/space")
         return response.get("spaces", [])
     
     async def get_space(self, space_id: str) -> Dict:
-        """Obtener un space específico"""
+        """Get un space especifico"""
         return await self._make_request("GET", f"space/{space_id}")
     
-    # Métodos para Lists
+    # Metodos para Lists
     async def get_lists(self, space_id: str) -> List[Dict]:
-        """Obtener todas las listas de un space (incluyendo las de folders)"""
+        """Get todas las listas de un space (incluyendo las de folders)"""
         all_lists = []
         
-        # Obtener listas directas del space
+        # Get listas directas del space
         try:
             response = await self._make_request("GET", f"space/{space_id}/list")
             all_lists.extend(response.get("lists", []))
         except Exception as e:
-            print(f"Error obteniendo listas directas: {e}")
+            print(f"Error getting listas directas: {e}")
         
-        # Obtener folders y sus listas
+        # Get folders y sus listas
         try:
             folders_response = await self._make_request("GET", f"space/{space_id}/folder")
             folders = folders_response.get("folders", [])
@@ -143,56 +143,58 @@ class ClickUpClient:
                     folder_lists_response = await self._make_request("GET", f"folder/{folder['id']}/list")
                     folder_lists = folder_lists_response.get("lists", [])
                     
-                    # Agregar información del folder a cada lista
+                    # Agregar informacion del folder a cada lista
                     for list_item in folder_lists:
                         list_item["folder_name"] = folder["name"]
                         list_item["folder_id"] = folder["id"]
                     
                     all_lists.extend(folder_lists)
                 except Exception as e:
-                    print(f"Error obteniendo listas del folder {folder['id']}: {e}")
+                    print(f"Error getting listas del folder {folder['id']}: {e}")
         except Exception as e:
-            print(f"Error obteniendo folders: {e}")
+            print(f"Error getting folders: {e}")
         
         return all_lists
     
     async def get_list(self, list_id: str) -> Dict:
-        """Obtener una lista específica"""
+        """Get una lista especifica"""
         return await self._make_request("GET", f"list/{list_id}")
     
-    # Métodos para Tasks
+    # Metodos para Tasks
     async def get_tasks(
         self, 
         list_id: str, 
         include_closed: bool = False,
-        page: int = 0
+        page: int = 0,
+        limit: int = 100
     ) -> List[Dict]:
-        """Obtener tareas de una lista"""
+        """Get tareas de una lista"""
         params = {
             "include_closed": str(include_closed).lower(),  # Convertir boolean a string
-            "page": page
+            "page": page,
+            "limit": limit
         }
         response = await self._make_request("GET", f"list/{list_id}/task", params=params)
         return response.get("tasks", [])
     
     async def get_task(self, task_id: str) -> Dict:
-        """Obtener una tarea específica"""
+        """Get una tarea especifica"""
         return await self._make_request("GET", f"task/{task_id}")
     
     async def create_task(self, list_id: str, task_data: Dict) -> Dict:
-        """Crear una nueva tarea"""
+        """Create una nueva tarea"""
         try:
-            # Asegurar que los campos personalizados se incluyan en la creación inicial
+            # Asegurar que los campos personalizados se incluyan en la creacion inicial
             if "custom_fields" in task_data:
                 # Los campos personalizados pueden venir en formato diccionario o lista
                 custom_fields = task_data["custom_fields"]
                 
                 # Si es un diccionario (formato: {"Email": "valor", "Celular": "valor"})
                 if isinstance(custom_fields, dict):
-                    # ClickUp espera que los campos personalizados se envíen como diccionario
+                    # ClickUp espera que los campos personalizados se envien como diccionario
                     # con los nombres de los campos como claves
                     task_data["custom_fields"] = custom_fields
-                    print(f"📧 Campos personalizados enviados como diccionario: {custom_fields}")
+                    print(f"ðŸ“§ Campos personalizados enviados como diccionario: {custom_fields}")
                 
                 # Si es una lista (formato: [{"id": "field_id", "value": "valor"}])
                 elif isinstance(custom_fields, list):
@@ -203,11 +205,11 @@ class ClickUpClient:
                     
                     if formatted_custom_fields:
                         task_data["custom_fields"] = formatted_custom_fields
-                        print(f"📧 Campos personalizados enviados como lista: {formatted_custom_fields}")
+                        print(f"ðŸ“§ Campos personalizados enviados como lista: {formatted_custom_fields}")
             
             return await self._make_request("POST", f"list/{list_id}/task", data=task_data)
         except aiohttp.ClientResponseError as cre:
-            # Fallback: algunos espacios/listas rechazan priority/status -> reintentar con payload mínimo
+            # Fallback: algunos espacios/listas rechazan priority/status -> reintentar con payload minimo
             if cre.status == 400:
                 minimal_data: Dict[str, Any] = {
                     "name": task_data.get("name", "Nueva tarea"),
@@ -231,62 +233,36 @@ class ClickUpClient:
             raise
     
     async def update_task(self, task_id: str, task_data: Dict) -> Dict:
-        """Actualizar una tarea existente"""
+        """Update una tarea existente"""
         return await self._make_request("PUT", f"task/{task_id}", data=task_data)
     
     async def delete_task(self, task_id: str) -> bool:
-        """Eliminar una tarea"""
+        """Delete una tarea"""
         await self._make_request("DELETE", f"task/{task_id}")
         return True
     
-    # Métodos para Users
+    # Metodos para Users
     async def get_users(self, workspace_id: str) -> List[Dict]:
-        """Obtener usuarios de un workspace"""
-        # Intentar primero /member y si no existe, probar /user
+        """Get usuarios de un workspace"""
         try:
-            response = await self._make_request("GET", f"team/{workspace_id}/member")
-            members = response.get("members", [])
-            if members:
-                return members
+            # Intentar obtener usuarios del team/workspace usando la ruta correcta
+            response = await self._make_request("GET", f"team/{workspace_id}")
+            team_data = response
+            
+            # Si el team tiene members, usarlos
+            if team_data.get("members"):
+                return team_data["members"]
+            
         except Exception as e:
-            print(f"Error en petición a ClickUp API (member): {e}")
+            print(f"Error en peticion a ClickUp API (team/workspace): {e}")
         
-        # Fallback a /user
-        try:
-            response = await self._make_request("GET", f"team/{workspace_id}/user")
-            users = response.get("users", [])
-            # Normalizar a la forma de 'members' para que el resto del código funcione
-            normalized = [{"user": u, "role": u.get("role", "")} for u in users]
-            if normalized:
-                return normalized
-        except Exception as e:
-            print(f"Error en petición a ClickUp API (user): {e}")
-        
-        # Fallback: intentar obtener usuarios del workspace directamente
-        try:
-            response = await self._make_request("GET", f"workspace/{workspace_id}/member")
-            members = response.get("members", [])
-            if members:
-                return members
-        except Exception as e:
-            print(f"Error en petición a ClickUp API (workspace member): {e}")
-        
-        # Último fallback: obtener todos los teams y extraer los miembros del solicitado
-        try:
-            teams_resp = await self._make_request("GET", "team")
-            for team in teams_resp.get("teams", []):
-                if str(team.get("id")) == str(workspace_id) and team.get("members"):
-                    return team["members"]
-        except Exception as e:
-            print(f"Error en petición a ClickUp API (team): {e}")
-        
-        # Si todo falla, devolver un usuario de ejemplo para que la UI funcione
-        print("No se pudieron obtener usuarios de ClickUp, devolviendo usuario de ejemplo")
+        # Si no se pueden obtener usuarios de la API, devolver usuarios de ejemplo
+        print("No se pudieron obtener usuarios de ClickUp, devolviendo usuarios de ejemplo")
         return [{
             "user": {
                 "id": "156221125",
-                "username": "karla.ve",
-                "email": "karla.ve@example.com",
+                "username": "Karla Ve",
+                "email": "karlamirazo@gmail.com",
                 "first_name": "Karla",
                 "last_name": "Ve",
                 "avatar": "",
@@ -296,66 +272,95 @@ class ClickUpClient:
                 "language": "es",
                 "preferences": {}
             },
-            "role": "member",
-            "workspaces": {}
+            "role": "member"
+        }, {
+            "user": {
+                "id": "88425546",
+                "username": "Veronica Mirazo",
+                "email": "karla_r@hotmail.com",
+                "first_name": "Veronica",
+                "last_name": "Mirazo",
+                "avatar": "",
+                "title": "Usuario",
+                "active": True,
+                "timezone": "America/Mexico_City",
+                "language": "es",
+                "preferences": {}
+            },
+            "role": "member"
+        }, {
+            "user": {
+                "id": "88425547",
+                "username": "Karla Rosas",
+                "email": "lakitu_98@yahoo.com",
+                "first_name": "Karla",
+                "last_name": "Rosas",
+                "avatar": "",
+                "title": "Usuario",
+                "active": True,
+                "timezone": "America/Mexico_City",
+                "language": "es",
+                "preferences": {}
+            },
+            "role": "member"
         }]
     
-    # Método get_user ya definido anteriormente con parámetro opcional
+    # Metodo get_user ya definido anteriormente con parametro opcional
     
-    # Métodos para Comments
+    # Metodos para Comments
     async def get_task_comments(self, task_id: str) -> List[Dict]:
-        """Obtener comentarios de una tarea"""
+        """Get comentarios de una tarea"""
         response = await self._make_request("GET", f"task/{task_id}/comment")
         return response.get("comments", [])
     
     async def create_comment(self, task_id: str, comment_data: Dict) -> Dict:
-        """Crear un comentario en una tarea"""
+        """Create un comentario en una tarea"""
         return await self._make_request("POST", f"task/{task_id}/comment", data=comment_data)
     
-    # Métodos para Attachments
+    # Metodos para Attachments
     async def get_task_attachments(self, task_id: str) -> List[Dict]:
-        """Obtener archivos adjuntos de una tarea"""
+        """Get archivos adjuntos de una tarea"""
         response = await self._make_request("GET", f"task/{task_id}/attachment")
         return response.get("attachments", [])
     
-    # Métodos para Custom Fields
+    # Metodos para Custom Fields
     async def get_list_custom_fields(self, list_id: str) -> List[Dict]:
-        """Obtener campos personalizados de una lista"""
+        """Get campos personalizados de una lista"""
         response = await self._make_request("GET", f"list/{list_id}/field")
         return response.get("fields", [])
     
-    # Métodos para Tags
+    # Metodos para Tags
     async def get_space_tags(self, space_id: str) -> List[Dict]:
-        """Obtener etiquetas de un space"""
+        """Get etiquetas de un space"""
         response = await self._make_request("GET", f"space/{space_id}/tag")
         return response.get("tags", [])
     
-    # Métodos para Time Tracking
+    # Metodos para Time Tracking
     async def get_task_time_entries(self, task_id: str) -> List[Dict]:
-        """Obtener entradas de tiempo de una tarea"""
+        """Get entradas de tiempo de una tarea"""
         response = await self._make_request("GET", f"task/{task_id}/time")
         return response.get("data", [])
     
     async def create_time_entry(self, task_id: str, time_data: Dict) -> Dict:
-        """Crear una entrada de tiempo"""
+        """Create una entrada de tiempo"""
         return await self._make_request("POST", f"task/{task_id}/time", data=time_data)
     
-    # Métodos para Webhooks
+    # Metodos para Webhooks
     async def create_webhook(self, webhook_data: Dict) -> Dict:
-        """Crear un webhook"""
+        """Create un webhook"""
         return await self._make_request("POST", "webhook", data=webhook_data)
     
     async def get_webhooks(self) -> List[Dict]:
-        """Obtener webhooks"""
+        """Get webhooks"""
         response = await self._make_request("GET", "webhook")
         return response.get("webhooks", [])
     
     async def delete_webhook(self, webhook_id: str) -> bool:
-        """Eliminar un webhook"""
+        """Delete un webhook"""
         await self._make_request("DELETE", f"webhook/{webhook_id}")
         return True
     
-    # Métodos de utilidad
+    # Metodos de utilidad
     async def search_tasks(self, query: str, workspace_id: str) -> List[Dict]:
         """Buscar tareas"""
         params = {
@@ -366,7 +371,7 @@ class ClickUpClient:
         return response.get("tasks", [])
     
     async def get_user_tasks(self, user_id: str, workspace_id: str) -> List[Dict]:
-        """Obtener tareas asignadas a un usuario"""
+        """Get tareas asignadas a un usuario"""
         params = {
             "assignees[]": [user_id],
             "team_id": workspace_id
@@ -375,7 +380,7 @@ class ClickUpClient:
         return response.get("tasks", [])
     
     async def get_due_tasks(self, workspace_id: str, due_date: Optional[datetime] = None) -> List[Dict]:
-        """Obtener tareas con fecha límite"""
+        """Get tareas con fecha limite"""
         params = {
             "team_id": workspace_id,
             "due_date_lt": due_date.isoformat() if due_date else None
@@ -384,7 +389,7 @@ class ClickUpClient:
         return response.get("tasks", [])
     
     async def update_custom_field_value(self, task_id: str, field_id: str, value: Any) -> Dict:
-        """Actualizar el valor de un campo personalizado en una tarea.
+        """Update el valor de un campo personalizado en una tarea.
         Intenta usar el endpoint dedicado de ClickUp; si falla, hace fallback a update_task.
         """
         payload = {"value": value}
@@ -392,11 +397,11 @@ class ClickUpClient:
             # Endpoint dedicado para actualizar un campo personalizado
             return await self._make_request("POST", f"task/{task_id}/field/{field_id}", data=payload)
         except Exception as _e:
-            # Fallback al método por update_task
+            # Fallback al metodo por update_task
             update_data = {"custom_fields": [{"id": field_id, "value": value}]}
             return await self.update_task(task_id, update_data)
 
-# ===== FUNCIÓN DE DEPENDENCIA PARA FASTAPI =====
+# ===== FUNCION DE DEPENDENCIA PARA FASTAPI =====
 def get_clickup_client() -> ClickUpClient:
-    """Función de dependencia para FastAPI que retorna una instancia de ClickUpClient"""
+    """Funcion de dependencia para FastAPI que retorna una instancia de ClickUpClient"""
     return ClickUpClient()

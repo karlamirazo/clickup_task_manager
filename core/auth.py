@@ -1,5 +1,5 @@
 """
-Sistema de autenticación para múltiples usuarios
+Sistema de autenticacion para multiples usuarios
 """
 
 import secrets
@@ -22,32 +22,32 @@ from models.user import User
 # Configurar logging
 auth_logger = logging.getLogger("auth")
 
-# Configuración de seguridad
+# Configuracion de seguridad
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer(auto_error=False)
 
-# Configuración JWT
+# Configuracion JWT
 SECRET_KEY = getattr(settings, 'JWT_SECRET_KEY', secrets.token_urlsafe(32))
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 24 horas
 
 
 class AuthManager:
-    """Gestor de autenticación y autorización"""
+    """Gestor de autenticacion y autorizacion"""
     
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
-        """Verificar contraseña"""
+        """Verificar contrasena"""
         return pwd_context.verify(plain_password, hashed_password)
     
     @staticmethod
     def get_password_hash(password: str) -> str:
-        """Generar hash de contraseña"""
+        """Generar hash de contrasena"""
         return pwd_context.hash(password)
     
     @staticmethod
     def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-        """Crear token JWT"""
+        """Create token JWT"""
         to_encode = data.copy()
         
         if expires_delta:
@@ -66,12 +66,12 @@ class AuthManager:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             return payload
         except JWTError as e:
-            auth_logger.warning(f"Token inválido: {e}")
+            auth_logger.warning(f"Token invalido: {e}")
             return None
     
     @staticmethod
     def create_api_key(user_id: int, description: str = "") -> str:
-        """Crear API key para usuario"""
+        """Create API key para usuario"""
         # Generar API key con formato: usuario_timestamp_random
         timestamp = int(datetime.now().timestamp())
         random_part = secrets.token_urlsafe(16)
@@ -140,19 +140,19 @@ class RoleManager:
     
     @classmethod
     def has_permission(cls, user_role: str, permission: str) -> bool:
-        """Verificar si un rol tiene un permiso específico"""
+        """Verificar si un rol tiene un permiso especifico"""
         role_data = cls.ROLES.get(user_role, {})
         permissions = role_data.get("permissions", [])
         return permission in permissions
     
     @classmethod
     def get_role_permissions(cls, role: str) -> list:
-        """Obtener permisos de un rol"""
+        """Get permisos de un rol"""
         return cls.ROLES.get(role, {}).get("permissions", [])
     
     @classmethod
     def get_available_roles(cls) -> dict:
-        """Obtener todos los roles disponibles"""
+        """Get todos los roles disponibles"""
         return {k: v["name"] for k, v in cls.ROLES.items()}
 
 
@@ -161,7 +161,7 @@ def get_current_user(
     db: Session = Depends(get_db)
 ) -> Optional[User]:
     """
-    Obtener usuario actual desde token JWT o API key
+    Get usuario actual desde token JWT o API key
     """
     if not credentials:
         return None
@@ -189,7 +189,7 @@ def require_auth(
     current_user: Optional[User] = Depends(get_current_user)
 ) -> User:
     """
-    Requerir autenticación obligatoria
+    Requerir autenticacion obligatoria
     """
     if not current_user:
         raise HTTPException(
@@ -202,7 +202,7 @@ def require_auth(
 
 def require_permission(permission: str):
     """
-    Decorator para requerir un permiso específico
+    Decorator para requerir un permiso especifico
     """
     def permission_dependency(current_user: User = Depends(require_auth)) -> User:
         if not RoleManager.has_permission(current_user.role, permission):
@@ -217,7 +217,7 @@ def require_permission(permission: str):
 
 def require_role(required_role: str):
     """
-    Decorator para requerir un rol específico
+    Decorator para requerir un rol especifico
     """
     def role_dependency(current_user: User = Depends(require_auth)) -> User:
         if current_user.role != required_role:
@@ -234,7 +234,7 @@ def optional_auth(
     current_user: Optional[User] = Depends(get_current_user)
 ) -> Optional[User]:
     """
-    Autenticación opcional (no requerida)
+    Autenticacion opcional (no requerida)
     """
     return current_user
 
@@ -245,7 +245,7 @@ class SecurityUtils:
     
     @staticmethod
     def generate_session_id() -> str:
-        """Generar ID de sesión único"""
+        """Generar ID de sesion unico"""
         return secrets.token_urlsafe(32)
     
     @staticmethod
@@ -276,7 +276,7 @@ class SecurityUtils:
     
     @staticmethod
     def is_safe_redirect_url(url: str, allowed_hosts: list) -> bool:
-        """Verificar si URL de redirección es segura"""
+        """Verificar si URL de redireccion es segura"""
         from urllib.parse import urlparse
         
         parsed = urlparse(url)

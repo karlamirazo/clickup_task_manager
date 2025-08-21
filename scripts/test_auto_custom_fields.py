@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script para probar la actualización automática de campos personalizados
+Script para probar la actualizacion automatica de campos personalizados
 """
 
 import asyncio
@@ -9,9 +9,9 @@ import json
 from datetime import datetime
 
 async def test_auto_custom_fields():
-    """Probar la actualización automática de campos personalizados"""
+    """Test la actualizacion automatica de campos personalizados"""
     
-    print("🧪 PROBANDO ACTUALIZACIÓN AUTOMÁTICA DE CAMPOS PERSONALIZADOS")
+    print("ğŸ§ª PROBANDO ACTUALIZACION AUTOMATICA DE CAMPOS PERSONALIZADOS")
     print("=" * 70)
     
     # URL de la API
@@ -20,7 +20,7 @@ async def test_auto_custom_fields():
     # Datos de prueba con campos personalizados
     task_data = {
         "name": f"PRUEBA AUTO CAMPOS - {datetime.now().strftime('%H:%M:%S')}",
-        "description": "Esta tarea debe mostrar automáticamente Email y Celular en ClickUp",
+        "description": "Esta tarea debe mostrar automaticamente Email y Celular en ClickUp",
         "workspace_id": "9014943317",
         "list_id": "901411770471",  # PROYECTO 1 (tiene campos personalizados)
         "status": "in progress",
@@ -35,54 +35,54 @@ async def test_auto_custom_fields():
     
     try:
         async with aiohttp.ClientSession() as session:
-            print("📤 Creando tarea con campos personalizados...")
-            print(f"📋 Datos: {json.dumps(task_data, indent=2)}")
+            print("ğŸ“¤ Creando tarea con campos personalizados...")
+            print(f"ğŸ“‹ Datos: {json.dumps(task_data, indent=2)}")
             
             async with session.post(
                 f"{base_url}/api/v1/tasks/",
                 json=task_data,
                 headers={"Content-Type": "application/json"}
             ) as response:
-                print(f"📡 Status: {response.status}")
+                print(f"ğŸ“¡ Status: {response.status}")
                 response_text = await response.text()
-                print(f"📄 Respuesta: {response_text}")
+                print(f"ğŸ“„ Respuesta: {response_text}")
                 
                 if response.status == 201:
                     task_response = json.loads(response_text)
-                    print(f"✅ Tarea creada exitosamente!")
-                    print(f"   🆔 ID Local: {task_response.get('id')}")
-                    print(f"   🆔 ClickUp ID: {task_response.get('clickup_id')}")
-                    print(f"   📝 Nombre: {task_response.get('name')}")
-                    print(f"   📧 Campos personalizados: {task_response.get('custom_fields')}")
+                    print(f"âœ… Tarea creada exitosamente!")
+                    print(f"   ğŸ†” ID Local: {task_response.get('id')}")
+                    print(f"   ğŸ†” ClickUp ID: {task_response.get('clickup_id')}")
+                    print(f"   ğŸ“� Nombre: {task_response.get('name')}")
+                    print(f"   ğŸ“§ Campos personalizados: {task_response.get('custom_fields')}")
                     
-                    print(f"\n🎯 INSTRUCCIONES PARA VERIFICAR:")
+                    print(f"\nğŸ�¯ INSTRUCCIONES PARA VERIFICAR:")
                     print(f"1. Ve a ClickUp y busca la tarea: '{task_data['name']}'")
-                    print(f"2. Verifica que los campos 'Email' y 'Celular' estén llenos")
+                    print(f"2. Verifica que los campos 'Email' y 'Celular' esten llenos")
                     print(f"3. Email debe mostrar: {task_data['custom_fields']['Email']}")
                     print(f"4. Celular debe mostrar: {task_data['custom_fields']['Celular']}")
                     
                     # Esperar un momento para que ClickUp procese
-                    print(f"\n⏳ Esperando 5 segundos para que ClickUp procese...")
+                    print(f"\nâ�³ Esperando 5 segundos para que ClickUp procese...")
                     await asyncio.sleep(5)
                     
-                    # Verificar que la tarea se guardó correctamente en la BD local
-                    print(f"\n🔍 Verificando tarea en BD local...")
+                    # Verificar que la tarea se guardo correctamente en la BD local
+                    print(f"\nğŸ”� Verificando tarea en BD local...")
                     async with session.get(f"{base_url}/api/v1/tasks/{task_response.get('id')}") as detail_response:
                         if detail_response.status == 200:
                             detail_data = json.loads(await detail_response.text())
-                            print(f"✅ Tarea encontrada en BD local:")
-                            print(f"   📧 Campos personalizados: {detail_data.get('custom_fields')}")
-                            print(f"   📊 Estado: {detail_data.get('status')}")
-                            print(f"   👤 Usuario asignado: {detail_data.get('assignee_id')}")
+                            print(f"âœ… Tarea encontrada en BD local:")
+                            print(f"   ğŸ“§ Campos personalizados: {detail_data.get('custom_fields')}")
+                            print(f"   ğŸ“Š Estado: {detail_data.get('status')}")
+                            print(f"   ğŸ‘¤ Usuario asignado: {detail_data.get('assignee_id')}")
                         else:
-                            print(f"❌ Error obteniendo detalles: {detail_response.status}")
+                            print(f"â�Œ Error getting detalles: {detail_response.status}")
                     
                 else:
-                    print(f"❌ Error creando tarea: {response.status}")
-                    print(f"📄 Respuesta: {response_text}")
+                    print(f"â�Œ Error creating tarea: {response.status}")
+                    print(f"ğŸ“„ Respuesta: {response_text}")
     
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"â�Œ Error: {e}")
 
 if __name__ == "__main__":
     asyncio.run(test_auto_custom_fields())

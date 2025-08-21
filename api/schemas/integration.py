@@ -1,64 +1,59 @@
 """
-Esquemas Pydantic para integraciones
+Pydantic schemas for integrations
 """
 
-from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field
+from datetime import datetime
 
 class IntegrationBase(BaseModel):
-    """Esquema base para integraciones"""
-    name: str = Field(..., min_length=1, max_length=255, description="Nombre de la integración")
-    description: Optional[str] = Field(None, description="Descripción de la integración")
-    integration_type: str = Field(..., description="Tipo de integración")
-    provider: str = Field(..., description="Proveedor de la integración")
-    config: Dict[str, Any] = Field(..., description="Configuración de la integración")
-    workspace_id: str = Field(..., description="ID del workspace")
+    """Base schema for integrations"""
+    name: str = Field(..., min_length=1, max_length=255, description="Integration name")
+    description: Optional[str] = Field(None, description="Integration description")
+    integration_type: str = Field(..., description="Integration type")
+    provider: str = Field(..., description="Integration provider")
+    config: Dict[str, Any] = Field(..., description="Integration configuration")
 
 class IntegrationCreate(IntegrationBase):
-    """Esquema para crear una integración"""
-    credentials: Optional[Dict[str, Any]] = Field(None, description="Credenciales de la integración")
+    """Schema for creating an integration"""
+    credentials: Optional[Dict[str, Any]] = Field(None, description="Integration credentials")
 
 class IntegrationUpdate(BaseModel):
-    """Esquema para actualizar una integración"""
-    name: Optional[str] = Field(None, min_length=1, max_length=255)
-    description: Optional[str] = None
+    """Schema for updating an integration"""
+    name: Optional[str] = Field(None, min_length=1, max_length=255, description="Integration name")
+    description: Optional[str] = Field(None, description="Integration description")
+    integration_type: Optional[str] = None
+    provider: Optional[str] = None
     config: Optional[Dict[str, Any]] = None
     credentials: Optional[Dict[str, Any]] = None
-    active: Optional[bool] = None
-    enabled: Optional[bool] = None
-    sync_interval: Optional[int] = Field(None, ge=60, description="Intervalo de sincronización en segundos")
-    auto_sync: Optional[bool] = None
+    is_active: Optional[bool] = None
+    sync_interval: Optional[int] = Field(None, ge=60, description="Sync interval in seconds")
 
 class IntegrationResponse(IntegrationBase):
-    """Esquema de respuesta para integraciones"""
+    """Response schema for integrations"""
     id: int
-    credentials: Optional[Dict[str, Any]] = None
-    active: bool
-    enabled: bool
-    connected: bool
+    workspace_id: str
     created_at: datetime
     updated_at: datetime
     last_sync: Optional[datetime] = None
-    created_by: str
-    sync_count: int
-    error_count: int
+    sync_count: int = 0
+    error_count: int = 0
+    is_active: bool = True
+    status: str = "active"
     last_error: Optional[str] = None
-    sync_interval: int
-    auto_sync: bool
     
     class Config:
         from_attributes = True
 
 class IntegrationList(BaseModel):
-    """Esquema para lista de integraciones"""
-    integrations: list[IntegrationResponse]
+    """Schema for integration list"""
+    integrations: List[IntegrationResponse]
     total: int
     page: int
     limit: int
     has_more: bool
 
 class IntegrationTest(BaseModel):
-    """Esquema para probar una integración"""
-    integration_id: int
-    test_type: str = Field(..., description="Tipo de prueba a realizar")
+    """Schema for testing an integration"""
+    config: Dict[str, Any] = Field(..., description="Test configuration")
+    credentials: Optional[Dict[str, Any]] = Field(None, description="Test credentials")

@@ -6,13 +6,13 @@ import json
 conn = sqlite3.connect('clickup_manager.db')
 cursor = conn.cursor()
 
-# Obtener el reporte más reciente
+# Get el reporte mas reciente
 cursor.execute("SELECT id, name, report_type, workspace_id, data, status FROM reports ORDER BY id DESC LIMIT 1")
 report = cursor.fetchone()
 
 if report:
     report_id, name, report_type, workspace_id, data, status = report
-    print(f"📊 Reporte más reciente:")
+    print(f"ðŸ“Š Reporte mas reciente:")
     print(f"  ID: {report_id}")
     print(f"  Nombre: {name}")
     print(f"  Tipo: {report_type}")

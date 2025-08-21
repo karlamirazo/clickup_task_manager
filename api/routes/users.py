@@ -1,5 +1,5 @@
 """
-Rutas para gestión de usuarios
+Routes for gestion de usuarios
 """
 
 from typing import List, Optional
@@ -20,10 +20,10 @@ async def get_users(
     workspace_id: Optional[str] = Query(None, description="ID del workspace"),
     db: Session = Depends(get_db)
 ):
-    """Obtener usuarios"""
+    """Get usuarios"""
     try:
         if workspace_id:
-            # Obtener usuarios de un workspace específico directamente de ClickUp
+            # Get usuarios de un workspace especifico directamente de ClickUp
             clickup_users = await clickup_client.get_users(workspace_id)
             
             # Convertir a formato simple para el frontend
@@ -47,7 +47,7 @@ async def get_users(
                 "total": len(users)
             }
         else:
-            # Sin workspace específico, devolver lista vacía
+            # Sin workspace especifico, devolver lista vacia
             return {
                 "users": [],
                 "total": 0
@@ -56,7 +56,7 @@ async def get_users(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al obtener los usuarios: {str(e)}"
+            detail=f"Error obtener los usuarios: {str(e)}"
         )
 
 @router.get("/{user_id}", response_model=UserResponse)
@@ -64,16 +64,16 @@ async def get_user(
     user_id: str,
     db: Session = Depends(get_db)
 ):
-    """Obtener un usuario específico"""
+    """Get un usuario especifico"""
     try:
         # Buscar en base de datos local
         db_user = db.query(User).filter(User.clickup_id == user_id).first()
         
         if not db_user:
-            # Obtener de ClickUp
+            # Get de ClickUp
             clickup_user = await clickup_client.get_user(user_id)
             
-            # Crear registro local
+            # Create registro local
             db_user = User(
                 clickup_id=clickup_user["user"]["id"],
                 username=clickup_user["user"]["username"],
@@ -110,7 +110,7 @@ async def get_user_tasks(
     workspace_id: str = Query(..., description="ID del workspace"),
     db: Session = Depends(get_db)
 ):
-    """Obtener tareas asignadas a un usuario"""
+    """Get tareas asignadas a un usuario"""
     try:
         tasks = await clickup_client.get_user_tasks(user_id, workspace_id)
         return {"tasks": tasks, "total": len(tasks)}
@@ -118,7 +118,7 @@ async def get_user_tasks(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al obtener las tareas del usuario: {str(e)}"
+            detail=f"Error obtener las tareas del usuario: {str(e)}"
         )
 
 @router.post("/{user_id}/sync", response_model=UserResponse)
@@ -126,9 +126,9 @@ async def sync_user(
     user_id: str,
     db: Session = Depends(get_db)
 ):
-    """Sincronizar un usuario con ClickUp"""
+    """Sync un usuario con ClickUp"""
     try:
-        # Obtener datos actualizados de ClickUp
+        # Get datos actualizados de ClickUp
         clickup_user = await clickup_client.get_user(user_id)
         
         # Buscar o crear usuario local
@@ -138,7 +138,7 @@ async def sync_user(
             db_user = User(clickup_id=user_id)
             db.add(db_user)
         
-        # Actualizar datos
+        # Update datos
         db_user.username = clickup_user["user"]["username"]
         db_user.email = clickup_user["user"]["email"]
         db_user.first_name = clickup_user["user"].get("first_name", "")
@@ -162,5 +162,5 @@ async def sync_user(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al sincronizar el usuario: {str(e)}"
+            detail=f"Error sincronizar el usuario: {str(e)}"
         )

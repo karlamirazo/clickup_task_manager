@@ -8,9 +8,9 @@ import aiohttp
 import json
 
 async def test_clickup_api():
-    """Probar la API de ClickUp con diferentes enfoques"""
+    """Test la API de ClickUp con diferentes enfoques"""
     
-    print("🔗 PROBANDO API DE CLICKUP")
+    print("üîó PROBANDO API DE CLICKUP")
     print("=" * 50)
     
     # Tokens a probar
@@ -38,68 +38,68 @@ async def test_clickup_api():
     ]
     
     for i, token in enumerate(tokens, 1):
-        print(f"\n🔄 PROBANDO TOKEN {i}: {token[:20]}...{token[-10:]}")
+        print(f"\nüîÑ PROBANDO TOKEN {i}: {token[:20]}...{token[-10:]}")
         print("-" * 50)
         
         for endpoint in endpoints:
-            print(f"\n📡 Probando endpoint: {endpoint}")
+            print(f"\nüì° Probando endpoint: {endpoint}")
             
             for j, header_format in enumerate(header_formats, 1):
-                # Crear headers con el token
+                # Create headers con el token
                 headers = {}
                 for key, value in header_format.items():
                     headers[key] = value.format(token=token)
                 
-                print(f"  🔑 Formato {j}: {list(headers.keys())[0]}")
+                print(f"  üîë Formato {j}: {list(headers.keys())[0]}")
                 
                 try:
                     async with aiohttp.ClientSession() as session:
                         async with session.get(endpoint, headers=headers, timeout=10) as response:
-                            print(f"    📊 Status: {response.status}")
+                            print(f"    üìä Status: {response.status}")
                             
                             if response.status == 200:
                                 try:
                                     data = await response.json()
-                                    print(f"    ✅ ¡ÉXITO! Respuesta: {json.dumps(data, indent=2)[:200]}...")
+                                    print(f"    ‚úÖ ¬°EXITO! Respuesta: {json.dumps(data, indent=2)[:200]}...")
                                     
-                                    # Si funciona, probar más endpoints
-                                    print(f"\n🎉 ¡TOKEN FUNCIONA! Probando más endpoints...")
+                                    # Si funciona, probar mas endpoints
+                                    print(f"\nüéâ ¬°TOKEN FUNCIONA! Probando mas endpoints...")
                                     await test_working_token(token)
                                     return
                                     
                                 except Exception as e:
-                                    print(f"    ⚠️  Status 200 pero error parseando JSON: {e}")
+                                    print(f"    ‚ö†Ô∏è  Status 200 pero error parseando JSON: {e}")
                                     text = await response.text()
-                                    print(f"    📝 Respuesta: {text[:200]}...")
+                                    print(f"    üìù Respuesta: {text[:200]}...")
                                     
                             elif response.status == 401:
                                 error_text = await response.text()
-                                print(f"    ❌ 401 Unauthorized: {error_text}")
+                                print(f"    ‚ùå 401 Unauthorized: {error_text}")
                                 
                             elif response.status == 403:
                                 error_text = await response.text()
-                                print(f"    ❌ 403 Forbidden: {error_text}")
+                                print(f"    ‚ùå 403 Forbidden: {error_text}")
                                 
                             else:
                                 error_text = await response.text()
-                                print(f"    ❌ Error {response.status}: {error_text[:100]}...")
+                                print(f"    ‚ùå Error {response.status}: {error_text[:100]}...")
                                 
                 except asyncio.TimeoutError:
-                    print(f"    ⏰ Timeout")
+                    print(f"    ‚è∞ Timeout")
                 except Exception as e:
-                    print(f"    ❌ Excepción: {e}")
+                    print(f"    ‚ùå Excepcion: {e}")
     
-    print("\n❌ NINGÚN TOKEN FUNCIONÓ")
-    print("\n🔍 DIAGNÓSTICO:")
+    print("\n‚ùå NINGUN TOKEN FUNCIONO")
+    print("\nüîç DIAGNOSTICO:")
     print("1. Los tokens pueden estar expirados")
     print("2. Los tokens pueden ser de tipo incorrecto")
     print("3. ClickUp puede haber cambiado su API")
-    print("4. Puede necesitar permisos específicos")
+    print("4. Puede necesitar permisos especificos")
 
 async def test_working_token(token):
-    """Probar más funcionalidades con un token que funciona"""
+    """Test mas funcionalidades con un token que funciona"""
     
-    print(f"\n🚀 PROBANDO FUNCIONALIDADES CON TOKEN VÁLIDO")
+    print(f"\nüöÄ PROBANDO FUNCIONALIDADES CON TOKEN VALIDO")
     print("=" * 50)
     
     headers = {"Authorization": f"Bearer {token}"}
@@ -120,24 +120,24 @@ async def test_working_token(token):
             async with aiohttp.ClientSession() as session:
                 async with session.get(endpoint, headers=headers, timeout=10) as response:
                     if response.status == 200:
-                        print(f"✅ {name}: Funciona")
+                        print(f"‚úÖ {name}: Funciona")
                     else:
-                        print(f"❌ {name}: Error {response.status}")
+                        print(f"‚ùå {name}: Error {response.status}")
                         
         except Exception as e:
-            print(f"❌ {name}: Excepción - {e}")
+            print(f"‚ùå {name}: Excepcion - {e}")
     
-    print(f"\n🎉 ¡CONEXIÓN EXITOSA CON CLICKUP!")
-    print(f"🔑 Token válido: {token[:20]}...{token[-10:]}")
+    print(f"\nüéâ ¬°CONEXION EXITOSA CON CLICKUP!")
+    print(f"üîë Token valido: {token[:20]}...{token[-10:]}")
 
 async def main():
-    """Función principal"""
-    print("🚀 INICIANDO PRUEBAS DE API DE CLICKUP")
+    """Funcion principal"""
+    print("üöÄ INICIANDO PRUEBAS DE API DE CLICKUP")
     print("=" * 60)
     
     await test_clickup_api()
     
-    print("\n🏁 Pruebas completadas")
+    print("\nüèÅ Pruebas completadas")
 
 if __name__ == "__main__":
     asyncio.run(main())

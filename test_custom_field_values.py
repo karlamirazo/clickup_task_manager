@@ -16,25 +16,25 @@ from core.config import settings
 
 async def test_custom_field_values():
     """Test setting custom field values in ClickUp"""
-    print("🧪 TESTING CUSTOM FIELD VALUES IN CLICKUP")
+    print("üß™ TESTING CUSTOM FIELD VALUES IN CLICKUP")
     print("=" * 60)
     
     # Initialize ClickUp client
     client = ClickUpClient()
-    print(f"✅ ClickUp client initialized with token: {client.api_token[:20]}...")
+    print(f"‚úÖ ClickUp client initialized with token: {client.api_token[:20]}...")
     
     try:
         # Get workspaces
         workspaces = await client.get_workspaces()
         if workspaces:
             workspace = workspaces[0]
-            print(f"🏢 Using workspace: {workspace['name']} (ID: {workspace['id']})")
+            print(f"üè¢ Using workspace: {workspace['name']} (ID: {workspace['id']})")
             
             # Get spaces
             spaces = await client.get_spaces(workspace['id'])
             if spaces:
                 space = spaces[0]
-                print(f"🚀 Using space: {space['name']} (ID: {space['id']})")
+                print(f"üöÄ Using space: {space['name']} (ID: {space['id']})")
                 
                 # Get lists
                 lists = await client.get_lists(space['id'])
@@ -47,17 +47,17 @@ async def test_custom_field_values():
                             break
                     
                     if target_list:
-                        print(f"🎯 Target list found: {target_list['name']} (ID: {target_list['id']})")
+                        print(f"üéØ Target list found: {target_list['name']} (ID: {target_list['id']})")
                         
                         # Get custom fields
                         custom_fields = await client.get_list_custom_fields(target_list['id'])
                         if custom_fields:
-                            print(f"🎯 Found {len(custom_fields)} custom fields:")
+                            print(f"üéØ Found {len(custom_fields)} custom fields:")
                             for field in custom_fields:
                                 print(f"   - {field['name']} ({field['type']}) - ID: {field['id']}")
                             
                             # Create a test task with custom field values
-                            print("\n📝 Creating test task with custom field values...")
+                            print("\nüìù Creating test task with custom field values...")
                             
                             task_data = {
                                 "name": f"Test Task with Custom Fields - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
@@ -74,54 +74,54 @@ async def test_custom_field_values():
                                 ]
                             }
                             
-                            print(f"📋 Task data: {task_data}")
+                            print(f"üìã Task data: {task_data}")
                             
                             # Create the task
                             new_task = await client.create_task(target_list['id'], task_data)
                             if new_task:
-                                print(f"✅ Task created successfully! ID: {new_task['id']}")
+                                print(f"‚úÖ Task created successfully! ID: {new_task['id']}")
                                 print(f"   Name: {new_task.get('name', 'N/A')}")
                                 
                                 # Wait a moment for ClickUp to process
-                                print("⏳ Waiting for ClickUp to process custom fields...")
+                                print("‚è≥ Waiting for ClickUp to process custom fields...")
                                 await asyncio.sleep(3)
                                 
                                 # Get the task to see if custom fields were set
-                                print("🔍 Retrieving task to check custom fields...")
+                                print("üîç Retrieving task to check custom fields...")
                                 # Note: We need to implement get_task method or check via API
                                 
                                 # For now, let's check if we can update the custom fields after creation
-                                print("🔄 Attempting to update custom fields after task creation...")
+                                print("üîÑ Attempting to update custom fields after task creation...")
                                 
                                 # This would require implementing update_custom_field_value method
-                                print("⚠️ Note: update_custom_field_value method not yet implemented")
+                                print("‚ö†Ô∏è Note: update_custom_field_value method not yet implemented")
                                 
                             else:
-                                print("❌ Failed to create test task")
+                                print("‚ùå Failed to create test task")
                         else:
-                            print("❌ No custom fields found in the list")
+                            print("‚ùå No custom fields found in the list")
                     else:
-                        print("❌ Target list 'Tareas del Proyecto' not found")
+                        print("‚ùå Target list 'Tareas del Proyecto' not found")
                 else:
-                    print("❌ No lists found in the space")
+                    print("‚ùå No lists found in the space")
             else:
-                print("❌ No spaces found in the workspace")
+                print("‚ùå No spaces found in the workspace")
         else:
-            print("❌ No workspaces found or API connection failed")
+            print("‚ùå No workspaces found or API connection failed")
             
     except Exception as e:
-        print(f"❌ Error during testing: {str(e)}")
+        print(f"‚ùå Error during testing: {str(e)}")
         import traceback
         traceback.print_exc()
 
 async def main():
     """Main test function"""
-    print("🚀 STARTING CUSTOM FIELD VALUES TEST")
+    print("üöÄ STARTING CUSTOM FIELD VALUES TEST")
     print("=" * 60)
     
     await test_custom_field_values()
     
-    print("\n\n🎯 TEST COMPLETED!")
+    print("\n\nüéØ TEST COMPLETED!")
     print("=" * 60)
 
 if __name__ == "__main__":

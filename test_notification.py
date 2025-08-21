@@ -32,29 +32,29 @@ from utils.notifications import (
 )
 
 async def test_notifications():
-    """Probar notificaciones directamente"""
-    print("🧪 Iniciando prueba de notificaciones...")
+    """Test notificaciones directamente"""
+    print("ğŸ§ª Iniciando prueba de notificaciones...")
     print("=" * 50)
     
     # Datos de prueba
     task_data = {
         "action": "created",
         "task_id": "TEST123456",
-        "name": "🎉 Prueba de notificaciones",
+        "name": "ğŸ�‰ Prueba de notificaciones",
         "status": "to_do",
         "priority": 2,
         "assignee_name": "Karla Ve",
         "due_date_iso": "2024-01-15T10:00:00Z"
     }
     
-    print(f"📋 Tarea de prueba: {task_data['name']}")
-    print(f"🆔 ID: {task_data['task_id']}")
+    print(f"ğŸ“‹ Tarea de prueba: {task_data['name']}")
+    print(f"ğŸ†” ID: {task_data['task_id']}")
     
-    # 1. Probar Email
-    print("\n📧 Probando email...")
+    # 1. Test Email
+    print("\nğŸ“§ Probando email...")
     try:
         subject, text_body, html_body = build_task_email_content(**task_data)
-        print(f"   ✅ Asunto: {subject}")
+        print(f"   âœ… Asunto: {subject}")
         
         await send_email_async(
             to_addresses=["karlamirazo@gmail.com"],
@@ -62,30 +62,30 @@ async def test_notifications():
             text_body=text_body,
             html_body=html_body
         )
-        print("   ✅ Email enviado correctamente")
+        print("   âœ… Email enviado correctamente")
     except Exception as e:
-        print(f"   ❌ Error en email: {e}")
+        print(f"   â�Œ Error en email: {e}")
     
-    # 2. Probar Telegram
-    print("\n🤖 Probando Telegram...")
+    # 2. Test Telegram
+    print("\nğŸ¤– Probando Telegram...")
     try:
         telegram_msg = build_task_telegram_message(**task_data)
-        print(f"   📝 Mensaje: {telegram_msg[:50]}...")
+        print(f"   ğŸ“� Mensaje: {telegram_msg[:50]}...")
         
         await send_telegram_async(
             to_chat_ids=["837060200"],
             message=telegram_msg
         )
-        print("   ✅ Telegram enviado correctamente")
+        print("   âœ… Telegram enviado correctamente")
     except Exception as e:
-        print(f"   ❌ Error en Telegram: {e}")
+        print(f"   â�Œ Error en Telegram: {e}")
     
-    print("\n" + "🎉" * 25)
-    print("🎉 PRUEBA COMPLETADA!")
-    print("🎉" * 25)
-    print("📱 Revisa tu Telegram y email")
-    print("📧 karlamirazo@gmail.com")
-    print("🤖 Chat ID: 837060200")
+    print("\n" + "ğŸ�‰" * 25)
+    print("ğŸ�‰ PRUEBA COMPLETADA!")
+    print("ğŸ�‰" * 25)
+    print("ğŸ“± Revisa tu Telegram y email")
+    print("ğŸ“§ karlamirazo@gmail.com")
+    print("ğŸ¤– Chat ID: 837060200")
 
 if __name__ == "__main__":
     asyncio.run(test_notifications())

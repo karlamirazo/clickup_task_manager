@@ -5,7 +5,7 @@ let workspaces = [];
 
 // Interceptor de fetch para forzar HTTPS en Railway
 if (window.location.hostname.includes('railway.app')) {
-    console.log('🚂 Aplicando interceptor de fetch para Railway...');
+    console.log('INFO: Aplicando interceptor de fetch para Railway...');
     
     // Guardar el fetch original
     const originalFetch = window.fetch;
@@ -15,21 +15,21 @@ if (window.location.hostname.includes('railway.app')) {
         // Convertir URL a string si es necesario
         let urlString = url.toString();
         
-        console.log('🔍 Interceptando fetch para URL:', urlString);
+        console.log('INFO: Interceptando fetch para URL:', urlString);
         
         // Si la URL es HTTP, convertir a HTTPS
         if (urlString.startsWith('http://')) {
             urlString = urlString.replace('http://', 'https://');
-            console.log('🔄 URL convertida a HTTPS:', urlString);
+            console.log('INFO: URL convertida a HTTPS:', urlString);
         }
         
         // Si la URL es relativa y estamos en Railway, hacerla absoluta HTTPS
         if (urlString.startsWith('/')) {
             urlString = `https://${window.location.host}${urlString}`;
-            console.log('🔄 URL relativa convertida a HTTPS absoluta:', urlString);
+            console.log('INFO: URL relativa convertida a HTTPS absoluta:', urlString);
         }
         
-        console.log('📡 Realizando fetch a:', urlString);
+        console.log('INFO: Realizando fetch a:', urlString);
         
         // Agregar headers para forzar HTTPS
         const httpsOptions = {
@@ -44,7 +44,7 @@ if (window.location.hostname.includes('railway.app')) {
         return originalFetch(urlString, httpsOptions);
     };
     
-    console.log('✅ Interceptor de fetch aplicado exitosamente');
+    console.log('SUCCESS: Interceptor de fetch aplicado exitosamente');
 }
 
 // Variables globales para reportes
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Inicializar la aplicación
 async function initializeApp() {
-    console.log('🚀 Inicializando ClickUp Project Manager...');
+    console.log('INFO: Inicializando ClickUp Project Manager...');
     
     // Configurar navegación por tabs
     setupTabNavigation();
@@ -75,8 +75,63 @@ async function initializeApp() {
     // Cargar datos iniciales
     await loadInitialData();
     
+    // Cargar workspaces para el formulario de tareas
+    console.log('INFO: Cargando workspaces para formulario de tareas...');
+    try {
+        console.log('DEBUG: Antes de llamar a loadWorkspacesForTask');
+        await loadWorkspacesForTask();
+        console.log('SUCCESS: Workspaces cargados exitosamente');
+        
+        // Verificar que se estableció el workspace por defecto
+        const workspaceSelect = document.getElementById('task-workspace');
+        if (workspaceSelect) {
+            console.log('DEBUG: Después de cargar workspaces - Valor del select:', workspaceSelect.value);
+            console.log('DEBUG: Después de cargar workspaces - Opciones disponibles:', workspaceSelect.options.length);
+        }
+    } catch (error) {
+        console.error('ERROR: Error cargando workspaces:', error);
+    }
+    
     // Configurar eventos
     setupEventListeners();
+    
+    // Cargar tareas al inicio DESACTIVADO - Solo se cargan cuando se necesitan
+    // console.log('INFO: Cargando tareas al inicio...');
+    // await loadTasks();
+    
+    // Mostrar el tab de dashboard por defecto
+    console.log('INFO: Mostrando tab de dashboard por defecto...');
+    console.log('DEBUG: Llamando a switchTab("dashboard")');
+    switchTab('dashboard');
+    console.log('DEBUG: switchTab completado');
+    
+    // Asegurar que el dashboard permanezca activo
+    setTimeout(() => {
+        if (currentTab !== 'dashboard') {
+            console.log('DEBUG: Forzando dashboard como tab activo...');
+            switchTab('dashboard');
+        }
+    }, 100);
+    
+    // FORZAR dashboard como tab activo después de 500ms
+    setTimeout(() => {
+        console.log('DEBUG: Forzando dashboard como tab activo (segunda verificación)...');
+        switchTab('dashboard');
+        
+        // Verificar que el tab de tareas NO esté activo
+        const tasksTab = document.getElementById('tasks');
+        const dashboardTab = document.getElementById('dashboard');
+        if (tasksTab && dashboardTab) {
+            tasksTab.classList.remove('active');
+            dashboardTab.classList.add('active');
+        }
+    }, 500);
+    
+    // FORZAR dashboard como tab activo después de 1 segundo
+    setTimeout(() => {
+        console.log('DEBUG: Forzando dashboard como tab activo (tercera verificación)...');
+        switchTab('dashboard');
+    }, 1000);
 }
 
 // Configurar navegación por tabs
@@ -119,7 +174,8 @@ async function loadTabData(tabName) {
             await loadDashboardData();
             break;
         case 'tasks':
-            await loadTasks();
+            // Solo cargar tareas cuando se solicite explícitamente
+            // await loadTasks();
             break;
         case 'workspaces':
             await loadWorkspaces();
@@ -166,9 +222,14 @@ async function checkSystemStatus() {
     
     // Verificar base de datos
     try {
-        const response = await fetch('/api/v1/tasks/');
+        const response = await fetch('/api/v1/dashboard/health');
         if (response.ok) {
-            updateStatus('db-status', 'success', 'Conectado');
+            const healthData = await response.json();
+            if (healthData.services && healthData.services.database && healthData.services.database.status === 'healthy') {
+                updateStatus('db-status', 'success', 'Conectado');
+            } else {
+                updateStatus('db-status', 'error', 'Error en BD');
+            }
         } else {
             updateStatus('db-status', 'error', 'Error');
         }
@@ -197,7 +258,7 @@ function updateConnectionStatus(status, text) {
 
 // Cargar datos iniciales
 async function loadInitialData() {
-    console.log('📊 Cargando datos iniciales...');
+    console.log('INFO: Cargando datos iniciales...');
     
     // Cargar estadísticas del dashboard
     await loadDashboardData();
@@ -206,9 +267,28 @@ async function loadInitialData() {
 // Cargar datos del dashboard
 async function loadDashboardData() {
     try {
-        // Cargar TODAS las tareas (incluidas completadas), paginando hasta 100 por página
-        const allTasks = await fetchAllTasksForDashboard();
-        updateDashboardStats(allTasks);
+        console.log('DEBUG: loadDashboardData iniciado - NO cargando tareas automáticamente');
+        // NO cargar tareas automáticamente - Solo mostrar contadores en 0
+        updateDashboardStats([]);
+        
+        // Mostrar mensaje de que se debe cargar manualmente
+        const dashboardContent = document.getElementById('dashboard');
+        if (dashboardContent) {
+            const messageDiv = dashboardContent.querySelector('.dashboard-message');
+            if (!messageDiv) {
+                const newMessageDiv = document.createElement('div');
+                newMessageDiv.className = 'dashboard-message';
+                newMessageDiv.innerHTML = `
+                    <div style="text-align: center; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <p><i class="fas fa-info-circle"></i> Los contadores se actualizarán cuando sincronices las tareas o cambies al tab de tareas.</p>
+                        <button class="btn btn-primary" onclick="loadDashboardCountersManually()" style="margin-top: 10px;">
+                            <i class="fas fa-sync-alt"></i> Cargar Contadores Ahora
+                        </button>
+                    </div>
+                `;
+                dashboardContent.appendChild(newMessageDiv);
+            }
+        }
     } catch (error) {
         console.error('Error cargando datos del dashboard:', error);
     }
@@ -216,25 +296,81 @@ async function loadDashboardData() {
 
 // Actualizar estadísticas del dashboard
 function updateDashboardStats(tasksArray) {
+    console.log('DEBUG: updateDashboardStats iniciado con:', tasksArray);
+    
     const tasks = Array.isArray(tasksArray)
         ? tasksArray
         : (tasksArray && Array.isArray(tasksArray.tasks) ? tasksArray.tasks : []);
 
+    console.log('DEBUG: Tareas procesadas:', tasks.length);
+    console.log('DEBUG: Primera tarea:', tasks[0]);
+
     const totalTasks = tasks.length;
-    const completedTasks = tasks.filter(t => (t.status || '').toLowerCase() === 'complete').length;
+    const completedTasks = tasks.filter(t => {
+        const status = (t.status || '').toLowerCase();
+        console.log(`DEBUG: Tarea ${t.name} - Status: "${status}"`);
+        return status === 'complete' || status === 'completada' || status === 'done';
+    }).length;
     const pendingTasks = totalTasks - completedTasks;
+
+    console.log(`DEBUG: Total: ${totalTasks}, Completadas: ${completedTasks}, Pendientes: ${pendingTasks}`);
 
     const totalEl = document.getElementById('total-tasks');
     const pendingEl = document.getElementById('pending-tasks');
     const completedEl = document.getElementById('completed-tasks');
-    if (totalEl) totalEl.textContent = totalTasks;
-    if (pendingEl) pendingEl.textContent = pendingTasks;
-    if (completedEl) completedEl.textContent = completedTasks;
+    
+    if (totalEl) {
+        totalEl.textContent = totalTasks;
+        console.log('DEBUG: Total actualizado en DOM');
+    }
+    if (pendingEl) {
+        pendingEl.textContent = pendingTasks;
+        console.log('DEBUG: Pendientes actualizado en DOM');
+    }
+    if (completedEl) {
+        completedEl.textContent = completedTasks;
+        console.log('DEBUG: Completadas actualizado en DOM');
+    }
+}
+
+// Función para cargar manualmente los contadores del dashboard
+async function loadDashboardCountersManually() {
+    try {
+        console.log('INFO: Cargando contadores del dashboard manualmente...');
+        
+        // Mostrar indicador de carga
+        const button = document.querySelector('[onclick="loadDashboardCountersManually()"]');
+        if (button) {
+            const originalContent = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+            
+            // Cargar TODAS las tareas para los contadores
+            const allTasks = await fetchAllTasksForDashboard();
+            updateDashboardStats(allTasks);
+            
+            // Restaurar botón
+            button.disabled = false;
+            button.innerHTML = originalContent;
+            
+            showNotification('Contadores cargados correctamente', 'success');
+        }
+    } catch (error) {
+        console.error('Error cargando contadores del dashboard:', error);
+        showNotification('Error al cargar contadores', 'error');
+        
+        // Restaurar botón en caso de error
+        const button = document.querySelector('[onclick="loadDashboardCountersManually()"]');
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-sync-alt"></i> Cargar Contadores Ahora';
+        }
+    }
 }
 
 // Función para actualizar manualmente los contadores del dashboard
 async function refreshDashboardCounters() {
-    console.log('🔄 Actualizando contadores del dashboard...');
+    console.log('INFO: Actualizando contadores del dashboard...');
     
     try {
         // Mostrar indicador de carga en el botón
@@ -268,49 +404,91 @@ async function refreshDashboardCounters() {
 
 // Obtener todas las tareas para el dashboard (incluye completadas)
 async function fetchAllTasksForDashboard() {
-    const all = [];
-    let page = 0;
-    const limit = 100; // máximo permitido por el backend
-    while (true) {
-        const resp = await fetch(`/api/v1/tasks/?include_closed=true&page=${page}&limit=${limit}`);
-        if (!resp.ok) break;
-        const data = await resp.json();
-        const batch = data.tasks || [];
-        all.push(...batch);
-        if (!data.has_more) break;
-        page += 1;
+    try {
+        console.log('DEBUG: fetchAllTasksForDashboard iniciado');
+        const all = [];
+        let page = 0;
+        const limit = 100; // máximo permitido por el backend
+        
+        while (true) {
+            const resp = await fetch(`/api/v1/tasks/?include_closed=true&page=${page}&limit=${limit}`);
+            if (!resp.ok) {
+                console.log(`DEBUG: Respuesta no OK en página ${page}:`, resp.status);
+                break;
+            }
+            const data = await resp.json();
+            const batch = data.tasks || [];
+            console.log(`DEBUG: Página ${page}: ${batch.length} tareas`);
+            all.push(...batch);
+            
+            // Verificar si hay más páginas
+            if (!data.has_more && page > 0) break;
+            if (batch.length < limit) break;
+            page += 1;
+        }
+        
+        console.log(`DEBUG: Total de tareas obtenidas: ${all.length}`);
+        return all;
+    } catch (error) {
+        console.error('ERROR: Error en fetchAllTasksForDashboard:', error);
+        return [];
     }
-    return all;
 }
 
 // Cargar tareas
 async function loadTasks() {
-    console.log('📋 Cargando tareas...');
-    
-    const tasksList = document.getElementById('tasks-list');
-    tasksList.innerHTML = '<div class="loading">Cargando tareas...</div>';
+    console.log('INFO: Cargando tareas...');
     
     try {
-        const response = await fetch('/api/v1/tasks/');
-        if (response.ok) {
-            const data = await response.json();
-            tasks = data.tasks || [];
-            console.log(`OK: Tareas cargadas: ${tasks.length} tareas`);
-            displayTasks(tasks);
-            
-            // Búsqueda simplificada - sin filtros complejos
-            console.log('INFO: Búsqueda simplificada activa');
-        } else {
-            tasksList.innerHTML = '<div class="error">Error cargando tareas</div>';
+        const response = await fetch('/api/v1/tasks/?include_closed=true&page=0&limit=100');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
+        
+        const tasks = await response.json();
+        console.log('SUCCESS: Tareas cargadas:', tasks.length);
+        
+        // Mostrar las tareas
+        displayTasks(tasks);
+        
+        // Actualizar contadores del dashboard
+        await updateDashboardCounters();
+        
+        // Actualizar estadísticas específicas si estamos en el dashboard
+        if (document.getElementById('total-tasks')) {
+            document.getElementById('total-tasks').textContent = tasks.length;
+            
+            // Contar tareas por estado
+            const pendingTasks = tasks.filter(t => t.status === 'to do' || t.status === 'todo').length;
+            const completedTasks = tasks.filter(t => t.status === 'complete' || t.status === 'completed').length;
+            
+            document.getElementById('pending-tasks').textContent = pendingTasks;
+            document.getElementById('completed-tasks').textContent = completedTasks;
+        }
+        
     } catch (error) {
-        console.error('Error cargando tareas:', error);
-        tasksList.innerHTML = '<div class="error">Error de conexión</div>';
+        console.error('ERROR: Error cargando tareas:', error);
+        showNotification(
+            `Error cargando tareas: ${error.message}`,
+            'error'
+        );
+        
+        // Mostrar mensaje de error en la interfaz
+        const tasksList = document.getElementById('tasks-list');
+        if (tasksList) {
+            tasksList.innerHTML = `
+                <div class="error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Error cargando tareas: ${error.message}
+                </div>
+            `;
+        }
     }
 }
 
 async function syncAllTasks() {
-    console.log('🔄 Sincronizando tareas con ClickUp...');
+    console.log('INFO: Sincronizando tareas con ClickUp...');
     
     try {
         const button = document.querySelector('[onclick="syncAllTasks()"]');
@@ -319,72 +497,154 @@ async function syncAllTasks() {
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
         }
         
-        const response = await fetch('/api/v1/tasks/sync?workspace_id=' + document.getElementById('task-workspace').value, {
-            method: 'POST'
-        });
+        // Obtener el workspace_id del select o usar el por defecto
+        let workspaceId = '9014943317'; // Workspace ID por defecto
+        
+        // Intentar obtener del select si existe
+        const workspaceSelect = document.getElementById('task-workspace');
+        if (workspaceSelect && workspaceSelect.value) {
+            workspaceId = workspaceSelect.value;
+        }
+        
+        // Si no hay workspace_id válido, intentar obtener el primero disponible
+        if (!workspaceId || workspaceId === '') {
+            try {
+                const workspacesResponse = await fetch('/api/v1/workspaces/');
+                if (workspacesResponse.ok) {
+                    const workspacesData = await workspacesResponse.json();
+                    if (workspacesData.workspaces && workspacesData.workspaces.length > 0) {
+                        workspaceId = workspacesData.workspaces[0].clickup_id;
+                        console.log('DEBUG: Usando primer workspace disponible:', workspaceId);
+                    }
+                }
+            } catch (error) {
+                console.warn('WARNING: No se pudo obtener workspace automáticamente, usando por defecto');
+            }
+        }
+        
+        console.log('DEBUG: Workspace ID a usar para sincronización:', workspaceId);
+        
+        let response;
+        
+        // Intentar primero con el endpoint normal
+        if (workspaceId && workspaceId !== '') {
+            try {
+                response = await fetch('/api/v1/tasks/sync?workspace_id=' + workspaceId, {
+                    method: 'POST'
+                });
+                console.log('DEBUG: Usando endpoint normal con workspace_id:', workspaceId);
+            } catch (error) {
+                console.warn('WARNING: Error con endpoint normal, usando endpoint simple');
+                response = await fetch('/api/v1/tasks/sync-simple', {
+                    method: 'POST'
+                });
+            }
+        } else {
+            // Si no hay workspace_id, usar el endpoint simple
+            console.log('DEBUG: Usando endpoint simple (sin workspace_id)');
+            response = await fetch('/api/v1/tasks/sync-simple', {
+                method: 'POST'
+            });
+        }
         
         if (response.ok) {
             const data = await response.json();
-            console.log(`OK: Sincronizadas ${data.length} tareas`);
-            await loadTasks(); // Recargar tareas
-            await loadDashboardData(); // Actualizar contadores del dashboard
-            showNotification(`Sincronizadas ${data.length} tareas correctamente`, 'success');
+            console.log(`SUCCESS: Sincronización completada:`, data);
+            
+            // Obtener el número total de tareas sincronizadas
+            const totalTasks = data.total_tasks_synced || 0;
+            const newTasks = data.total_tasks_created || 0;
+            const updatedTasks = data.total_tasks_updated || 0;
+            
+            // Mostrar notificación de éxito
+            showNotification(
+                `Sincronizadas ${totalTasks} tareas correctamente (${newTasks} nuevas, ${updatedTasks} actualizadas)`,
+                'success'
+            );
+            
+            // Recargar las tareas para mostrar los cambios
+            await loadTasks();
+            
+            // Actualizar contadores del dashboard
+            await updateDashboardCounters();
+            
         } else {
-            console.error('Error sincronizando tareas:', response.status);
-            showNotification('Error al sincronizar tareas', 'error');
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Error en la sincronización');
         }
+        
     } catch (error) {
-        console.error('Error sincronizando tareas:', error);
-        showNotification('Error al sincronizar tareas', 'error');
+        console.error('ERROR: Error en sincronización:', error);
+        showNotification(
+            `Error en sincronización: ${error.message}`,
+            'error'
+        );
     } finally {
+        // Restaurar el botón
         const button = document.querySelector('[onclick="syncAllTasks()"]');
         if (button) {
             button.disabled = false;
-            button.innerHTML = '<i class="fas fa-sync"></i> Sincronizar';
+            button.innerHTML = '<i class="fas fa-sync-alt"></i> Sincronizar';
         }
     }
 }
 
 // Mostrar tareas
 function displayTasks(tasksToShow) {
+    console.log('INFO: displayTasks llamada con:', tasksToShow.length, 'tareas');
+    
     const tasksList = document.getElementById('tasks-list');
     
-    if (tasksToShow.length === 0) {
+    if (!tasksList) {
+        console.error('ERROR: No se encontró el elemento tasks-list');
+        return;
+    }
+    
+    if (!Array.isArray(tasksToShow) || tasksToShow.length === 0) {
+        console.log('INFO: No hay tareas para mostrar');
         tasksList.innerHTML = '<div class="empty-state">No hay tareas disponibles</div>';
         return;
     }
     
-    const tasksHTML = tasksToShow.map(task => `
-        <div class="task-item">
-            <div class="task-header">
-                <div>
-                    <div class="task-title">${task.name || 'Sin título'}</div>
-                    <div class="task-description">${task.description || 'Sin descripción'}</div>
-                </div>
-                <div class="task-actions">
-                    <button class="btn btn-secondary" onclick="editTask('${task.clickup_id || task.id}')">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-danger" onclick="deleteTask('${task.clickup_id || task.id}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="task-meta">
-                <span><i class="fas fa-tag"></i> ${task.status || 'Sin estado'}</span>
-                <span><i class="fas fa-flag"></i> Prioridad ${task.priority || 'N/A'}</span>
-                <span><i class="fas fa-user"></i> ${task.assignee_name || task.assignee_id || 'Sin asignar'}</span>
-                <span><i class="fas fa-calendar"></i> ${formatDate(task.due_date)}</span>
-            </div>
-        </div>
-    `).join('');
+    console.log('SUCCESS: Generando HTML para', tasksToShow.length, 'tareas');
     
+    const tasksHTML = tasksToShow.map(task => {
+        console.log('DEBUG: Procesando tarea:', task.name, 'ID:', task.id || task.clickup_id);
+        
+        return `
+            <div class="task-item">
+                <div class="task-header">
+                    <div>
+                        <div class="task-title">${task.name || 'Sin título'}</div>
+                        <div class="task-description">${task.description || 'Sin descripción'}</div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn btn-secondary" onclick="editTask('${task.clickup_id || task.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteTask(${task.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="task-meta">
+                    <span><i class="fas fa-tag"></i> ${task.status || 'Sin estado'}</span>
+                    <span><i class="fas fa-flag"></i> Prioridad ${task.priority || 'N/A'}</span>
+                    <span><i class="fas fa-user"></i> ${task.assignee_name || task.assignee_id || 'Sin asignar'}</span>
+                    <span><i class="fas fa-calendar"></i> ${formatDate(task.due_date)}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    console.log('SUCCESS: HTML generado, actualizando DOM');
     tasksList.innerHTML = tasksHTML;
+    console.log('SUCCESS: Tareas mostradas correctamente');
 }
 
 // Cargar workspaces
 async function loadWorkspaces() {
-    console.log('🏢 Cargando workspaces...');
+    console.log('INFO: Cargando workspaces...');
     
     const workspacesList = document.getElementById('workspaces-list');
     workspacesList.innerHTML = '<div class="loading">Cargando workspaces...</div>';
@@ -430,7 +690,7 @@ function displayWorkspaces(workspacesToShow) {
 
 // Cargar automatizaciones
 async function loadAutomations() {
-    console.log('🔧 Cargando automatizaciones...');
+    console.log('INFO: Cargando automatizaciones...');
     
     const automationList = document.getElementById('automation-list');
     automationList.innerHTML = '<div class="loading">Cargando automatizaciones...</div>';
@@ -478,7 +738,7 @@ function displayAutomations(automations) {
 
 // Cargar reportes
 async function loadReports() {
-    console.log('📊 Cargando reportes...');
+    console.log('INFO: Cargando reportes...');
     
     const reportsList = document.getElementById('reports-list');
     reportsList.innerHTML = '<div class="loading">Cargando reportes...</div>';
@@ -539,23 +799,32 @@ async function showCreateTaskModal() {
 
 async function loadWorkspacesForTask() {
     try {
-        console.log('🔄 Iniciando carga de workspaces para tarea...');
+        console.log('INFO: Iniciando carga de workspaces para tarea...');
+        
+        // Verificar que el elemento existe
+        const workspaceSelect = document.getElementById('task-workspace');
+        if (!workspaceSelect) {
+            console.error('ERROR: Elemento task-workspace no encontrado en loadWorkspacesForTask');
+            return;
+        }
+        console.log('SUCCESS: Elemento task-workspace encontrado en loadWorkspacesForTask');
+        
         // Usar URL relativa - el interceptor se encarga de HTTPS en Railway
         const apiUrl = '/api/v1/workspaces';
-        console.log('🌐 Usando URL relativa (interceptor manejará HTTPS):', apiUrl);
+        console.log('INFO: Usando URL relativa (interceptor manejará HTTPS):', apiUrl);
         const response = await fetch(apiUrl);
-        console.log('📡 Respuesta del servidor:', response.status, response.statusText);
+        console.log('INFO: Respuesta del servidor:', response.status, response.statusText);
         
         if (response.ok) {
             const data = await response.json();
-            console.log('📊 Datos recibidos:', data);
+            console.log('INFO: Datos recibidos:', data);
             
             const workspaceSelect = document.getElementById('task-workspace');
             const listSelect = document.getElementById('task-list');
             const assigneeSelect = document.getElementById('task-assignee');
             
             if (!workspaceSelect) {
-                console.error('❌ No se encontró el elemento task-workspace');
+                console.error('ERROR: No se encontró el elemento task-workspace');
                 return;
             }
             
@@ -566,20 +835,31 @@ async function loadWorkspacesForTask() {
             
             // Agregar workspaces
             const workspaces = data.workspaces || data.items || [];
-            console.log('🏢 Workspaces a agregar:', workspaces.length);
+            console.log('INFO: Workspaces a agregar:', workspaces.length);
             
             workspaces.forEach(workspace => {
                 const option = document.createElement('option');
                 option.value = workspace.clickup_id;
                 option.textContent = workspace.name;
                 workspaceSelect.appendChild(option);
-                console.log('✅ Workspace agregado:', workspace.name, 'ID:', workspace.clickup_id);
+                console.log('INFO: Workspace agregado:', workspace.name, 'ID:', workspace.clickup_id);
             });
+            
+            // Establecer workspace por defecto si existe
+            if (workspaces.length > 0) {
+                const defaultWorkspace = workspaces.find(w => w.clickup_id === '9014943317') || workspaces[0];
+                workspaceSelect.value = defaultWorkspace.clickup_id;
+                console.log('INFO: Workspace por defecto establecido:', defaultWorkspace.name, 'ID:', defaultWorkspace.clickup_id);
+                
+                // Cargar listas y usuarios para el workspace por defecto
+                loadListsForWorkspace(defaultWorkspace.clickup_id);
+                loadUsersForWorkspace(defaultWorkspace.clickup_id);
+            }
             
             // Agregar event listener para cargar listas y usuarios cuando se seleccione un workspace
             workspaceSelect.addEventListener('change', async function() {
                 const workspaceId = this.value;
-                console.log('🔄 Workspace seleccionado:', workspaceId);
+                console.log('INFO: Workspace seleccionado:', workspaceId);
                 if (workspaceId) {
                     await loadListsForWorkspace(workspaceId);
                     await loadUsersForWorkspace(workspaceId);
@@ -589,26 +869,26 @@ async function loadWorkspacesForTask() {
                 }
             });
             
-            console.log('✅ Workspaces cargados exitosamente');
+            console.log('INFO: Workspaces cargados exitosamente');
         } else {
-            console.error('❌ Error en respuesta del servidor:', response.status, response.statusText);
+            console.error('ERROR: Error en respuesta del servidor:', response.status, response.statusText);
         }
     } catch (error) {
-        console.error('❌ Error cargando workspaces para tarea:', error);
+        console.error('ERROR: Error cargando workspaces para tarea:', error);
     }
 }
 
 async function loadListsForWorkspace(workspaceId) {
     try {
-        console.log('📋 Cargando listas para workspace:', workspaceId);
+        console.log('INFO: Cargando listas para workspace:', workspaceId);
         const apiUrl = `/api/v1/workspaces/${workspaceId}/spaces`;
-        console.log('🌐 URL spaces (interceptor manejará HTTPS):', apiUrl);
+        console.log('INFO: URL spaces (interceptor manejará HTTPS):', apiUrl);
         const response = await fetch(apiUrl);
-        console.log('📡 Respuesta spaces:', response.status, response.statusText);
+        console.log('INFO: Respuesta spaces:', response.status, response.statusText);
         
         if (response.ok) {
             const data = await response.json();
-            console.log('📊 Spaces recibidos:', data);
+            console.log('INFO: Spaces recibidos:', data);
             
             const listSelect = document.getElementById('task-list');
             
@@ -616,58 +896,58 @@ async function loadListsForWorkspace(workspaceId) {
             listSelect.innerHTML = '<option value="">Seleccionar lista...</option>';
             
             // Para cada space, obtener sus listas
-            console.log('🔄 Procesando', data.spaces.length, 'spaces');
+            console.log('INFO: Procesando', data.spaces.length, 'spaces');
             for (const space of data.spaces) {
                 try {
-                    console.log('📋 Cargando listas para space:', space.name, space.id);
+                    console.log('INFO: Cargando listas para space:', space.name, space.id);
                     const listsUrl = `/api/v1/spaces/${space.id}/lists`;
                     const listsResponse = await fetch(listsUrl);
-                    console.log('📡 Respuesta listas:', listsResponse.status, listsResponse.statusText);
+                    console.log('INFO: Respuesta listas:', listsResponse.status, listsResponse.statusText);
                     
                     if (listsResponse.ok) {
                         const listsData = await listsResponse.json();
-                        console.log('📊 Listas recibidas:', listsData);
+                        console.log('INFO: Listas recibidas:', listsData);
                         
                         listsData.lists.forEach(list => {
                             const option = document.createElement('option');
                             option.value = list.id;
                             option.textContent = `${space.name} - ${list.name}`;
                             listSelect.appendChild(option);
-                            console.log('✅ Lista agregada:', list.name);
+                            console.log('INFO: Lista agregada:', list.name);
                         });
                     } else {
-                        console.error('❌ Error obteniendo listas del space:', space.id);
+                        console.error('ERROR: Error obteniendo listas del space:', space.id);
                     }
                 } catch (error) {
-                    console.error(`❌ Error cargando listas para space ${space.id}:`, error);
+                    console.error(`ERROR: Error cargando listas para space ${space.id}:`, error);
                 }
             }
-            console.log('✅ Listas cargadas exitosamente');
+            console.log('INFO: Listas cargadas exitosamente');
         } else {
-            console.error('❌ Error obteniendo spaces del workspace:', workspaceId);
+            console.error('ERROR: Error obteniendo spaces del workspace:', workspaceId);
         }
     } catch (error) {
-        console.error('❌ Error cargando listas para workspace:', error);
+        console.error('ERROR: Error cargando listas para workspace:', error);
     }
 }
 
 async function loadUsersForWorkspace(workspaceId) {
     try {
-        console.log('👥 Cargando usuarios para workspace:', workspaceId);
+        console.log('INFO: Cargando usuarios para workspace:', workspaceId);
         const apiUrl = `/api/v1/users/?workspace_id=${workspaceId}`;
-        console.log('🌐 URL users (interceptor manejará HTTPS):', apiUrl);
+        console.log('INFO: URL users (interceptor manejará HTTPS):', apiUrl);
         const response = await fetch(apiUrl);
-        console.log('📡 Respuesta usuarios:', response.status, response.statusText);
+        console.log('INFO: Respuesta usuarios:', response.status, response.statusText);
         
         if (response.ok) {
             const data = await response.json();
-            console.log('📊 Usuarios recibidos:', data);
+            console.log('INFO: Usuarios recibidos:', data);
             
             const assigneeSelect = document.getElementById('task-assignee');
             assigneeSelect.innerHTML = '<option value="">Sin asignar</option>';
             
             if (data.users && data.users.length > 0) {
-                console.log('👥 Procesando', data.users.length, 'usuarios');
+                console.log('INFO: Procesando', data.users.length, 'usuarios');
                 data.users.forEach(user => {
                     // Construir nombre completo
                     let displayName = '';
@@ -687,11 +967,11 @@ async function loadUsersForWorkspace(workspaceId) {
                     option.value = user.clickup_id;
                     option.textContent = displayName;
                     assigneeSelect.appendChild(option);
-                    console.log('✅ Usuario agregado:', displayName);
+                    console.log('INFO: Usuario agregado:', displayName);
                 });
-                console.log('✅ Usuarios cargados exitosamente');
+                console.log('INFO: Usuarios cargados exitosamente');
             } else {
-                console.log('⚠️ No hay usuarios disponibles');
+                console.log('INFO: No hay usuarios disponibles');
                 // Si no hay usuarios, agregar un mensaje informativo
                 const option = document.createElement('option');
                 option.value = "";
@@ -700,12 +980,12 @@ async function loadUsersForWorkspace(workspaceId) {
                 assigneeSelect.appendChild(option);
             }
         } else {
-            console.error('❌ Error en respuesta del servidor:', response.status);
+            console.error('ERROR: Error en respuesta del servidor:', response.status);
             const assigneeSelect = document.getElementById('task-assignee');
             assigneeSelect.innerHTML = '<option value="">Error cargando usuarios</option>';
         }
     } catch (error) {
-        console.error('❌ Error cargando usuarios del workspace:', error);
+        console.error('ERROR: Error cargando usuarios del workspace:', error);
         const assigneeSelect = document.getElementById('task-assignee');
         assigneeSelect.innerHTML = '<option value="">Error de conexión</option>';
     }
@@ -840,8 +1120,8 @@ async function handleCreateTask(event) {
         custom_fields: Object.keys(customFields).length > 0 ? customFields : null
     };
     
-    console.log('📝 Datos que se enviarán al servidor:', formData);
-    console.log('📧 Custom fields preparados:', customFields);
+            console.log('INFO: Datos que se enviarán al servidor:', formData);
+            console.log('INFO: Custom fields preparados:', customFields);
     
     try {
         const response = await fetch('/api/v1/tasks/', {
@@ -854,7 +1134,7 @@ async function handleCreateTask(event) {
         
         if (response.ok) {
             const result = await response.json();
-            console.log('✅ Tarea creada exitosamente:', result);
+            console.log('INFO: Tarea creada exitosamente:', result);
             
             closeModal('create-task-modal');
             event.target.reset();
@@ -873,10 +1153,10 @@ async function handleCreateTask(event) {
             await loadDashboardData();
             
             // Mostrar mensaje de éxito (solo uno)
-            showNotification('✅ Tarea creada exitosamente!', 'success');
+            showNotification('INFO: Tarea creada exitosamente!', 'success');
         } else {
             const errorData = await response.json().catch(() => ({}));
-            console.error('❌ Error del servidor:', response.status, response.statusText, errorData);
+            console.error('ERROR: Error del servidor:', response.status, response.statusText, errorData);
             showNotification(`Error creando tarea: ${errorData.detail || response.statusText}`, 'error');
         }
     } catch (error) {
@@ -969,7 +1249,7 @@ async function handleEditTask(event) {
             closeModal('edit-task-modal');
             
             // Mostrar mensaje de éxito
-            showNotification('✅ Tarea actualizada exitosamente con notificaciones!', 'success');
+            showNotification('INFO: Tarea actualizada exitosamente con notificaciones!', 'success');
             
             // Recargar tareas
             if (currentTab === 'tasks') {
@@ -1253,29 +1533,49 @@ async function editTask(taskId) {
     }
 }
 
-async function deleteTask(taskClickupId) {
-    if (!taskClickupId) {
+async function deleteTask(taskId) {
+    if (!taskId) {
         showNotification('ID de tarea inválido', 'error');
         return;
     }
-    if (!confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
+    
+    // Buscar la tarea para mostrar confirmación
+    const task = tasks.find(t => t.id == taskId || t.clickup_id == taskId);
+    if (!task) {
+        showNotification('Tarea no encontrada', 'error');
         return;
     }
+    
+    if (!confirm(`¿Estás seguro de que quieres eliminar la tarea "${task.name}"?`)) {
+        return;
+    }
+    
     try {
-        const resp = await fetch(`/api/v1/tasks/${taskClickupId}`, { method: 'DELETE' });
+        // Usar el ID local de la base de datos para el endpoint DELETE
+        const localTaskId = task.id;
+        console.log(`🗑️ Eliminando tarea: ${task.name} (ID local: ${localTaskId}, ClickUp ID: ${task.clickup_id})`);
+        
+        const resp = await fetch(`/api/v1/tasks/${localTaskId}`, { method: 'DELETE' });
+        
         if (resp.ok) {
+            const result = await resp.json();
+            console.log('✅ Tarea eliminada exitosamente:', result);
+            
             // Actualizar arreglo en memoria y UI
-            tasks = (tasks || []).filter(t => (t.clickup_id || t.id) !== taskClickupId);
+            tasks = tasks.filter(t => t.id !== localTaskId);
             displayTasks(tasks);
-            showNotification('Tarea eliminada correctamente', 'success');
+            showNotification(`Tarea "${task.name}" eliminada correctamente`, 'success');
+            
             // Refrescar estadísticas del dashboard
             await loadDashboardData();
         } else {
-            showNotification('No se pudo eliminar la tarea', 'error');
+            const errorData = await resp.json().catch(() => ({}));
+            console.error('❌ Error eliminando tarea:', errorData);
+            showNotification(`No se pudo eliminar la tarea: ${errorData.detail || 'Error desconocido'}`, 'error');
         }
     } catch (e) {
-        console.error('Error eliminando tarea:', e);
-        showNotification('Error de conexión al eliminar', 'error');
+        console.error('❌ Error de conexión eliminando tarea:', e);
+        showNotification('Error de conexión al eliminar la tarea', 'error');
     }
 }
 
@@ -1694,9 +1994,9 @@ async function performSearch() {
     const query = searchInput.value.trim();
     
     if (!query) {
-        // Si no hay consulta, mostrar todas las tareas
+        // Si no hay consulta, NO mostrar tareas automáticamente
         isSearchActive = false;
-        await loadTasks();
+        // await loadTasks(); // COMENTADO: No cargar tareas automáticamente
         return;
     }
     
@@ -1716,7 +2016,7 @@ async function performSearch() {
         }
         
     } catch (error) {
-        console.error('❌ Error en búsqueda:', error);
+        console.error('ERROR: Error en búsqueda:', error);
         showError('tasks-list', 'Error en búsqueda: ' + error.message);
     }
 }
@@ -1767,7 +2067,7 @@ async function performAdvancedSearch(event) {
         }
         
     } catch (error) {
-        console.error('❌ Error en búsqueda avanzada:', error);
+        console.error('ERROR: Error en búsqueda avanzada:', error);
         showError('tasks-list', 'Error en búsqueda avanzada: ' + error.message);
     }
 }
@@ -1825,7 +2125,7 @@ function displaySearchResults(data) {
                         <button class="btn btn-sm btn-outline-primary" onclick="editTask('${task.clickup_id || task.id}')">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteTask('${task.clickup_id || task.id}')">
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${task.id})">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -1848,7 +2148,7 @@ async function clearSearch() {
     isSearchActive = false;
     searchResults = [];
     document.getElementById('task-search').value = '';
-    await loadTasks();
+    // await loadTasks(); // COMENTADO: No cargar tareas automáticamente
 }
 
 // Mostrar modal de búsqueda avanzada
@@ -1871,7 +2171,7 @@ async function getSearchSuggestions(partialQuery) {
             displaySearchSuggestions(data.suggestions);
         }
     } catch (error) {
-        console.error('❌ Error obteniendo sugerencias:', error);
+        console.error('ERROR: Error obteniendo sugerencias:', error);
     }
 }
 
@@ -1909,7 +2209,7 @@ function selectSuggestion(suggestion) {
 // Reconstruir índice de búsqueda
 async function rebuildSearchIndex() {
     try {
-        showLoading('tasks-list', '🔄 Reconstruyendo índice de búsqueda...');
+        showLoading('tasks-list', 'INFO: Reconstruyendo índice de búsqueda...');
         
         const response = await fetch('/api/v1/search/rebuild-index', {
             method: 'POST'
@@ -1917,18 +2217,18 @@ async function rebuildSearchIndex() {
         
         if (response.ok) {
             const data = await response.json();
-            showSuccess('tasks-list', `✅ Índice reconstruido: ${data.stats.indexed_tasks} tareas indexadas`);
+            showSuccess('tasks-list', `INFO: Índice reconstruido: ${data.stats.indexed_tasks} tareas indexadas`);
             
             // Recargar tareas después de un breve delay
-            setTimeout(async () => {
-                await loadTasks();
-            }, 2000);
+            // setTimeout(async () => {
+            //     await loadTasks(); // COMENTADO: No cargar tareas automáticamente
+            // }, 2000);
         } else {
             throw new Error(`Error reconstruyendo índice: ${response.status}`);
         }
         
     } catch (error) {
-        console.error('❌ Error reconstruyendo índice:', error);
+        console.error('ERROR: Error reconstruyendo índice:', error);
         showError('tasks-list', 'Error reconstruyendo índice: ' + error.message);
     }
 }
@@ -1968,3 +2268,331 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ===== FUNCIONES DE BÚSQUEDA SIMPLIFICADAS =====
 // Solo búsqueda de texto libre - sin filtros complejos
+
+// Actualizar contadores del dashboard
+async function updateDashboardCounters() {
+    console.log('INFO: Actualizando contadores del dashboard...');
+    
+    try {
+        // Obtener tareas para contar
+        const response = await fetch('/api/v1/tasks/?include_closed=true&page=0&limit=1000');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const tasks = await response.json();
+        console.log('SUCCESS: Tareas obtenidas para contadores:', tasks.length);
+        
+        // Contar tareas por estado
+        const totalTasks = tasks.length;
+        const pendingTasks = tasks.filter(t => 
+            t.status === 'to do' || 
+            t.status === 'todo' || 
+            t.status === 'pending'
+        ).length;
+        const completedTasks = tasks.filter(t => 
+            t.status === 'complete' || 
+            t.status === 'completed' || 
+            t.status === 'done'
+        ).length;
+        const inProgressTasks = tasks.filter(t => 
+            t.status === 'in progress' || 
+            t.status === 'in_progress' || 
+            t.status === 'working'
+        ).length;
+        
+        // Actualizar contadores en el dashboard principal
+        const totalElement = document.getElementById('total-tasks');
+        const pendingElement = document.getElementById('pending-tasks');
+        const completedElement = document.getElementById('completed-tasks');
+        
+        if (totalElement) totalElement.textContent = totalTasks;
+        if (pendingElement) pendingElement.textContent = pendingTasks;
+        if (completedElement) completedElement.textContent = completedTasks;
+        
+        // Actualizar contadores en el dashboard de tareas si existe
+        const dashboardTotalElement = document.getElementById('dashboard-total-tasks');
+        const dashboardPendingElement = document.getElementById('dashboard-pending-tasks');
+        const dashboardCompletedElement = document.getElementById('dashboard-completed-tasks');
+        const dashboardInProgressElement = document.getElementById('dashboard-in-progress-tasks');
+        
+        if (dashboardTotalElement) dashboardTotalElement.textContent = totalTasks;
+        if (dashboardPendingElement) dashboardPendingElement.textContent = pendingTasks;
+        if (dashboardCompletedElement) dashboardCompletedElement.textContent = completedTasks;
+        if (dashboardInProgressElement) dashboardInProgressElement.textContent = inProgressTasks;
+        
+        console.log('SUCCESS: Contadores actualizados:', {
+            total: totalTasks,
+            pending: pendingTasks,
+            completed: completedTasks,
+            inProgress: inProgressTasks
+        });
+        
+        // Mostrar notificación de éxito si hay cambios
+        if (totalTasks > 0) {
+            showNotification(
+                `Dashboard actualizado: ${totalTasks} tareas totales`,
+                'success'
+            );
+        }
+        
+    } catch (error) {
+        console.error('ERROR: Error actualizando contadores:', error);
+        showNotification(
+            `Error actualizando contadores: ${error.message}`,
+            'error'
+        );
+    }
+}
+
+// Función para inicializar el dashboard
+async function initializeDashboard() {
+    console.log('INFO: Inicializando dashboard...');
+    
+    try {
+        // Cargar tareas
+        // await loadTasks(); // COMENTADO: No cargar tareas automáticamente
+        
+        // Actualizar contadores
+        await updateDashboardCounters();
+        
+        // Cargar tabla de tareas
+        refreshTaskTable();
+        
+        // Verificar estado de conexión
+        await checkConnectionStatus();
+        
+        console.log('SUCCESS: Dashboard inicializado correctamente');
+        
+    } catch (error) {
+        console.error('ERROR: Error inicializando dashboard:', error);
+        showNotification(
+            `Error inicializando dashboard: ${error.message}`,
+            'error'
+        );
+    }
+}
+
+// Verificar estado de conexión
+async function checkConnectionStatus() {
+    try {
+        const response = await fetch('/api/v1/dashboard/health');
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Actualizar indicador de estado
+            const statusElement = document.getElementById('connection-status');
+            if (statusElement) {
+                statusElement.className = 'status-badge connected';
+                statusElement.innerHTML = '<i class="fas fa-circle"></i> Conectado';
+            }
+            
+            console.log('SUCCESS: Estado de conexión verificado');
+        }
+    } catch (error) {
+        console.warn('WARNING: No se pudo verificar el estado de conexión:', error);
+        
+        // Mostrar estado desconectado
+        const statusElement = document.getElementById('connection-status');
+        if (statusElement) {
+            statusElement.className = 'status-badge disconnected';
+            statusElement.innerHTML = '<i class="fas fa-circle"></i> Desconectado';
+        }
+    }
+}
+
+// Inicializar cuando se carga la página
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('INFO: Página cargada, inicializando dashboard...');
+    
+    // Inicializar dashboard
+    initializeDashboard();
+    
+    // ACTUALIZACIÓN AUTOMÁTICA DESACTIVADA - Solo se actualiza manualmente
+    // setInterval(async () => {
+    //     try {
+    //         await updateDashboardCounters();
+    //     } catch (error) {
+    //         console.warn('WARNING: Error en actualización automática:', error);
+    //     }
+    // }, 30000);
+    
+    console.log('SUCCESS: Dashboard configurado - Sin actualización automática');
+});
+
+// Función de sincronización manual
+async function manualSync() {
+    console.log('INFO: Iniciando sincronización manual...');
+    
+    try {
+        // Mostrar estado de sincronización
+        const syncBtn = document.getElementById('dashboard-sync-btn');
+        if (syncBtn) {
+            syncBtn.disabled = true;
+            syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
+        }
+        
+        // Llamar a la API de sincronización
+        const response = await fetch('/api/v1/tasks/sync', {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            console.log('SUCCESS: Sincronización exitosa:', data.message);
+            
+            // Actualizar contadores después de sincronizar
+            await updateDashboardCounters();
+            
+            // Mostrar notificación de éxito
+            showNotification(
+                `Sincronización exitosa: ${data.message}`,
+                'success'
+            );
+        } else {
+            throw new Error(data.error || 'Error en la sincronización');
+        }
+        
+    } catch (error) {
+        console.error('ERROR: Error en sincronización manual:', error);
+        
+        // Mostrar notificación de error
+        showNotification(
+            `Error en sincronización: ${error.message}`,
+            'error'
+        );
+    } finally {
+        // Restaurar botón de sincronización
+        const syncBtn = document.getElementById('dashboard-sync-btn');
+        if (syncBtn) {
+            syncBtn.disabled = false;
+            syncBtn.innerHTML = '<i class="fas fa-sync"></i> Sincronizar';
+        }
+    }
+}
+
+// Función para mostrar notificaciones
+function showNotification(message, type = 'info') {
+    console.log(`NOTIFICATION [${type.toUpperCase()}]:`, message);
+    
+    // Aquí podrías implementar un sistema de notificaciones visual
+    // Por ahora solo se muestra en consola
+}
+
+// Función para actualizar la tabla de tareas
+function refreshTaskTable() {
+    console.log('Actualizando tabla de tareas...');
+    
+    // Mostrar estado de carga
+    const tableBody = document.getElementById('task-table-body');
+    if (tableBody) {
+        tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Cargando tareas...</td></tr>';
+    }
+    
+    // Cargar tareas desde la API
+    fetch('/api/v1/tasks/?include_closed=true&page=0&limit=100')
+        .then(response => response.json())
+        .then(data => {
+            if (data.tasks && data.tasks.length > 0) {
+                displayTaskTable(data.tasks);
+            } else {
+                if (tableBody) {
+                    tableBody.innerHTML = '<tr><td colspan="4" class="text-center">No se encontraron tareas</td></tr>';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error al cargar tareas:', error);
+            if (tableBody) {
+                tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error al cargar tareas</td></tr>';
+            }
+        });
+}
+
+// Función para mostrar tareas en la tabla
+function displayTaskTable(tasks) {
+    const tableBody = document.getElementById('task-table-body');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '';
+    
+    tasks.forEach(task => {
+        const row = document.createElement('tr');
+        
+        // Nombre de la tarea
+        const nameCell = document.createElement('td');
+        nameCell.textContent = task.name || 'Sin nombre';
+        nameCell.style.maxWidth = '200px';
+        nameCell.style.overflow = 'hidden';
+        nameCell.style.textOverflow = 'ellipsis';
+        nameCell.style.whiteSpace = 'nowrap';
+        row.appendChild(nameCell);
+        
+        // Usuario asignado
+        const userCell = document.createElement('td');
+        userCell.textContent = task.assignee || 'Sin asignar';
+        row.appendChild(userCell);
+        
+        // Prioridad
+        const priorityCell = document.createElement('td');
+        const priority = task.priority || 3;
+        const priorityText = getPriorityText(priority);
+        const priorityClass = getPriorityClass(priority);
+        priorityCell.innerHTML = `<span class="priority-badge ${priorityClass}">${priorityText}</span>`;
+        row.appendChild(priorityCell);
+        
+        // Estado
+        const statusCell = document.createElement('td');
+        const status = task.status || 'to do';
+        const statusText = getStatusText(status);
+        const statusClass = getStatusClass(status);
+        statusCell.innerHTML = `<span class="status-badge ${statusClass}">${statusText}</span>`;
+        row.appendChild(statusCell);
+        
+        tableBody.appendChild(row);
+    });
+}
+
+// Función para obtener texto de prioridad
+function getPriorityText(priority) {
+    const priorities = {
+        1: 'Urgente',
+        2: 'Alta',
+        3: 'Normal',
+        4: 'Baja'
+    };
+    return priorities[priority] || 'Normal';
+}
+
+// Función para obtener clase CSS de prioridad
+function getPriorityClass(priority) {
+    const classes = {
+        1: 'priority-urgent',
+        2: 'priority-high',
+        3: 'priority-normal',
+        4: 'priority-low'
+    };
+    return classes[priority] || 'priority-normal';
+}
+
+// Función para obtener texto de estado
+function getStatusText(status) {
+    const statuses = {
+        'to do': 'Pendiente',
+        'in progress': 'En Progreso',
+        'complete': 'complete'
+    };
+    return statuses[status] || status;
+}
+
+// Función para obtener clase CSS de estado
+function getStatusClass(status) {
+    const classes = {
+        'to do': 'status-pending',
+        'in progress': 'status-progress',
+        'complete': 'status-complete'
+    };
+    return classes[status] || 'status-pending';
+}

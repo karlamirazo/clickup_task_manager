@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script alternativo para probar ClickUp con diferentes métodos de autenticación
+Script alternativo para probar ClickUp con diferentes metodos de autenticacion
 """
 
 import asyncio
@@ -9,9 +9,9 @@ import json
 import base64
 
 async def test_clickup_alternatives():
-    """Probar métodos alternativos de autenticación con ClickUp"""
+    """Test metodos alternativos de autenticacion con ClickUp"""
     
-    print("🔗 PROBANDO MÉTODOS ALTERNATIVOS DE CLICKUP")
+    print("üîó PROBANDO METODOS ALTERNATIVOS DE CLICKUP")
     print("=" * 60)
     
     # Tokens existentes
@@ -21,40 +21,40 @@ async def test_clickup_alternatives():
         "pk_156221125_EAW6ZP8QWASDNZKT5K0HS8RNL737HIXZ"
     ]
     
-    # Métodos alternativos de autenticación
+    # Metodos alternativos de autenticacion
     auth_methods = [
-        # Método 1: Bearer token estándar
+        # Metodo 1: Bearer token estandar
         {"name": "Bearer Token", "headers": lambda t: {"Authorization": f"Bearer {t}"}},
         
-        # Método 2: Token directo (sin Bearer)
+        # Metodo 2: Token directo (sin Bearer)
         {"name": "Direct Token", "headers": lambda t: {"Authorization": t}},
         
-        # Método 3: API Key header
+        # Metodo 3: API Key header
         {"name": "API Key Header", "headers": lambda t: {"X-API-Key": t}},
         
-        # Método 4: ClickUp específico
+        # Metodo 4: ClickUp especifico
         {"name": "ClickUp Token", "headers": lambda t: {"X-ClickUp-Token": t}},
         
-        # Método 5: Query parameter
+        # Metodo 5: Query parameter
         {"name": "Query Param", "headers": lambda t: {}, "params": lambda t: {"token": t}},
         
-        # Método 6: Basic Auth (codificando token)
+        # Metodo 6: Basic Auth (codificando token)
         {"name": "Basic Auth", "headers": lambda t: {"Authorization": f"Basic {base64.b64encode(t.encode()).decode()}"}},
         
-        # Método 7: Custom header
+        # Metodo 7: Custom header
         {"name": "Custom Header", "headers": lambda t: {"X-Auth-Token": t}},
         
-        # Método 8: Cookie
+        # Metodo 8: Cookie
         {"name": "Cookie Auth", "headers": lambda t: {"Cookie": f"auth_token={t}"}},
         
-        # Método 9: User-Agent + Token
+        # Metodo 9: User-Agent + Token
         {"name": "User-Agent + Token", "headers": lambda t: {"User-Agent": f"ClickUp-API/{t}"}},
         
-        # Método 10: Referer + Token
+        # Metodo 10: Referer + Token
         {"name": "Referer + Token", "headers": lambda t: {"Referer": f"https://app.clickup.com?token={t}"}}
     ]
     
-    # Endpoints a probar (ordenados por probabilidad de éxito)
+    # Endpoints a probar (ordenados por probabilidad de exito)
     endpoints = [
         ("User Info", "https://api.clickup.com/api/v2/user"),
         ("Teams", "https://api.clickup.com/api/v2/team"),
@@ -66,84 +66,84 @@ async def test_clickup_alternatives():
     ]
     
     for i, token in enumerate(existing_tokens, 1):
-        print(f"\n🔄 PROBANDO TOKEN {i}: {token[:20]}...{token[-10:]}")
+        print(f"\nüîÑ PROBANDO TOKEN {i}: {token[:20]}...{token[-10:]}")
         print("=" * 60)
         
         for auth_method in auth_methods:
             method_name = auth_method["name"]
-            print(f"\n🔑 Método: {method_name}")
+            print(f"\nüîë Metodo: {method_name}")
             print("-" * 40)
             
-            # Probar con el primer endpoint (user) para cada método
+            # Test con el primer endpoint (user) para cada metodo
             endpoint_name, endpoint_url = endpoints[0]
             
             try:
-                # Preparar headers y parámetros
+                # Preparar headers y parametros
                 headers = auth_method["headers"](token)
                 params = auth_method.get("params", lambda t: {})(token)
                 
-                print(f"  📡 Endpoint: {endpoint_name}")
-                print(f"  🔧 Headers: {list(headers.keys())}")
+                print(f"  üì° Endpoint: {endpoint_name}")
+                print(f"  üîß Headers: {list(headers.keys())}")
                 if params:
-                    print(f"  🔧 Params: {list(params.keys())}")
+                    print(f"  üîß Params: {list(params.keys())}")
                 
                 async with aiohttp.ClientSession() as session:
                     async with session.get(endpoint_url, headers=headers, params=params, timeout=15) as response:
-                        print(f"  📊 Status: {response.status}")
+                        print(f"  üìä Status: {response.status}")
                         
                         if response.status == 200:
                             try:
                                 data = await response.json()
-                                print(f"  ✅ ¡ÉXITO! Respuesta: {json.dumps(data, indent=2)[:200]}...")
+                                print(f"  ‚úÖ ¬°EXITO! Respuesta: {json.dumps(data, indent=2)[:200]}...")
                                 
                                 # Si funciona, probar todos los endpoints
-                                print(f"\n🎉 ¡MÉTODO FUNCIONA! Probando todos los endpoints...")
+                                print(f"\nüéâ ¬°METODO FUNCIONA! Probando todos los endpoints...")
                                 await test_all_endpoints_with_method(token, auth_method)
                                 return
                                 
                             except Exception as e:
-                                print(f"  ⚠️  Status 200 pero error parseando JSON: {e}")
+                                print(f"  ‚ö†Ô∏è  Status 200 pero error parseando JSON: {e}")
                                 text = await response.text()
-                                print(f"  📝 Respuesta: {text[:200]}...")
+                                print(f"  üìù Respuesta: {text[:200]}...")
                                 
                         elif response.status == 401:
                             error_text = await response.text()
-                            print(f"  ❌ 401 Unauthorized: {error_text}")
+                            print(f"  ‚ùå 401 Unauthorized: {error_text}")
                             
                         elif response.status == 403:
                             error_text = await response.text()
-                            print(f"  ❌ 403 Forbidden: {error_text}")
+                            print(f"  ‚ùå 403 Forbidden: {error_text}")
                             
                         elif response.status == 400:
                             error_text = await response.text()
-                            print(f"  ❌ 400 Bad Request: {error_text}")
+                            print(f"  ‚ùå 400 Bad Request: {error_text}")
                             
                         else:
                             error_text = await response.text()
-                            print(f"  ❌ Error {response.status}: {error_text[:100]}...")
+                            print(f"  ‚ùå Error {response.status}: {error_text[:100]}...")
                             
             except asyncio.TimeoutError:
-                print(f"  ⏰ Timeout")
+                print(f"  ‚è∞ Timeout")
             except Exception as e:
-                print(f"  ❌ Excepción: {e}")
+                print(f"  ‚ùå Excepcion: {e}")
     
-    print("\n❌ NINGÚN MÉTODO FUNCIONÓ")
-    print("\n🔍 DIAGNÓSTICO FINAL:")
-    print("1. Los tokens están expirados o son inválidos")
+    print("\n‚ùå NINGUN METODO FUNCIONO")
+    print("\nüîç DIAGNOSTICO FINAL:")
+    print("1. Los tokens estan expirados o son invalidos")
     print("2. ClickUp requiere un token de cuenta personal (no de app OAuth)")
     print("3. Los permisos de la cuenta pueden estar restringidos")
-    print("4. ClickUp puede haber cambiado su sistema de autenticación")
+    print("4. ClickUp puede haber cambiado su sistema de autenticacion")
     
-    print("\n💡 SOLUCIÓN RECOMENDADA:")
-    print("1. Ve a ClickUp → Settings → Account")
+    print("\nüí° SOLUCION RECOMENDADA:")
+    print("1. Ve a ClickUp ‚Üí Settings ‚Üí Account")
     print("2. Busca 'API' o 'Developer' o 'Integrations'")
     print("3. Genera un 'Personal API Token' (no OAuth)")
     print("4. O contacta soporte de ClickUp para obtener acceso API")
 
 async def test_all_endpoints_with_method(token, auth_method):
-    """Probar todos los endpoints con un método que funciona"""
+    """Test todos los endpoints con un metodo que funciona"""
     
-    print(f"\n🚀 PROBANDO TODOS LOS ENDPOINTS CON MÉTODO: {auth_method['name']}")
+    print(f"\nüöÄ PROBANDO TODOS LOS ENDPOINTS CON METODO: {auth_method['name']}")
     print("=" * 60)
     
     endpoints = [
@@ -166,30 +166,30 @@ async def test_all_endpoints_with_method(token, auth_method):
             async with aiohttp.ClientSession() as session:
                 async with session.get(endpoint_url, headers=headers, params=params, timeout=15) as response:
                     if response.status == 200:
-                        print(f"✅ {name}: Funciona")
+                        print(f"‚úÖ {name}: Funciona")
                         working_endpoints.append(name)
                     else:
-                        print(f"❌ {name}: Error {response.status}")
+                        print(f"‚ùå {name}: Error {response.status}")
                         
         except Exception as e:
-            print(f"❌ {name}: Excepción - {e}")
+            print(f"‚ùå {name}: Excepcion - {e}")
     
-    print(f"\n🎉 ¡CONEXIÓN EXITOSA CON CLICKUP!")
-    print(f"🔑 Token válido: {token[:20]}...{token[-10:]}")
-    print(f"🔧 Método que funciona: {auth_method['name']}")
-    print(f"📊 Endpoints funcionando: {len(working_endpoints)}/{len(endpoints)}")
+    print(f"\nüéâ ¬°CONEXION EXITOSA CON CLICKUP!")
+    print(f"üîë Token valido: {token[:20]}...{token[-10:]}")
+    print(f"üîß Metodo que funciona: {auth_method['name']}")
+    print(f"üìä Endpoints funcionando: {len(working_endpoints)}/{len(endpoints)}")
     
     if working_endpoints:
-        print(f"✅ Endpoints activos: {', '.join(working_endpoints)}")
+        print(f"‚úÖ Endpoints activos: {', '.join(working_endpoints)}")
 
 async def main():
-    """Función principal"""
-    print("🚀 INICIANDO PRUEBAS ALTERNATIVAS DE CLICKUP")
+    """Funcion principal"""
+    print("üöÄ INICIANDO PRUEBAS ALTERNATIVAS DE CLICKUP")
     print("=" * 70)
     
     await test_clickup_alternatives()
     
-    print("\n🏁 Pruebas alternativas completadas")
+    print("\nüèÅ Pruebas alternativas completadas")
 
 if __name__ == "__main__":
     asyncio.run(main())

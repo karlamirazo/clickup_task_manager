@@ -15,18 +15,18 @@ def migrate_sqlite_to_postgres():
     # Verificar que exista la base de datos SQLite local
     sqlite_db_path = "clickup_task_manager.db"
     if not os.path.exists(sqlite_db_path):
-        print(f"❌ Base de datos SQLite no encontrada: {sqlite_db_path}")
+        print(f"â�Œ Base de datos SQLite not found: {sqlite_db_path}")
         return
     
-    # Obtener DATABASE_URL de Railway
+    # Get DATABASE_URL de Railway
     database_url = os.getenv("DATABASE_URL")
     if not database_url:
-        print("❌ DATABASE_URL no está configurado")
+        print("â�Œ DATABASE_URL no esta configured")
         return
     
-    print(f"🔄 Iniciando migración de SQLite a PostgreSQL...")
-    print(f"📁 SQLite: {sqlite_db_path}")
-    print(f"📊 PostgreSQL: {database_url[:50]}...")
+    print(f"ğŸ”„ Iniciando migracion de SQLite a PostgreSQL...")
+    print(f"ğŸ“� SQLite: {sqlite_db_path}")
+    print(f"ğŸ“Š PostgreSQL: {database_url[:50]}...")
     
     try:
         # Conectar a SQLite
@@ -47,29 +47,29 @@ def migrate_sqlite_to_postgres():
         """)
         
         if not postgres_cursor.fetchone()[0]:
-            print(f"❌ La tabla 'tasks' no existe en PostgreSQL. Ejecuta primero create_postgres_tasks_table.py")
+            print(f"â�Œ La tabla 'tasks' no existe en PostgreSQL. Ejecuta primero create_postgres_tasks_table.py")
             return
         
-        # Obtener datos de SQLite
-        print(f"📥 Obteniendo datos de SQLite...")
+        # Get datos de SQLite
+        print(f"ğŸ“¥ Obteniendo datos de SQLite...")
         sqlite_cursor.execute("SELECT * FROM tasks;")
         sqlite_tasks = sqlite_cursor.fetchall()
         
-        print(f"📊 Encontradas {len(sqlite_tasks)} tareas en SQLite")
+        print(f"ğŸ“Š Encontradas {len(sqlite_tasks)} tareas en SQLite")
         
-        # Obtener estructura de columnas de SQLite
+        # Get estructura de columnas de SQLite
         sqlite_cursor.execute("PRAGMA table_info(tasks);")
         sqlite_columns = [col[1] for col in sqlite_cursor.fetchall()]
-        print(f"🏗️ Columnas en SQLite: {', '.join(sqlite_columns)}")
+        print(f"ğŸ�—ï¸� Columnas en SQLite: {', '.join(sqlite_columns)}")
         
-        # Obtener estructura de columnas de PostgreSQL
+        # Get estructura de columnas de PostgreSQL
         postgres_cursor.execute("""
             SELECT column_name FROM information_schema.columns 
             WHERE table_name = 'tasks' 
             ORDER BY ordinal_position;
         """)
         postgres_columns = [col[0] for col in postgres_cursor.fetchall()]
-        print(f"🏗️ Columnas en PostgreSQL: {', '.join(postgres_columns)}")
+        print(f"ğŸ�—ï¸� Columnas en PostgreSQL: {', '.join(postgres_columns)}")
         
         # Migrar cada tarea
         migrated_count = 0
@@ -77,7 +77,7 @@ def migrate_sqlite_to_postgres():
         
         for i, sqlite_task in enumerate(sqlite_tasks):
             try:
-                # Crear diccionario con datos de SQLite
+                # Create diccionario con datos de SQLite
                 task_dict = dict(zip(sqlite_columns, sqlite_task))
                 
                 # Preparar datos para PostgreSQL
@@ -110,25 +110,25 @@ def migrate_sqlite_to_postgres():
                 migrated_count += 1
                 
                 if (i + 1) % 10 == 0:
-                    print(f"   ✅ Migradas {i + 1}/{len(sqlite_tasks)} tareas...")
+                    print(f"   âœ… Migradas {i + 1}/{len(sqlite_tasks)} tareas...")
                 
             except Exception as e:
-                print(f"   ❌ Error migrando tarea {i + 1}: {e}")
+                print(f"   â�Œ Error migrando tarea {i + 1}: {e}")
                 error_count += 1
                 continue
         
-        # Commit de la transacción
+        # Commit de la transaccion
         postgres_conn.commit()
         
-        print(f"\n🎉 Migración completada!")
-        print(f"✅ Tareas migradas exitosamente: {migrated_count}")
-        print(f"❌ Errores durante migración: {error_count}")
-        print(f"📊 Total procesadas: {len(sqlite_tasks)}")
+        print(f"\nğŸ�‰ Migracion completada!")
+        print(f"âœ… Tareas migradas exitosamente: {migrated_count}")
+        print(f"â�Œ Errores durante migracion: {error_count}")
+        print(f"ğŸ“Š Total procesadas: {len(sqlite_tasks)}")
         
         # Verificar datos en PostgreSQL
         postgres_cursor.execute("SELECT COUNT(*) FROM tasks;")
         postgres_count = postgres_cursor.fetchone()[0]
-        print(f"📊 Total tareas en PostgreSQL: {postgres_count}")
+        print(f"ğŸ“Š Total tareas en PostgreSQL: {postgres_count}")
         
         # Cerrar conexiones
         sqlite_cursor.close()
@@ -136,12 +136,12 @@ def migrate_sqlite_to_postgres():
         postgres_cursor.close()
         postgres_conn.close()
         
-        print(f"\n🎉 ¡Migración completada exitosamente!")
+        print(f"\nğŸ�‰ Â¡Migracion completada exitosamente!")
         
     except Exception as e:
-        print(f"❌ Error durante migración: {e}")
+        print(f"â�Œ Error durante migracion: {e}")
         import traceback
-        print(f"🔍 Traceback: {traceback.format_exc()}")
+        print(f"ğŸ”� Traceback: {traceback.format_exc()}")
 
 if __name__ == "__main__":
     migrate_sqlite_to_postgres()

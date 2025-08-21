@@ -1,3 +1,0 @@
-Tareas del Proyecto|Celular|51fa0661-0995-4c37-ba8d-3307aef300ca|phone
-Proyecto 1|Celular|51fa0661-0995-4c37-ba8d-3307aef300ca|phone
-Proyecto 1|Email|6464a671-73dd-4be5-b720-b5f0fe5adb04|email

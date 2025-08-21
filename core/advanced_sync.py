@@ -1,10 +1,10 @@
 """
-Sistema avanzado de sincronización con ClickUp
-- Sincronización bidireccional
-- Detección de cambios
+Sistema avanzado de sincronizacion con ClickUp
+- Sincronizacion bidireccional
+- Deteccion de cambios
 - Cache inteligente
 - Rate limiting
-- Reintentos automáticos
+- Reintentos automaticos
 """
 
 import asyncio
@@ -27,7 +27,7 @@ sync_logger = logging.getLogger("sync")
 
 @dataclass
 class SyncResult:
-    """Resultado de operación de sincronización"""
+    """Resultado de operacion de sincronizacion"""
     success: bool
     items_processed: int
     items_created: int
@@ -61,7 +61,7 @@ class TaskCache:
         self.ttl = timedelta(minutes=5)  # TTL de 5 minutos
     
     def get(self, task_id: str) -> Optional[Dict]:
-        """Obtener tarea del cache"""
+        """Get tarea del cache"""
         if task_id in self._cache:
             if datetime.now() - self._last_update.get(task_id, datetime.min) < self.ttl:
                 return self._cache[task_id]
@@ -111,7 +111,7 @@ class TaskCache:
         self._last_update.clear()
     
     def get_stats(self) -> dict:
-        """Obtener estadísticas del cache"""
+        """Get estadisticas del cache"""
         now = datetime.now()
         expired_count = sum(1 for last_update in self._last_update.values() 
                           if now - last_update >= self.ttl)
@@ -120,7 +120,7 @@ class TaskCache:
             "total_cached": len(self._cache),
             "expired": expired_count,
             "active": len(self._cache) - expired_count,
-            "hit_rate": 0  # Sería necesario trackear hits/misses
+            "hit_rate": 0  # Seria necesario trackear hits/misses
         }
 
 
@@ -140,20 +140,20 @@ class RateLimiter:
         self.requests = [req_time for req_time in self.requests 
                         if now - req_time < timedelta(seconds=self.time_window)]
         
-        # Verificar si podemos hacer más requests
+        # Verificar si podemos hacer mas requests
         if len(self.requests) >= self.max_requests:
             # Calcular tiempo de espera
             oldest_request = min(self.requests)
             wait_time = self.time_window - (now - oldest_request).total_seconds()
             
             if wait_time > 0:
-                sync_logger.info(f"🚦 Rate limit alcanzado, esperando {wait_time:.1f}s")
+                sync_logger.info(f"ðŸš¦ Rate limit alcanzado, esperando {wait_time:.1f}s")
                 await asyncio.sleep(wait_time)
         
         self.requests.append(now)
     
     def get_stats(self) -> dict:
-        """Obtener estadísticas del rate limiter"""
+        """Get estadisticas del rate limiter"""
         now = datetime.now()
         recent_requests = [req for req in self.requests 
                           if now - req < timedelta(seconds=self.time_window)]
@@ -167,7 +167,7 @@ class RateLimiter:
 
 
 class AdvancedSyncService:
-    """Servicio avanzado de sincronización con ClickUp"""
+    """Servicio avanzado de sincronizacion con ClickUp"""
     
     def __init__(self):
         self.clickup_client = ClickUpClient()
@@ -176,13 +176,13 @@ class AdvancedSyncService:
         self.sync_history: List[SyncResult] = []
         self.max_history = 100
         
-        # Configuración de sincronización
+        # Configuracion de sincronizacion
         self.batch_size = 50
         self.max_retries = 3
         self.retry_delay = 2
     
     async def full_sync_workspace(self, workspace_id: str) -> SyncResult:
-        """Sincronización completa de un workspace"""
+        """Sincronizacion completa de un workspace"""
         start_time = datetime.now()
         result = SyncResult(
             success=False,
@@ -196,9 +196,9 @@ class AdvancedSyncService:
         )
         
         try:
-            sync_logger.info(f"🔄 Iniciando sincronización completa del workspace {workspace_id}")
+            sync_logger.info(f"ðŸ”„ Iniciando sincronizacion completa del workspace {workspace_id}")
             
-            # Obtener todas las listas del workspace
+            # Get todas las listas del workspace
             await self.rate_limiter.acquire()
             spaces = await self.clickup_client.get_spaces(workspace_id)
             
@@ -227,25 +227,25 @@ class AdvancedSyncService:
             result.success = len(result.errors) == 0
             
         except Exception as e:
-            error_msg = f"Error en sincronización completa: {e}"
+            error_msg = f"Error en sincronizacion completa: {e}"
             sync_logger.error(error_msg)
             result.errors.append(error_msg)
         
         result.duration = (datetime.now() - start_time).total_seconds()
         self._add_to_history(result)
         
-        sync_logger.info(f"✅ Sincronización completa terminada: {result.items_processed} procesadas, "
+        sync_logger.info(f"âœ… Sincronizacion completa terminada: {result.items_processed} procesadas, "
                         f"{result.items_created} creadas, {result.items_updated} actualizadas, "
                         f"{result.items_deleted} eliminadas en {result.duration:.1f}s")
         
         return result
     
     async def incremental_sync(self, workspace_id: str, since: Optional[datetime] = None) -> SyncResult:
-        """Sincronización incremental basada en cambios recientes"""
+        """Sincronizacion incremental basada en cambios recientes"""
         start_time = datetime.now()
         
         if since is None:
-            since = start_time - timedelta(hours=1)  # Última hora por defecto
+            since = start_time - timedelta(hours=1)  # Ultima hora por defecto
         
         result = SyncResult(
             success=False,
@@ -259,10 +259,10 @@ class AdvancedSyncService:
         )
         
         try:
-            sync_logger.info(f"🔄 Sincronización incremental desde {since}")
+            sync_logger.info(f"ðŸ”„ Sincronizacion incremental desde {since}")
             
-            # Obtener tareas modificadas recientemente
-            # Nota: ClickUp no tiene API nativa para esto, así que usamos caché
+            # Get tareas modificadas recientemente
+            # Nota: ClickUp no tiene API nativa para esto, asi que usamos cache
             db = next(get_db())
             try:
                 local_tasks = db.query(Task).filter(
@@ -283,7 +283,7 @@ class AdvancedSyncService:
                         result.items_processed += 1
                         
                     except Exception as e:
-                        error_msg = f"Error sincronizando tarea {task.clickup_id}: {e}"
+                        error_msg = f"Error syncing tarea {task.clickup_id}: {e}"
                         sync_logger.error(error_msg)
                         result.errors.append(error_msg)
                 
@@ -294,7 +294,7 @@ class AdvancedSyncService:
                 db.close()
         
         except Exception as e:
-            error_msg = f"Error en sincronización incremental: {e}"
+            error_msg = f"Error en sincronizacion incremental: {e}"
             sync_logger.error(error_msg)
             result.errors.append(error_msg)
         
@@ -304,7 +304,7 @@ class AdvancedSyncService:
         return result
     
     async def sync_single_task(self, task_id: str) -> SyncResult:
-        """Sincronizar una sola tarea"""
+        """Sync una sola tarea"""
         start_time = datetime.now()
         result = SyncResult(
             success=False,
@@ -342,7 +342,7 @@ class AdvancedSyncService:
                 db.close()
         
         except Exception as e:
-            error_msg = f"Error sincronizando tarea {task_id}: {e}"
+            error_msg = f"Error syncing tarea {task_id}: {e}"
             sync_logger.error(error_msg)
             result.errors.append(error_msg)
         
@@ -392,8 +392,8 @@ class AdvancedSyncService:
         return result
     
     async def _update_local_task(self, local_task: Task, clickup_data: Dict, db: Session):
-        """Actualizar tarea local con datos de ClickUp"""
-        # Actualizar campos
+        """Update tarea local con datos de ClickUp"""
+        # Update campos
         local_task.name = clickup_data.get("name", local_task.name)
         local_task.description = clickup_data.get("description", local_task.description)
         
@@ -431,7 +431,7 @@ class AdvancedSyncService:
         sync_logger.debug(f"Actualizada tarea local {local_task.clickup_id}")
     
     async def _create_local_task(self, clickup_data: Dict, db: Session):
-        """Crear nueva tarea local desde datos de ClickUp"""
+        """Create nueva tarea local desde datos de ClickUp"""
         from api.routes.tasks import _priority_to_int
         
         task = Task(
@@ -475,7 +475,7 @@ class AdvancedSyncService:
         """Detectar y marcar tareas eliminadas"""
         db = next(get_db())
         try:
-            # Obtener todas las tareas locales del workspace
+            # Get todas las tareas locales del workspace
             local_tasks = db.query(Task).filter(Task.workspace_id == workspace_id).all()
             local_task_ids = {task.clickup_id for task in local_tasks}
             current_task_ids_set = set(current_task_ids)
@@ -490,7 +490,7 @@ class AdvancedSyncService:
                 ).delete(synchronize_session=False)
                 
                 db.commit()
-                sync_logger.info(f"🗑️ Eliminadas {deleted_count} tareas que ya no existen en ClickUp")
+                sync_logger.info(f"ðŸ—‘ï¸� Eliminadas {deleted_count} tareas que ya no existen en ClickUp")
                 return deleted_count
             
             return 0
@@ -502,16 +502,16 @@ class AdvancedSyncService:
         """Agregar resultado al historial"""
         self.sync_history.append(result)
         
-        # Mantener solo los últimos resultados
+        # Mantener solo los ultimos resultados
         if len(self.sync_history) > self.max_history:
             self.sync_history = self.sync_history[-self.max_history:]
     
     def get_sync_stats(self) -> dict:
-        """Obtener estadísticas de sincronización"""
+        """Get estadisticas de sincronizacion"""
         if not self.sync_history:
             return {"no_syncs": True}
         
-        recent_syncs = self.sync_history[-10:]  # Últimas 10 sincronizaciones
+        recent_syncs = self.sync_history[-10:]  # Ultimas 10 sincronizaciones
         
         total_processed = sum(s.items_processed for s in recent_syncs)
         total_errors = sum(len(s.errors) for s in recent_syncs)
@@ -532,8 +532,8 @@ class AdvancedSyncService:
     def clear_cache(self):
         """Limpiar cache"""
         self.cache.clear()
-        sync_logger.info("🧹 Cache limpiado")
+        sync_logger.info("ðŸ§¹ Cache limpiado")
 
 
-# Instancia global del servicio de sincronización
+# Instancia global del servicio de sincronizacion
 sync_service = AdvancedSyncService()

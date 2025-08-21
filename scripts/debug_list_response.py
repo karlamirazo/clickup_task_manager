@@ -9,7 +9,7 @@ import sys
 import json
 from datetime import datetime
 
-# Agregar el directorio raíz al path para importar módulos
+# Agregar el directorio raiz al path para importar modulos
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.clickup_client import ClickUpClient
@@ -17,7 +17,7 @@ from core.clickup_client import ClickUpClient
 async def debug_list_response():
     """Debuggear la respuesta completa del endpoint de lista"""
     
-    print("🔍 DEBUGGEANDO RESPUESTA DE LISTA")
+    print("ğŸ”� DEBUGGEANDO RESPUESTA DE LISTA")
     print("=" * 50)
     
     list_id = "901411770471"  # PROYECTO 1
@@ -26,17 +26,17 @@ async def debug_list_response():
         # Inicializar cliente ClickUp
         client = ClickUpClient()
         
-        print(f"📋 Obteniendo lista: {list_id}")
+        print(f"ğŸ“‹ Obteniendo lista: {list_id}")
         
-        # Obtener la lista
+        # Get la lista
         list_details = await client._make_request("GET", f"list/{list_id}")
         
-        print(f"✅ Lista obtenida exitosamente")
-        print(f"📄 Respuesta completa:")
+        print(f"âœ… Lista obtenida exitosamente")
+        print(f"ğŸ“„ Respuesta completa:")
         print(json.dumps(list_details, indent=2, ensure_ascii=False))
         
         # Buscar campos relacionados con estados
-        print(f"\n🔍 BUSCANDO CAMPOS RELACIONADOS CON ESTADOS:")
+        print(f"\nğŸ”� BUSCANDO CAMPOS RELACIONADOS CON ESTADOS:")
         
         # Buscar en toda la respuesta
         def search_for_status_fields(obj, path=""):
@@ -44,7 +44,7 @@ async def debug_list_response():
                 for key, value in obj.items():
                     current_path = f"{path}.{key}" if path else key
                     if 'status' in key.lower():
-                        print(f"   📊 Encontrado en {current_path}: {value}")
+                        print(f"   ğŸ“Š Encontrado en {current_path}: {value}")
                     elif isinstance(value, (dict, list)):
                         search_for_status_fields(value, current_path)
             elif isinstance(obj, list):
@@ -54,15 +54,15 @@ async def debug_list_response():
         
         search_for_status_fields(list_details)
         
-        # Verificar si hay algún campo que contenga estados
-        print(f"\n🔍 VERIFICANDO CAMPOS ESPECÍFICOS:")
+        # Verificar si hay algun campo que contenga estados
+        print(f"\nğŸ”� VERIFICANDO CAMPOS ESPECIFICOS:")
         for key in list_details.keys():
-            print(f"   📋 {key}: {type(list_details[key])}")
+            print(f"   ğŸ“‹ {key}: {type(list_details[key])}")
             if key == 'status':
-                print(f"      📊 Contenido: {list_details[key]}")
+                print(f"      ğŸ“Š Contenido: {list_details[key]}")
         
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"â�Œ Error: {e}")
 
 if __name__ == "__main__":
     asyncio.run(debug_list_response())

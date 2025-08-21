@@ -14,7 +14,7 @@ import logging
 from core.config import settings
 from utils.email_templates import get_email_template, get_summary_email_template
 
-# Configurar logging específico para notificaciones
+# Configurar logging especifico para notificaciones
 logging.basicConfig(level=logging.INFO)
 notification_logger = logging.getLogger("notifications")
 
@@ -46,7 +46,7 @@ class NotificationResult:
         self.failed_to = []
         
     def add_success(self, channel: str, recipient: str):
-        """Agregar notificación exitosa"""
+        """Agregar notificacion exitosa"""
         self.total_sent += 1
         self.sent_to.append({"channel": channel, "recipient": recipient, "timestamp": datetime.now().isoformat()})
         
@@ -58,7 +58,7 @@ class NotificationResult:
             self.successful_telegram += 1
     
     def add_failure(self, channel: str, recipient: str, error: str):
-        """Agregar notificación fallida"""
+        """Agregar notificacion fallida"""
         self.failed_notifications += 1
         self.failed_to.append({
             "channel": channel, 
@@ -69,7 +69,7 @@ class NotificationResult:
         self.errors.append(f"{channel} to {recipient}: {error}")
     
     def get_summary(self) -> dict:
-        """Obtener resumen de resultados"""
+        """Get resumen de resultados"""
         return {
             "total_sent": self.total_sent,
             "successful": {
@@ -112,17 +112,17 @@ class AdvancedNotificationService:
         description: Optional[str] = None
     ) -> NotificationResult:
         """
-        Enviar notificación completa de tarea con plantillas HTML y reintentos
+        Enviar notificacion completa de tarea con plantillas HTML y reintentos
         """
         result = NotificationResult()
         
         # Validar que tenemos destinatarios
         all_recipients = (recipient_emails or []) + (recipient_sms or []) + (recipient_telegrams or [])
         if not all_recipients:
-            notification_logger.warning("No hay destinatarios para la notificación")
+            notification_logger.warning("No hay destinatarios para la notificacion")
             return result
         
-        notification_logger.info(f"🔔 Enviando notificación de tarea {action}: {task_name}")
+        notification_logger.info(f"ðŸ”” Enviando notificacion de tarea {action}: {task_name}")
         
         # Generar plantilla HTML para email
         subject, html_body = get_email_template(
@@ -159,16 +159,16 @@ class AdvancedNotificationService:
         if recipient_telegrams:
             tasks.append(self._send_telegram_with_retry(recipient_telegrams, text_message, result))
         
-        # Ejecutar todas las notificaciones en paralelo
+        # Execute todas las notificaciones en paralelo
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
         
-        # Actualizar estadísticas
+        # Update estadisticas
         self._update_stats(result)
         
         # Log del resumen
         summary = result.get_summary()
-        notification_logger.info(f"📊 Notificación completada: {summary['successful']['total']} exitosas, {summary['failed']} fallidas")
+        notification_logger.info(f"ðŸ“Š Notificacion completada: {summary['successful']['total']} exitosas, {summary['failed']} fallidas")
         
         return result
     
@@ -218,18 +218,18 @@ class AdvancedNotificationService:
                         await smtp.quit()
                         
                         result.add_success("email", email)
-                        notification_logger.info(f"✅ Email enviado a: {email}")
+                        notification_logger.info(f"âœ… Email enviado a: {email}")
                         
                     except Exception as email_error:
                         error_msg = f"Error enviando email a {email}: {email_error}"
                         notification_logger.error(error_msg)
-                        if attempt == max_retries - 1:  # Último intento
+                        if attempt == max_retries - 1:  # Ultimo intento
                             result.add_failure("email", email, str(email_error))
                 
                 break  # Salir del loop si todo fue exitoso
                 
             except Exception as smtp_error:
-                notification_logger.error(f"Intento {attempt + 1}/{max_retries} de SMTP falló: {smtp_error}")
+                notification_logger.error(f"Intento {attempt + 1}/{max_retries} de SMTP fallo: {smtp_error}")
                 if attempt < max_retries - 1:
                     await asyncio.sleep(2 ** attempt)  # Backoff exponencial
                 else:
@@ -253,7 +253,7 @@ class AdvancedNotificationService:
             for phone_number in recipients:
                 for attempt in range(max_retries):
                     try:
-                        # Formatear número de teléfono
+                        # Formatear numero de telefono
                         clean_number = phone_number.strip()
                         if not clean_number.startswith("+"):
                             clean_number = f"+{clean_number}"
@@ -265,7 +265,7 @@ class AdvancedNotificationService:
                         )
                         
                         result.add_success("sms", phone_number)
-                        notification_logger.info(f"✅ SMS enviado a {phone_number}: {message_obj.sid}")
+                        notification_logger.info(f"âœ… SMS enviado a {phone_number}: {message_obj.sid}")
                         break
                         
                     except Exception as sms_error:
@@ -289,7 +289,7 @@ class AdvancedNotificationService:
     ):
         """Enviar Telegram con reintentos"""
         if not settings.TELEGRAM_ENABLED or not settings.TELEGRAM_BOT_TOKEN or not HTTPX_AVAILABLE or not recipients:
-            notification_logger.info("🚫 Telegram deshabilitado en configuración")
+            notification_logger.info("ðŸš« Telegram deshabilitado en configuracion")
             return
         
         url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendMessage"
@@ -308,7 +308,7 @@ class AdvancedNotificationService:
                         
                         if response.status_code == 200:
                             result.add_success("telegram", chat_id)
-                            notification_logger.info(f"✅ Telegram enviado a {chat_id}")
+                            notification_logger.info(f"âœ… Telegram enviado a {chat_id}")
                             break
                         else:
                             error_msg = f"HTTP {response.status_code}: {response.text}"
@@ -338,40 +338,40 @@ class AdvancedNotificationService:
     ) -> str:
         """Construir mensaje de texto para SMS/Telegram"""
         action_emoji = {
-            "created": "🆕",
-            "updated": "✏️", 
-            "deleted": "🗑️"
+            "created": "ðŸ†•",
+            "updated": "âœ�ï¸�", 
+            "deleted": "ðŸ—‘ï¸�"
         }
         
-        emoji = action_emoji.get(action, "📋")
+        emoji = action_emoji.get(action, "ðŸ“‹")
         action_text = action.title().replace("_", " ")
         
-        parts = [f"{emoji} {action_text}", f"📝 {task_name}", f"🆔 {task_id}"]
+        parts = [f"{emoji} {action_text}", f"ðŸ“� {task_name}", f"ðŸ†” {task_id}"]
         
         if status:
-            parts.append(f"📊 Estado: {status}")
+            parts.append(f"ðŸ“Š Estado: {status}")
         
         if priority is not None:
-            priority_emoji = {1: "🔴", 2: "🟠", 3: "🟡", 4: "🟢"}.get(priority, "⚪")
+            priority_emoji = {1: "ðŸ”´", 2: "ðŸŸ ", 3: "ðŸŸ¡", 4: "ðŸŸ¢"}.get(priority, "âšª")
             parts.append(f"{priority_emoji} Prioridad: {priority}")
         
         if assignee_name:
-            parts.append(f"👤 Asignado: {assignee_name}")
+            parts.append(f"ðŸ‘¤ Asignado: {assignee_name}")
         
         if due_date:
-            parts.append(f"⏰ Vence: {due_date}")
+            parts.append(f"â�° Vence: {due_date}")
         
         return "\\n".join(parts)
     
     def _update_stats(self, result: NotificationResult):
-        """Actualizar estadísticas del servicio"""
+        """Update estadisticas del servicio"""
         summary = result.get_summary()
         self.stats["total_notifications"] += summary["total_sent"] + summary["failed"]
         self.stats["successful_notifications"] += summary["successful"]["total"]
         self.stats["failed_notifications"] += summary["failed"]
     
     def get_stats(self) -> dict:
-        """Obtener estadísticas del servicio"""
+        """Get estadisticas del servicio"""
         return {
             **self.stats,
             "success_rate": (self.stats["successful_notifications"] / max(self.stats["total_notifications"], 1)) * 100,
@@ -379,7 +379,7 @@ class AdvancedNotificationService:
         }
     
     def reset_stats(self):
-        """Resetear estadísticas"""
+        """Resetear estadisticas"""
         self.stats = {
             "total_notifications": 0,
             "successful_notifications": 0,
@@ -393,7 +393,7 @@ class AdvancedNotificationService:
         
         subject, html_body = get_summary_email_template(
             notifications_sent=stats["total_notifications"],
-            successful_emails=0,  # Tendríamos que trackear esto por separado
+            successful_emails=0,  # Tendriamos que trackear esto por separado
             successful_sms=0,
             successful_telegram=0,
             failed_notifications=stats["failed_notifications"]
