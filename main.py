@@ -340,6 +340,107 @@ async def initialize_database():
             "timestamp": datetime.datetime.now().isoformat()
         }
 
+@app.post("/api/recreate-db")
+async def recreate_database():
+    """Recreate database tables completely (nuclear option)"""
+    try:
+        from core.database import engine, Base
+        from sqlalchemy import text
+        
+        print("💥 RECREANDO COMPLETAMENTE LA BASE DE DATOS...")
+        
+        # Verificar estado antes
+        before_tables = []
+        try:
+            with engine.connect() as conn:
+                result = conn.execute(text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name"))
+                before_tables = [row[0] for row in result]
+        except Exception as e:
+            print(f"⚠️ Error verificando tablas antes: {e}")
+        
+        print(f"📋 Tablas antes: {before_tables}")
+        
+        # ELIMINAR TODAS LAS TABLAS EXISTENTES
+        print("🗑️ Eliminando todas las tablas existentes...")
+        try:
+            with engine.connect() as conn:
+                # Deshabilitar verificaciones de foreign keys temporalmente
+                conn.execute(text("SET session_replication_role = replica;"))
+                
+                # Eliminar todas las tablas
+                for table_name in before_tables:
+                    conn.execute(text(f"DROP TABLE IF EXISTS {table_name} CASCADE;"))
+                    print(f"   🗑️ Tabla {table_name} eliminada")
+                
+                # Rehabilitar verificaciones
+                conn.execute(text("SET session_replication_role = DEFAULT;"))
+                conn.commit()
+                
+        except Exception as e:
+            print(f"⚠️ Error eliminando tablas: {e}")
+        
+        # RECREAR TODAS LAS TABLAS
+        print("🔄 Recreando todas las tablas...")
+        try:
+            from models import Task, Workspace, User, Automation, Report, Integration, NotificationLog
+            
+            # Crear todas las tablas
+            Base.metadata.create_all(bind=engine)
+            print("✅ Tablas recreadas exitosamente")
+            
+        except Exception as e:
+            print(f"❌ Error recreando tablas: {e}")
+            return {
+                "error": f"Error recreando tablas: {str(e)}",
+                "timestamp": datetime.datetime.now().isoformat()
+            }
+        
+        # Verificar estado después
+        after_tables = []
+        table_columns = {}
+        
+        try:
+            with engine.connect() as conn:
+                # Obtener lista de tablas
+                result = conn.execute(text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name"))
+                after_tables = [row[0] for row in result]
+                
+                # Verificar estructura de notification_logs específicamente
+                if 'notification_logs' in after_tables:
+                    result = conn.execute(text("""
+                        SELECT column_name, data_type, is_nullable 
+                        FROM information_schema.columns 
+                        WHERE table_name = 'notification_logs' 
+                        ORDER BY ordinal_position
+                    """))
+                    columns = [(row[0], row[1], row[2]) for row in result]
+                    table_columns['notification_logs'] = columns
+                    
+                    # Verificar si notification_type existe
+                    has_notification_type = any(col[0] == 'notification_type' for col in columns)
+                    print(f"🔍 Columna notification_type existe: {has_notification_type}")
+                    
+        except Exception as e:
+            print(f"⚠️ Error verificando tablas después: {e}")
+        
+        print(f"📋 Tablas después: {after_tables}")
+        
+        return {
+            "message": "Database completely recreated",
+            "timestamp": datetime.datetime.now().isoformat(),
+            "before_tables": before_tables,
+            "after_tables": after_tables,
+            "table_columns": table_columns,
+            "notification_type_exists": 'notification_logs' in table_columns and any(col[0] == 'notification_type' for col in table_columns.get('notification_logs', []))
+        }
+        
+    except Exception as e:
+        print(f"❌ Error durante recreación: {e}")
+        return {
+            "error": str(e),
+            "timestamp": datetime.datetime.now().isoformat()
+        }
+
 @app.get("/debug")
 async def debug_info():
     """Independent debug endpoint to check server status"""
