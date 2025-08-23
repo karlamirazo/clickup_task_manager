@@ -641,6 +641,69 @@ async def test_simple_endpoint():
         "deployment_version": "2025-08-18-13:10"
     }
 
+@app.get("/api/debug-tables")
+async def debug_tables():
+    """Debug endpoint to check table structure in detail"""
+    try:
+        from core.database import engine
+        from sqlalchemy import text
+        
+        print("🔍 DEBUGGING TABLE STRUCTURE...")
+        
+        tables_info = {}
+        
+        with engine.connect() as conn:
+            # Get all tables
+            result = conn.execute(text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name"))
+            table_names = [row[0] for row in result]
+            
+            print(f"📋 Tablas encontradas: {table_names}")
+            
+            for table_name in table_names:
+                print(f"\n🔍 Verificando tabla: {table_name}")
+                
+                # Get columns for this table
+                result = conn.execute(text(f"""
+                    SELECT column_name, data_type, is_nullable, column_default
+                    FROM information_schema.columns 
+                    WHERE table_name = '{table_name}' 
+                    ORDER BY ordinal_position
+                """))
+                
+                columns = []
+                for row in result:
+                    column_info = {
+                        "name": row[0],
+                        "type": row[1],
+                        "nullable": row[2],
+                        "default": row[3]
+                    }
+                    columns.append(column_info)
+                    print(f"   📊 {row[0]}: {row[1]} ({'NULL' if row[2] == 'YES' else 'NOT NULL'})")
+                
+                tables_info[table_name] = {
+                    "columns": columns,
+                    "column_count": len(columns)
+                }
+                
+                # Check if table has any data
+                result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
+                row_count = result.fetchone()[0]
+                tables_info[table_name]["row_count"] = row_count
+                print(f"   📊 Filas en la tabla: {row_count}")
+        
+        return {
+            "message": "Table structure debug completed",
+            "timestamp": datetime.datetime.now().isoformat(),
+            "tables": tables_info
+        }
+        
+    except Exception as e:
+        print(f"❌ Error durante debug: {e}")
+        return {
+            "error": str(e),
+            "timestamp": datetime.datetime.now().isoformat()
+        }
 
 
 if __name__ == "__main__":
