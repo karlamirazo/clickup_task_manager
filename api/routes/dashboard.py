@@ -347,6 +347,32 @@ async def clear_notification_logs(
         return {"error": str(e)}
 
 
+@router.post("/init-db", status_code=http_status.HTTP_200_OK)
+async def initialize_database(db: Session = Depends(get_db)):
+    """
+    Initialize database tables (temporary endpoint for Railway)
+    """
+    try:
+        from core.database import init_db
+        
+        # Inicializar base de datos
+        init_db()
+        
+        dashboard_logger.info("Database initialized successfully")
+        
+        return {
+            "message": "Database initialized successfully",
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        dashboard_logger.error(f"Error initializing database: {e}")
+        return {
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+
+
 async def _get_notification_stats(db: Session, since: datetime) -> Dict[str, Any]:
     """Get estadisticas de notificaciones"""
     
