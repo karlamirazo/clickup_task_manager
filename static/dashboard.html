@@ -911,6 +911,8 @@
                 const workspaceSelect = document.getElementById('task-workspace');
                 workspaceSelect.innerHTML = '<option value="">Selecciona un workspace</option>';
                 
+                let selectedWorkspaceId = null;
+                
                 if (workspaceData.workspaces && workspaceData.workspaces.length > 0) {
                     workspaceData.workspaces.forEach(workspace => {
                         const option = document.createElement('option');
@@ -918,6 +920,12 @@
                         option.textContent = workspace.name;
                         workspaceSelect.appendChild(option);
                     });
+                    
+                    // Seleccionar el primer workspace por defecto
+                    if (workspaceData.workspaces.length > 0) {
+                        selectedWorkspaceId = workspaceData.workspaces[0].id;
+                        workspaceSelect.value = selectedWorkspaceId;
+                    }
                 } else {
                     // Si no hay workspaces, mostrar opción por defecto
                     const option = document.createElement('option');
@@ -926,27 +934,52 @@
                     workspaceSelect.appendChild(option);
                 }
                 
-                // Cargar listas
-                const response = await fetch('/api/v1/lists/');
-                const data = await response.json();
-                
-                const listSelect = document.getElementById('task-list');
-                listSelect.innerHTML = '<option value="">Selecciona una lista</option>';
-                
-                if (data.lists && data.lists.length > 0) {
-                    data.lists.forEach(list => {
+                // Cargar listas del workspace seleccionado
+                if (selectedWorkspaceId) {
+                    const response = await fetch(`/api/v1/lists/?workspace_id=${selectedWorkspaceId}`);
+                    const data = await response.json();
+                    
+                    const listSelect = document.getElementById('task-list');
+                    listSelect.innerHTML = '<option value="">Selecciona una lista</option>';
+                    
+                    if (data.lists && data.lists.length > 0) {
+                        data.lists.forEach(list => {
+                            const option = document.createElement('option');
+                            option.value = list.id;
+                            option.textContent = list.name;
+                            listSelect.appendChild(option);
+                        });
+                    } else {
+                        // Si no hay listas, mostrar opción por defecto
                         const option = document.createElement('option');
-                        option.value = list.id;
-                        option.textContent = list.name;
+                        option.value = 'default';
+                        option.textContent = 'Lista por defecto';
                         listSelect.appendChild(option);
-                    });
-                } else {
-                    // Si no hay listas, mostrar opción por defecto
-                    const option = document.createElement('option');
-                    option.value = 'default';
-                    option.textContent = 'Lista por defecto';
-                    listSelect.appendChild(option);
+                    }
                 }
+                
+                // Agregar event listener para cambiar workspace
+                workspaceSelect.addEventListener('change', async function() {
+                    const workspaceId = this.value;
+                    if (workspaceId && workspaceId !== 'default') {
+                        // Recargar listas cuando cambie el workspace
+                        const response = await fetch(`/api/v1/lists/?workspace_id=${workspaceId}`);
+                        const data = await response.json();
+                        
+                        const listSelect = document.getElementById('task-list');
+                        listSelect.innerHTML = '<option value="">Selecciona una lista</option>';
+                        
+                        if (data.lists && data.lists.length > 0) {
+                            data.lists.forEach(list => {
+                                const option = document.createElement('option');
+                                option.value = list.id;
+                                option.textContent = list.name;
+                                listSelect.appendChild(option);
+                            });
+                        }
+                    }
+                });
+                
             } catch (error) {
                 console.error('Error cargando datos de ClickUp:', error);
                 // Mostrar opciones por defecto en caso de error
