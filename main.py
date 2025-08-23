@@ -275,17 +275,66 @@ async def api_root():
 async def initialize_database():
     """Initialize database tables (temporary endpoint for Railway)"""
     try:
-        from core.database import init_db
+        from core.database import init_db, engine
+        from sqlalchemy import text
+        
+        print("🔄 Iniciando inicialización de base de datos...")
+        
+        # Verificar estado antes de la inicialización
+        before_tables = []
+        try:
+            with engine.connect() as conn:
+                result = conn.execute(text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name"))
+                before_tables = [row[0] for row in result]
+        except Exception as e:
+            print(f"⚠️ Error verificando tablas antes: {e}")
+        
+        print(f"📋 Tablas antes de inicialización: {before_tables}")
         
         # Inicializar base de datos
         init_db()
         
+        # Verificar estado después de la inicialización
+        after_tables = []
+        table_columns = {}
+        
+        try:
+            with engine.connect() as conn:
+                # Obtener lista de tablas
+                result = conn.execute(text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name"))
+                after_tables = [row[0] for row in result]
+                
+                # Verificar estructura de notification_logs específicamente
+                if 'notification_logs' in after_tables:
+                    result = conn.execute(text("""
+                        SELECT column_name, data_type, is_nullable 
+                        FROM information_schema.columns 
+                        WHERE table_name = 'notification_logs' 
+                        ORDER BY ordinal_position
+                    """))
+                    columns = [(row[0], row[1], row[2]) for row in result]
+                    table_columns['notification_logs'] = columns
+                    
+                    # Verificar si notification_type existe
+                    has_notification_type = any(col[0] == 'notification_type' for col in columns)
+                    print(f"🔍 Columna notification_type existe: {has_notification_type}")
+                    
+        except Exception as e:
+            print(f"⚠️ Error verificando tablas después: {e}")
+        
+        print(f"📋 Tablas después de inicialización: {after_tables}")
+        
         return {
-            "message": "Database initialized successfully",
-            "timestamp": datetime.datetime.now().isoformat()
+            "message": "Database initialization completed",
+            "timestamp": datetime.datetime.now().isoformat(),
+            "before_tables": before_tables,
+            "after_tables": after_tables,
+            "table_columns": table_columns,
+            "notification_type_exists": 'notification_logs' in table_columns and any(col[0] == 'notification_type' for col in table_columns.get('notification_logs', []))
         }
         
     except Exception as e:
+        print(f"❌ Error durante inicialización: {e}")
         return {
             "error": str(e),
             "timestamp": datetime.datetime.now().isoformat()
