@@ -82,11 +82,25 @@ Base = declarative_base()
 def init_db():
     """Initialize database"""
     try:
-        from models import task, workspace, user, automation, report, integration
+        # Import all models from the models package
+        from models import Task, Workspace, User, Automation, Report, Integration, NotificationLog
         
         # Create all tables (synchronous for both SQLite and PostgreSQL)
         Base.metadata.create_all(bind=engine)
         print("✅ Database initialized successfully")
+        
+        # Verify that notification_logs table was created
+        try:
+            with engine.connect() as conn:
+                from sqlalchemy import text
+                result = conn.execute(text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'notification_logs'"))
+                if result.fetchone():
+                    print("✅ notification_logs table created successfully")
+                else:
+                    print("❌ notification_logs table not found")
+        except Exception as e:
+            print(f"⚠️ Error verifying table creation: {e}")
+            
     except Exception as e:
         print(f"⚠️  Error initializing database: {e}")
         # Don't raise exception to avoid server failure
