@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     # Configuracion de la aplicacion
     APP_NAME: str = "ClickUp Project Manager"
     VERSION: str = "1.0.0"
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
     HOST: str = os.getenv("HOST", "127.0.0.1")
     PORT: int = int(os.getenv("PORT", "8000"))  # Puerto principal con Waitress
