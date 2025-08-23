@@ -235,21 +235,21 @@ async def api_root():
     try:
         # Basic configuration information
         config_status = {
-            "CLICKUP_API_TOKEN": "‚úÖ Configured" if os.getenv("CLICKUP_API_TOKEN") else "‚ùå Not configured",
-            "DATABASE_URL": "‚úÖ Configured" if os.getenv("DATABASE_URL") else "‚ùå Not configured",
+            "CLICKUP_API_TOKEN": "✅ Configured" if os.getenv("CLICKUP_API_TOKEN") else "❌ Not configured",
+            "DATABASE_URL": "✅ Configured" if os.getenv("DATABASE_URL") else "❌ Not configured",
             "ENVIRONMENT": os.getenv("ENVIRONMENT", "development")
         }
         
         # Database information
-        db_status = "‚ùå Not available"
+        db_status = "❌ Not available"
         db_type = "Unknown"
         
         try:
             if engine:
                 db_type = "PostgreSQL" if "postgresql" in str(engine.url) else "SQLite"
-                db_status = "‚úÖ Connected"
+                db_status = "✅ Connected"
         except Exception as e:
-            db_status = f"‚ùå Error: {str(e)}"
+            db_status = f"❌ Error: {str(e)}"
         
         return {
             "message": "ClickUp Project Manager - Intelligent Agent",
@@ -269,6 +269,26 @@ async def api_root():
             "version": "1.0.0",
             "status": "error",
             "error": str(e)
+        }
+
+@app.post("/api/init-db")
+async def initialize_database():
+    """Initialize database tables (temporary endpoint for Railway)"""
+    try:
+        from core.database import init_db
+        
+        # Inicializar base de datos
+        init_db()
+        
+        return {
+            "message": "Database initialized successfully",
+            "timestamp": datetime.datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        return {
+            "error": str(e),
+            "timestamp": datetime.datetime.now().isoformat()
         }
 
 @app.get("/debug")
