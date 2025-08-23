@@ -401,6 +401,13 @@
                             <option value="4">Baja</option>
                         </select>
                     </div>
+                    
+                    <div class="form-group">
+                        <label for="task-assignee">Usuario Asignado</label>
+                        <select id="task-assignee" name="assignee_id">
+                            <option value="">Sin asignar</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -958,6 +965,11 @@
                     }
                 }
                 
+                // Cargar usuarios del workspace
+                if (selectedWorkspaceId) {
+                    await loadClickUpUsers(selectedWorkspaceId);
+                }
+                
                 // Agregar event listener para cambiar workspace
                 workspaceSelect.addEventListener('change', async function() {
                     const workspaceId = this.value;
@@ -977,6 +989,9 @@
                                 listSelect.appendChild(option);
                             });
                         }
+                        
+                        // Recargar usuarios cuando cambie el workspace
+                        await loadClickUpUsers(workspaceId);
                     }
                 });
                 
@@ -985,9 +1000,40 @@
                 // Mostrar opciones por defecto en caso de error
                 const workspaceSelect = document.getElementById('task-workspace');
                 const listSelect = document.getElementById('task-list');
+                const assigneeSelect = document.getElementById('task-assignee');
                 
                 workspaceSelect.innerHTML = '<option value="">Error cargando workspaces</option>';
                 listSelect.innerHTML = '<option value="">Error cargando listas</option>';
+                assigneeSelect.innerHTML = '<option value="">Error cargando usuarios</option>';
+            }
+        }
+
+        async function loadClickUpUsers(workspaceId) {
+            try {
+                const response = await fetch(`/api/v1/users/?workspace_id=${workspaceId}`);
+                const data = await response.json();
+                
+                const assigneeSelect = document.getElementById('task-assignee');
+                assigneeSelect.innerHTML = '<option value="">Sin asignar</option>';
+                
+                if (data.users && data.users.length > 0) {
+                    data.users.forEach(user => {
+                        const option = document.createElement('option');
+                        option.value = user.id;
+                        option.textContent = user.name || user.username || user.email;
+                        assigneeSelect.appendChild(option);
+                    });
+                } else {
+                    // Si no hay usuarios, mostrar opción por defecto
+                    const option = document.createElement('option');
+                    option.value = 'default';
+                    option.textContent = 'Usuario por defecto';
+                    assigneeSelect.appendChild(option);
+                }
+            } catch (error) {
+                console.error('Error cargando usuarios:', error);
+                const assigneeSelect = document.getElementById('task-assignee');
+                assigneeSelect.innerHTML = '<option value="">Error cargando usuarios</option>';
             }
         }
 
@@ -1015,7 +1061,8 @@
                     priority: parseInt(formData.get('priority')),
                     due_date: formData.get('due_date'),
                     list_id: formData.get('list_id'),
-                    workspace_id: formData.get('workspace_id') // Asegúrate de que workspace_id se incluya
+                    workspace_id: formData.get('workspace_id'),
+                    assignee_id: formData.get('assignee_id') || null
                 };
                 
                 console.log('🔄 Creando tarea:', taskData);
@@ -1026,12 +1073,26 @@
                     priority: formData.get('priority'),
                     due_date: formData.get('due_date'),
                     list_id: formData.get('list_id'),
-                    workspace_id: formData.get('workspace_id')
+                    workspace_id: formData.get('workspace_id'),
+                    assignee_id: formData.get('assignee_id')
                 });
                 
                 // Validar datos requeridos
                 if (!taskData.name || !taskData.list_id || !taskData.workspace_id) {
                     throw new Error('Nombre de tarea, lista y workspace son obligatorios');
+                }
+                
+                // Mapear estado para ClickUp (corregir el problema de "COMPLETADA")
+                const statusMapping = {
+                    'to do': 'to do',
+                    'in progress': 'in progress', 
+                    'complete': 'complete'  // Enviar exactamente como "complete"
+                };
+                
+                // Aplicar mapeo de estado
+                if (taskData.status && statusMapping[taskData.status]) {
+                    taskData.status = statusMapping[taskData.status];
+                    console.log(`🔄 Estado mapeado: ${formData.get('status')} -> ${taskData.status}`);
                 }
                 
                 // Mostrar estado de carga
@@ -1065,8 +1126,14 @@
                 const result = await response.json();
                 console.log('✅ Tarea creada exitosamente:', result);
                 
-                // Mostrar mensaje de éxito
-                alert('🎉 ¡Tarea creada exitosamente en ClickUp!');
+                // Verificar si se sincronizó con ClickUp
+                if (result.clickup_id) {
+                    alert('🎉 ¡Tarea creada exitosamente en ClickUp!');
+                    console.log(`✅ Sincronización exitosa - ClickUp ID: ${result.clickup_id}`);
+                } else {
+                    alert('⚠️ Tarea creada localmente, pero no se sincronizó con ClickUp');
+                    console.log('⚠️ No se recibió ClickUp ID - Verificar configuración');
+                }
                 
                 // Cerrar modal y limpiar formulario
                 closeCreateTaskModal();
