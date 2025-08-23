@@ -415,6 +415,13 @@
                     </select>
                 </div>
                 
+                <div class="form-group">
+                    <label for="task-workspace">Workspace de ClickUp</label>
+                    <select id="task-workspace" name="workspace_id" required>
+                        <option value="">Selecciona un workspace</option>
+                    </select>
+                </div>
+                
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Crear Tarea
@@ -897,6 +904,29 @@
 
         async function loadClickUpLists() {
             try {
+                // Cargar workspaces primero
+                const workspaceResponse = await fetch('/api/v1/workspaces/');
+                const workspaceData = await workspaceResponse.json();
+                
+                const workspaceSelect = document.getElementById('task-workspace');
+                workspaceSelect.innerHTML = '<option value="">Selecciona un workspace</option>';
+                
+                if (workspaceData.workspaces && workspaceData.workspaces.length > 0) {
+                    workspaceData.workspaces.forEach(workspace => {
+                        const option = document.createElement('option');
+                        option.value = workspace.id;
+                        option.textContent = workspace.name;
+                        workspaceSelect.appendChild(option);
+                    });
+                } else {
+                    // Si no hay workspaces, mostrar opción por defecto
+                    const option = document.createElement('option');
+                    option.value = 'default';
+                    option.textContent = 'Workspace por defecto';
+                    workspaceSelect.appendChild(option);
+                }
+                
+                // Cargar listas
                 const response = await fetch('/api/v1/lists/');
                 const data = await response.json();
                 
@@ -918,9 +948,12 @@
                     listSelect.appendChild(option);
                 }
             } catch (error) {
-                console.error('Error cargando listas:', error);
-                // Mostrar opción por defecto en caso de error
+                console.error('Error cargando datos de ClickUp:', error);
+                // Mostrar opciones por defecto en caso de error
+                const workspaceSelect = document.getElementById('task-workspace');
                 const listSelect = document.getElementById('task-list');
+                
+                workspaceSelect.innerHTML = '<option value="">Error cargando workspaces</option>';
                 listSelect.innerHTML = '<option value="">Error cargando listas</option>';
             }
         }
@@ -948,10 +981,25 @@
                     status: formData.get('status'),
                     priority: parseInt(formData.get('priority')),
                     due_date: formData.get('due_date'),
-                    list_id: formData.get('list_id')
+                    list_id: formData.get('list_id'),
+                    workspace_id: formData.get('workspace_id') // Asegúrate de que workspace_id se incluya
                 };
                 
                 console.log('🔄 Creando tarea:', taskData);
+                console.log('📋 Datos del formulario:', {
+                    name: formData.get('name'),
+                    description: formData.get('description'),
+                    status: formData.get('status'),
+                    priority: formData.get('priority'),
+                    due_date: formData.get('due_date'),
+                    list_id: formData.get('list_id'),
+                    workspace_id: formData.get('workspace_id')
+                });
+                
+                // Validar datos requeridos
+                if (!taskData.name || !taskData.list_id || !taskData.workspace_id) {
+                    throw new Error('Nombre de tarea, lista y workspace son obligatorios');
+                }
                 
                 // Mostrar estado de carga
                 const submitBtn = form.querySelector('button[type="submit"]');
@@ -969,7 +1017,16 @@
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    // Obtener detalles del error
+                    let errorDetail = '';
+                    try {
+                        const errorData = await response.json();
+                        errorDetail = errorData.detail || errorData.message || 'Error desconocido';
+                    } catch (e) {
+                        errorDetail = `HTTP ${response.status}: ${response.statusText}`;
+                    }
+                    
+                    throw new Error(`Error del servidor: ${errorDetail}`);
                 }
                 
                 const result = await response.json();
@@ -988,10 +1045,19 @@
                 console.error('❌ Error creando tarea:', error);
                 alert('❌ Error creando tarea: ' + error.message);
                 
-                // Restaurar botón
-                const submitBtn = form.querySelector('button[type="submit"]');
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
+                // Restaurar botón solo si form existe
+                try {
+                    const form = document.getElementById('create-task-form');
+                    if (form) {
+                        const submitBtn = form.querySelector('button[type="submit"]');
+                        if (submitBtn) {
+                            submitBtn.innerHTML = '<i class="fas fa-plus"></i> Crear Tarea';
+                            submitBtn.disabled = false;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error restaurando botón:', e);
+                }
             }
         }
 
