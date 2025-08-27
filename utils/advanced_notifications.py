@@ -187,38 +187,35 @@ class AdvancedNotificationService:
         
         for attempt in range(max_retries):
             try:
-                import aiosmtplib
+                import smtplib
+                from email.mime.text import MIMEText
+                from email.mime.multipart import MIMEMultipart
                 
                 # Validar emails
                 valid_emails = [email for email in recipients if email and "@" in email]
                 
                 for email in valid_emails:
                     try:
-                        msg = EmailMessage()
+                        # Crear mensaje usando MIMEMultipart para compatibilidad
+                        msg = MIMEMultipart('alternative')
                         msg["Subject"] = subject
                         msg["From"] = settings.SMTP_FROM
                         msg["To"] = email
-                        msg.set_content(text_body)
-                        msg.add_alternative(html_body, subtype="html")
                         
-                        smtp = aiosmtplib.SMTP(
-                            hostname=settings.SMTP_HOST, 
-                            port=settings.SMTP_PORT,
-                            use_tls=bool(settings.SMTP_USE_SSL),
-                            timeout=30
-                        )
+                        # Agregar texto plano y HTML
+                        text_part = MIMEText(text_body, 'plain', 'utf-8')
+                        html_part = MIMEText(html_body, 'html', 'utf-8')
+                        msg.attach(text_part)
+                        msg.attach(html_part)
                         
-                        await smtp.connect()
-                        if settings.SMTP_USE_TLS and not settings.SMTP_USE_SSL:
-                            await smtp.starttls()
-                        if settings.SMTP_USER and settings.SMTP_PASS:
-                            await smtp.login(settings.SMTP_USER, settings.SMTP_PASS)
-                        
-                        await smtp.send_message(msg)
-                        await smtp.quit()
+                        # Usar smtplib estándar (más compatible con Windows)
+                        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=30) as server:
+                            server.starttls()
+                            server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+                            server.send_message(msg)
                         
                         result.add_success("email", email)
-                        notification_logger.info(f"âœ… Email enviado a: {email}")
+                        notification_logger.info(f"✅ Email enviado a: {email}")
                         
                     except Exception as email_error:
                         error_msg = f"Error enviando email a {email}: {email_error}"
