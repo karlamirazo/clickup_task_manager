@@ -14,7 +14,7 @@ class TaskBase(BaseModel):
     priority: Optional[int] = Field(None, description="Prioridad (1=Urgente, 2=Alta, 3=Normal, 4=Baja)")
     due_date: Optional[Union[datetime, int, str]] = Field(None, description="Fecha limite (datetime, timestamp en milisegundos, o string)")
     start_date: Optional[datetime] = Field(None, description="Fecha de inicio")
-    assignee_id: Optional[str] = Field(None, description="ID del usuario asignado")
+    assignee_id: str = Field(..., description="ID del usuario asignado (obligatorio)")
     tags: Optional[List[str]] = Field(None, description="Lista de etiquetas")
     custom_fields: Optional[Dict[str, Any]] = Field(None, description="Campos personalizados (email, Celular)")
 
@@ -36,13 +36,8 @@ class TaskCreate(TaskBase):
                     # leave the value as is; it will be ignored if not valid
                     pass
         
-        # Validar campos personalizados si se proporcionan
-        if self.custom_fields:
-            required_fields = ['email', 'Celular']
-            missing_fields = [field for field in required_fields if not self.custom_fields.get(field)]
-            if missing_fields:
-                print(f"⚠️ Campos obligatorios faltantes: {', '.join(missing_fields)}")
-                # No fallar, solo mostrar advertencia
+        # Los campos personalizados son opcionales ahora
+        # El email se obtiene automáticamente del usuario asignado
 
 class TaskUpdate(BaseModel):
     """Schema for updating a task"""
@@ -67,12 +62,7 @@ class TaskUpdate(BaseModel):
                 except (ValueError, TypeError):
                     pass
         
-        # Validar campos personalizados si se proporcionan
-        if self.custom_fields is not None:
-            required_fields = ['email', 'Celular']
-            missing_fields = [field for field in required_fields if not self.custom_fields.get(field)]
-            if missing_fields:
-                raise ValueError(f"Campos obligatorios faltantes: {', '.join(missing_fields)}")
+        # Los campos personalizados son opcionales ahora
 
 class TaskResponse(BaseModel):
     """Response schema for tasks"""

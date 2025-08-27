@@ -1051,16 +1051,14 @@ async function handleCreateTask(event) {
     // Recopilar custom_fields desde el formulario con nombres como claves
     const customFields = {};
     
-    // Campo Email (obligatorio)
-    const emailValue = document.getElementById('task-email').value.trim();
-    if (emailValue) {
-        customFields['Email'] = emailValue;
-        console.log('INFO: Campo Email capturado:', emailValue);
-    } else {
-        console.error('ERROR: Campo Email es obligatorio');
-        alert('El campo de correo electrónico es obligatorio');
-        return;
+    // Usuario asignado (obligatorio)
+    const assigneeId = document.getElementById('task-assignee').value.trim();
+    if (!assigneeId) {
+        console.error('ERROR: Usuario asignado es obligatorio');
+        alert('Debes seleccionar un usuario asignado para la tarea');
+        return; // Stop execution if assignee is missing
     }
+    console.log('INFO: Usuario asignado seleccionado:', assigneeId);
     
     // Obtener fecha límite
     const dueDateValue = document.getElementById('task-due-date').value;
@@ -1121,7 +1119,6 @@ async function handleCreateTask(event) {
             event.target.reset();
             
             // Limpiar campos personalizados explícitamente
-            document.getElementById('task-email').value = '';
             document.getElementById('task-due-date').value = '';
             
             // Recargar tareas
@@ -2589,29 +2586,38 @@ async function sendTaskNotificationEmail(taskResult, formData) {
         console.log('📧 Iniciando envío de notificación por email...');
         
         // Obtener datos del formulario
-        const email = document.getElementById('task-email').value.trim();
-        const contactName = document.getElementById('task-contact-name')?.value?.trim() || 'Usuario';
         const taskName = formData.name;
         const taskDescription = formData.description || 'Sin descripción';
         const dueDate = formData.due_date;
         const priority = formData.priority;
-        const assignee = formData.assignee_id;
+        const assigneeId = formData.assignee_id;
         
-        if (!email) {
-            console.warn('⚠️ No hay email para enviar notificación');
+        if (!assigneeId) {
+            console.warn('⚠️ No hay usuario asignado para enviar notificación');
             return;
         }
+        
+        // Obtener el email del usuario asignado desde ClickUp
+        console.log('📧 Obteniendo email del usuario asignado:', assigneeId);
+        const userEmail = await getUserEmailFromClickUp(assigneeId);
+        
+        if (!userEmail) {
+            console.warn('⚠️ No se pudo obtener el email del usuario asignado');
+            return;
+        }
+        
+        console.log('📧 Email del usuario asignado obtenido:', userEmail);
         
         // Preparar datos de la notificación
         const notificationData = {
             task_id: taskResult.clickup_id || taskResult.id,
             task_name: taskName,
             task_description: taskDescription,
-            contact_email: email,
-            contact_name: contactName,
+            contact_email: userEmail,
+            contact_name: await getUserNameFromClickUp(assigneeId) || 'Usuario',
             due_date: dueDate,
             priority: priority,
-            assignee: assignee,
+            assignee: assigneeId,
             action: 'created',
             workspace_id: formData.workspace_id,
             list_id: formData.list_id
@@ -2705,6 +2711,87 @@ function showNotificationSuccess(message) {
             }
         }, 300);
     }, 5000);
+}
+
+/**
+ * Obtener el email de un usuario desde ClickUp
+ * @param {string} userId - ID del usuario en ClickUp
+ * @returns {Promise<string|null>} Email del usuario o null si no se encuentra
+ */
+async function getUserEmailFromClickUp(userId) {
+    try {
+        console.log('🔍 Obteniendo email del usuario:', userId);
+        
+        // Obtener usuarios del workspace actual
+        const response = await fetch('/api/v1/users/?workspace_id=9014943317');
+        if (!response.ok) {
+            console.error('❌ Error obteniendo usuarios del workspace');
+            return null;
+        }
+        
+        const data = await response.json();
+        const users = data.users || data.items || [];
+        
+        // Buscar el usuario por ID
+        const user = users.find(u => u.clickup_id === userId || u.id === userId);
+        if (user && user.email) {
+            console.log('✅ Email del usuario encontrado:', user.email);
+            return user.email;
+        }
+        
+        console.warn('⚠️ Usuario no encontrado o sin email:', userId);
+        return null;
+        
+    } catch (error) {
+        console.error('❌ Error obteniendo email del usuario:', error);
+        return null;
+    }
+}
+
+/**
+ * Obtener el nombre de un usuario desde ClickUp
+ * @param {string} userId - ID del usuario en ClickUp
+ * @returns {Promise<string|null>} Nombre del usuario o null si no se encuentra
+ */
+async function getUserNameFromClickUp(userId) {
+    try {
+        console.log('🔍 Obteniendo nombre del usuario:', userId);
+        
+        // Obtener usuarios del workspace actual
+        const response = await fetch('/api/v1/users/?workspace_id=9014943317');
+        if (!response.ok) {
+            console.error('❌ Error obteniendo usuarios del workspace');
+            return null;
+        }
+        
+        const data = await response.json();
+        const users = data.users || data.items || [];
+        
+        // Buscar el usuario por ID
+        const user = users.find(u => u.clickup_id === userId || u.id === userId);
+        if (user) {
+            let userName = '';
+            if (user.first_name && user.last_name) {
+                userName = `${user.first_name} ${user.last_name}`;
+            } else if (user.first_name) {
+                userName = user.first_name;
+            } else if (user.username) {
+                userName = user.username;
+            } else {
+                userName = `Usuario ${user.clickup_id || user.id}`;
+            }
+            
+            console.log('✅ Nombre del usuario encontrado:', userName);
+            return userName;
+        }
+        
+        console.warn('⚠️ Usuario no encontrado:', userId);
+        return null;
+        
+    } catch (error) {
+        console.error('❌ Error obteniendo nombre del usuario:', error);
+        return null;
+    }
 }
 
 /**

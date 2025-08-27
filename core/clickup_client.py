@@ -250,8 +250,8 @@ class ClickUpClient:
             team_data = response
             
             # Si el team tiene members, usarlos
-            if team_data.get("members"):
-                return team_data["members"]
+            if team_data.get("team", {}).get("members"):
+                return team_data["team"]["members"]
             
         except Exception as e:
             print(f"Error en peticion a ClickUp API (team/workspace): {e}")

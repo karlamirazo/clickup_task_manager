@@ -57,6 +57,39 @@ def get_custom_field_id(list_id: str, field_name: str) -> str:
     
     return None
 
+async def get_user_email_from_clickup(assignee_id: str, workspace_id: str) -> Optional[str]:
+    """Obtener el email de un usuario desde ClickUp"""
+    try:
+        from core.clickup_client import ClickUpClient
+        from core.config import settings
+        
+        if not settings.CLICKUP_API_TOKEN:
+            print(f"❌ No hay token de ClickUp configurado")
+            return None
+        
+        client = ClickUpClient()
+        users = await client.get_users(workspace_id)
+        
+        if not users:
+            return None
+        
+        # Buscar el usuario por ID
+        for user in users:
+            if isinstance(user, dict) and "user" in user:
+                user_data = user["user"]
+                if str(user_data.get("id")) == str(assignee_id):
+                    email = user_data.get("email")
+                    if email:
+                        print(f"✅ Email del usuario {assignee_id} encontrado: {email}")
+                        return email
+        
+        print(f"⚠️ Usuario {assignee_id} no encontrado o sin email")
+        return None
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo email del usuario {assignee_id}: {e}")
+        return None
+
 def has_custom_fields(list_id: str) -> bool:
     """Verificar si una lista tiene campos personalizados"""
     return bool(CUSTOM_FIELD_IDS.get(list_id, {}))
@@ -282,6 +315,21 @@ async def create_task_FINAL_VERSION(
         clickup_status = status_mapping.get(task_data.status.lower(), "pendiente")
         print(f"   🔄 Estado mapeado: {task_data.status} -> {clickup_status}")
         
+        # Obtener automáticamente el email del usuario asignado
+        user_email = None
+        if clickup_assignee_id:
+            user_email = await get_user_email_from_clickup(clickup_assignee_id, task_data.workspace_id)
+            if user_email:
+                print(f"✅ Email del usuario asignado obtenido automáticamente: {user_email}")
+            else:
+                print(f"⚠️ No se pudo obtener el email del usuario asignado")
+        
+        # Preparar campos personalizados incluyendo el email del usuario asignado
+        custom_fields = task_data.custom_fields or {}
+        if user_email:
+            custom_fields["Email"] = user_email
+            print(f"📧 Campo Email agregado automáticamente: {user_email}")
+        
         # Preparar datos para ClickUp
         clickup_task_data = {
             "name": task_data.name,
@@ -290,7 +338,7 @@ async def create_task_FINAL_VERSION(
             "priority": task_data.priority or 3,
             "due_date": int(datetime.strptime(task_data.due_date, "%Y-%m-%d").timestamp() * 1000) if task_data.due_date else None,
             "assignees": [clickup_assignee_id] if clickup_assignee_id else [],  # Campo "Asignar a" → "Persona asignada"
-            "custom_fields": task_data.custom_fields or {}
+            "custom_fields": custom_fields
         }
         
         print(f"🔍 Campo 'Asignar a' configurado para sincronizar con 'Persona asignada' en ClickUp")
