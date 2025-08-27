@@ -1136,6 +1136,9 @@ async function handleCreateTask(event) {
             const result = await response.json();
             console.log('INFO: Tarea creada exitosamente:', result);
             
+            // Enviar notificación por email
+            await sendTaskNotificationEmail(result, formData);
+            
             closeModal('create-task-modal');
             event.target.reset();
             
@@ -2595,4 +2598,179 @@ function getStatusClass(status) {
         'complete': 'status-complete'
     };
     return classes[status] || 'status-pending';
+}
+
+// ===== SISTEMA DE NOTIFICACIONES POR EMAIL =====
+
+/**
+ * Enviar notificación por email cuando se crea una tarea
+ * @param {Object} taskResult - Resultado de la tarea creada
+ * @param {Object} formData - Datos del formulario original
+ */
+async function sendTaskNotificationEmail(taskResult, formData) {
+    try {
+        console.log('📧 Iniciando envío de notificación por email...');
+        
+        // Obtener datos del formulario
+        const email = document.getElementById('task-email').value.trim();
+        const contactName = document.getElementById('task-contact-name')?.value?.trim() || 'Usuario';
+        const taskName = formData.name;
+        const taskDescription = formData.description || 'Sin descripción';
+        const dueDate = formData.due_date;
+        const priority = formData.priority;
+        const assignee = formData.assignee_id;
+        
+        if (!email) {
+            console.warn('⚠️ No hay email para enviar notificación');
+            return;
+        }
+        
+        // Preparar datos de la notificación
+        const notificationData = {
+            task_id: taskResult.clickup_id || taskResult.id,
+            task_name: taskName,
+            task_description: taskDescription,
+            contact_email: email,
+            contact_name: contactName,
+            due_date: dueDate,
+            priority: priority,
+            assignee: assignee,
+            action: 'created',
+            workspace_id: formData.workspace_id,
+            list_id: formData.list_id
+        };
+        
+        console.log('📧 Datos de notificación preparados:', notificationData);
+        
+        // Enviar notificación al servidor
+        const response = await fetch('/api/v1/notifications/send-task-notification', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(notificationData)
+        });
+        
+        if (response.ok) {
+            const notificationResult = await response.json();
+            console.log('✅ Notificación por email enviada exitosamente:', notificationResult);
+            
+            // Mostrar mensaje de éxito al usuario
+            showNotificationSuccess('📧 Notificación por email enviada correctamente');
+        } else {
+            const errorData = await response.json();
+            console.error('❌ Error enviando notificación por email:', errorData);
+            
+            // Mostrar mensaje de error al usuario
+            showNotificationError('❌ Error al enviar notificación por email');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error en sistema de notificaciones:', error);
+        showNotificationError('❌ Error en sistema de notificaciones');
+    }
+}
+
+/**
+ * Mostrar mensaje de éxito para notificaciones
+ * @param {string} message - Mensaje a mostrar
+ */
+function showNotificationSuccess(message) {
+    // Crear elemento de notificación
+    const notification = document.createElement('div');
+    notification.className = 'notification-success';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-check-circle"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    // Agregar estilos
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #28a745;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        font-size: 14px;
+        font-weight: 500;
+        animation: slideInRight 0.3s ease-out;
+    `;
+    
+    // Agregar animación CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Agregar al DOM
+    document.body.appendChild(notification);
+    
+    // Remover después de 5 segundos
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease-out';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 5000);
+}
+
+/**
+ * Mostrar mensaje de error para notificaciones
+ * @param {string} message - Mensaje a mostrar
+ */
+function showNotificationError(message) {
+    // Crear elemento de notificación
+    const notification = document.createElement('div');
+    notification.className = 'notification-error';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    // Agregar estilos
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #dc3545;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        font-size: 14px;
+        font-weight: 500;
+        animation: slideInRight 0.3s ease-out;
+    `;
+    
+    // Agregar al DOM
+    document.body.appendChild(notification);
+    
+    // Remover después de 5 segundos
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease-out';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 5000);
 }
