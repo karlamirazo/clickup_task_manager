@@ -267,30 +267,18 @@ async function loadInitialData() {
 // Cargar datos del dashboard
 async function loadDashboardData() {
     try {
-        console.log('DEBUG: loadDashboardData iniciado - NO cargando tareas automáticamente');
-        // NO cargar tareas automáticamente - Solo mostrar contadores en 0
-        updateDashboardStats([]);
+        console.log('DEBUG: loadDashboardData iniciado - Cargando tareas automáticamente');
         
-        // Mostrar mensaje de que se debe cargar manualmente
-        const dashboardContent = document.getElementById('dashboard');
-        if (dashboardContent) {
-            const messageDiv = dashboardContent.querySelector('.dashboard-message');
-            if (!messageDiv) {
-                const newMessageDiv = document.createElement('div');
-                newMessageDiv.className = 'dashboard-message';
-                newMessageDiv.innerHTML = `
-                    <div style="text-align: center; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-                        <p><i class="fas fa-info-circle"></i> Los contadores se actualizarán cuando sincronices las tareas o cambies al tab de tareas.</p>
-                        <button class="btn btn-primary" onclick="loadDashboardCountersManually()" style="margin-top: 10px;">
-                            <i class="fas fa-sync-alt"></i> Cargar Contadores Ahora
-                        </button>
-                    </div>
-                `;
-                dashboardContent.appendChild(newMessageDiv);
-            }
-        }
+        // Cargar tareas automáticamente para mostrar contadores reales
+        const allTasks = await fetchAllTasksForDashboard();
+        updateDashboardStats(allTasks);
+        
+        console.log('DEBUG: Dashboard actualizado con tareas reales');
+        
     } catch (error) {
         console.error('Error cargando datos del dashboard:', error);
+        // Fallback: mostrar contadores en 0
+        updateDashboardStats([]);
     }
 }
 
@@ -417,7 +405,7 @@ async function fetchAllTasksForDashboard() {
                 break;
             }
             const data = await resp.json();
-            const batch = data.tasks || [];
+            const batch = data.items || data.tasks || [];
             console.log(`DEBUG: Página ${page}: ${batch.length} tareas`);
             all.push(...batch);
             
