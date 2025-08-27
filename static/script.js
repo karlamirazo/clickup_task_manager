@@ -1063,26 +1063,16 @@ async function handleCreateTask(event) {
     // Recopilar custom_fields desde el formulario con nombres como claves
     const customFields = {};
     
-    // Campo Email
+    // Campo Email (obligatorio)
     const emailValue = document.getElementById('task-email').value.trim();
     if (emailValue) {
-        // Usar nombre visible común en ClickUp (case-insensitive más tarde)
         customFields['Email'] = emailValue;
+        console.log('INFO: Campo Email capturado:', emailValue);
+    } else {
+        console.error('ERROR: Campo Email es obligatorio');
+        alert('El campo de correo electrónico es obligatorio');
+        return;
     }
-    
-    // Campo Celular (teléfono/SMS)
-    const phoneValue = document.getElementById('task-phone').value.trim();
-    if (phoneValue) {
-        customFields['Celular'] = phoneValue;
-    }
-
-    // Campo Nombre (si existe en la UI)
-    const nameValue = document.getElementById('task-contact-name')?.value?.trim();
-    if (nameValue) {
-        customFields['Nombre'] = nameValue;
-    }
-    
-    // Campo Nota eliminado - Telegram deshabilitado
     
     // Obtener fecha límite
     const dueDateValue = document.getElementById('task-due-date').value;
@@ -1144,7 +1134,6 @@ async function handleCreateTask(event) {
             
             // Limpiar campos personalizados explícitamente
             document.getElementById('task-email').value = '';
-            document.getElementById('task-phone').value = '';
             document.getElementById('task-due-date').value = '';
             
             // Recargar tareas
