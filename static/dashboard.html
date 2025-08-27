@@ -391,7 +391,7 @@
                     <button onclick="window.location.href='/users-tasks'" class="nav-btn primary">
                         <i class="fas fa-tasks"></i> <span class="btn-text">Ver Lista de Tareas</span>
                     </button>
-                    <button onclick="window.location.href='/index#tasks'" class="nav-btn secondary">
+                    <button onclick="showCreateTaskModal()" class="nav-btn secondary">
                         <i class="fas fa-plus"></i> <span class="btn-text">Crear Nueva Tarea</span>
                     </button>
                 </div>
@@ -441,7 +441,7 @@
                 <button class="sync-btn" onclick="manualSync()" id="sync-btn">
                     <i class="fas fa-sync-alt"></i> Sincronizar Ahora
                 </button>
-                <button class="sync-btn" onclick="createTask()" style="background: #17a2b8;">
+                <button class="sync-btn" onclick="showCreateTaskModal()" style="background: #17a2b8;">
                     <i class="fas fa-plus"></i> Crear Tarea
                 </button>
                 <button class="sync-btn" onclick="deleteTask()" style="background: #dc3545;">
@@ -478,7 +478,7 @@
     <!-- Última actualización: Campo de usuario asignado implementado -->
     <div id="create-task-modal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeCreateTaskModal()">&times;</span>
+            <span class="close" onclick="closeModal('create-task-modal')">&times;</span>
             <h2><i class="fas fa-plus-circle"></i> Crear Nueva Tarea</h2>
             
             <form id="create-task-form">
@@ -490,6 +490,12 @@
                 <div class="form-group">
                     <label for="task-description">Descripción</label>
                     <textarea id="task-description" name="description" rows="3" placeholder="Describe la tarea (opcional)"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="task-email">Correo Electrónico *</label>
+                    <input type="email" id="task-email" name="email" required placeholder="Ingresa tu correo electrónico">
+                    <small class="form-help">Se enviará una notificación a este correo cuando se cree la tarea</small>
                 </div>
                 
                 <div class="form-row">
@@ -543,7 +549,7 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Crear Tarea
                     </button>
-                    <button type="button" class="btn btn-secondary" onclick="closeCreateTaskModal()">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('create-task-modal')">
                         Cancelar
                     </button>
                 </div>
@@ -620,6 +626,14 @@
         .form-group textarea {
             resize: vertical;
             min-height: 80px;
+        }
+        
+        .form-help {
+            display: block;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #6c757d;
+            font-style: italic;
         }
         
         .form-actions {
@@ -1494,5 +1508,8 @@
             return classes[status] || 'status-pending';
         }
     </script>
+    
+    <!-- Script principal del dashboard -->
+    <script src="script.js"></script>
 </body>
 </html>
