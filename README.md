@@ -1,68 +1,76 @@
 # ClickUp Project Manager - Agente Inteligente
 
-Un mÃ³dulo completo de gestiÃ³n de tareas con la API de ClickUp que incluye automatizaciÃ³n, reportes e integraciones.
+Un módulo completo de gestión de tareas con la API de ClickUp que incluye automatización, reportes e integraciones.
 
-## ğŸš€ CaracterÃ­sticas
+## 🚀 Características
 
-### GestiÃ³n de Tareas
-- âœ… Crear, actualizar y eliminar tareas
-- âœ… GestiÃ³n de espacios de trabajo, listas y usuarios
-- âœ… BÃºsqueda y filtrado avanzado
-- âœ… Operaciones masivas (bulk operations)
-- âœ… SincronizaciÃ³n bidireccional con ClickUp
+### Gestión de Tareas
+- ✅ Crear, actualizar y eliminar tareas
+- ✅ Gestión de espacios de trabajo, listas y usuarios
+- ✅ Búsqueda y filtrado avanzado
+- ✅ Operaciones masivas (bulk operations)
+- ✅ Sincronización bidireccional con ClickUp
 
-### AutomatizaciÃ³n
-- âœ… Reglas de automatizaciÃ³n personalizables
-- âœ… Triggers basados en eventos de tareas
-- âœ… Acciones automÃ¡ticas (asignaciones, fechas lÃ­mite, etiquetas)
-- âœ… EjecuciÃ³n manual y programada
-- âœ… Monitoreo de ejecuciones y errores
+### Automatización
+- ✅ Reglas de automatización personalizables
+- ✅ Triggers basados en eventos de tareas
+- ✅ Acciones automáticas (asignaciones, fechas límite, etiquetas)
+- ✅ Ejecución manual y programada
+- ✅ Monitoreo de ejecuciones y errores
 
 ### Reportes
-- âœ… Resumen de tareas por estado y prioridad
-- âœ… AnÃ¡lisis de rendimiento de usuarios
-- âœ… LÃ­nea de tiempo de tareas
-- âœ… Vista general del workspace
-- âœ… Reportes personalizables con filtros
-- âœ… ExportaciÃ³n en formato JSON
+- ✅ Resumen de tareas por estado y prioridad
+- ✅ Análisis de rendimiento de usuarios
+- ✅ Línea de tiempo de tareas
+- ✅ Vista general del workspace
+- ✅ Reportes personalizables con filtros
+- ✅ Exportación en formato JSON
 
 ### Integraciones
-- âœ… CRMs (Salesforce, HubSpot, Pipedrive)
-- âœ… Bases de datos (PostgreSQL, MySQL, MongoDB)
-- âœ… Herramientas de productividad (Slack, Teams, Google Workspace)
-- âœ… GestiÃ³n de proyectos (Jira, Asana, Trello)
-- âœ… Pruebas de conexiÃ³n y sincronizaciÃ³n
+- ✅ CRMs (Salesforce, HubSpot, Pipedrive)
+- ✅ Bases de datos (PostgreSQL, MySQL, MongoDB)
+- ✅ Herramientas de productividad (Slack, Teams, Google Workspace)
+- ✅ Gestión de proyectos (Jira, Asana, Trello)
+- ✅ Pruebas de conexión y sincronización
 
-## ğŸ�—ï¸� Arquitectura
+### 🆕 **Nueva Funcionalidad: Notificaciones por WhatsApp**
+- ✅ Campo de teléfono en formulario de creación de tareas
+- ✅ Integración automática del teléfono en descripción de ClickUp
+- ✅ Sistema de notificaciones por WhatsApp configurado
+- ✅ Preview en tiempo real de la descripción final
+- ✅ Validación automática del formato del número
+
+## 🏗️ Arquitectura
 
 ```
 ClickUp Project Manager/
-â”œâ”€â”€ api/                    # API REST con FastAPI
-â”‚   â”œâ”€â”€ routes/            # Endpoints de la API
-â”‚   â””â”€â”€ schemas/           # Esquemas Pydantic
-â”œâ”€â”€ core/                  # ConfiguraciÃ³n y utilidades
-â”‚   â”œâ”€â”€ config.py         # ConfiguraciÃ³n de la aplicaciÃ³n
-â”‚   â”œâ”€â”€ database.py       # ConfiguraciÃ³n de base de datos
-â”‚   â””â”€â”€ clickup_client.py # Cliente de ClickUp API
-â”œâ”€â”€ models/               # Modelos de SQLAlchemy
-â”œâ”€â”€ utils/                # Utilidades y helpers
-â”œâ”€â”€ data/                 # Datos y reportes generados
-â”œâ”€â”€ logs/                 # Archivos de log
-â”œâ”€â”€ static/               # Archivos estÃ¡ticos
-â”œâ”€â”€ templates/            # Plantillas HTML
-â””â”€â”€ tests/                # Tests unitarios y de integraciÃ³n
+├── api/                    # API REST con FastAPI
+│   ├── routes/            # Endpoints de la API
+│   └── schemas/           # Esquemas Pydantic
+├── core/                  # Configuración y utilidades
+│   ├── config.py         # Configuración de la aplicación
+│   ├── database.py       # Configuración de base de datos
+│   └── clickup_client.py # Cliente de ClickUp API
+├── models/               # Modelos de SQLAlchemy
+├── utils/                # Utilidades y helpers
+├── data/                 # Datos y reportes generados
+├── logs/                 # Archivos de log
+├── static/               # Archivos estáticos (Dashboard HTML)
+├── templates/            # Plantillas HTML
+└── tests/                # Tests unitarios y de integración
 ```
 
-## ğŸ› ï¸� TecnologÃ­as
+## 🛠️ Tecnologías
 
 - **Backend**: FastAPI, SQLAlchemy, Pydantic
-- **Base de datos**: SQLite (desarrollo) / PostgreSQL (producciÃ³n)
+- **Base de datos**: SQLite (desarrollo) / PostgreSQL (producción)
 - **API**: ClickUp API v2
-- **AutenticaciÃ³n**: JWT
-- **DocumentaciÃ³n**: OpenAPI/Swagger
+- **Autenticación**: JWT
+- **Documentación**: OpenAPI/Swagger
 - **Tests**: pytest, pytest-asyncio
+- **Frontend**: HTML5, CSS3, JavaScript (Dashboard responsivo)
 
-## ğŸ“¦ InstalaciÃ³n
+## 📦 Instalación
 
 ### Prerrequisitos
 
@@ -70,12 +78,12 @@ ClickUp Project Manager/
 - pip
 - ClickUp API Token
 
-### Pasos de instalaciÃ³n
+### Pasos de instalación
 
 1. **Clonar el repositorio**
 ```bash
-git clone <repository-url>
-cd ClickUp_Project_Manager
+git clone https://github.com/karlamirazo/clickup_task_manager.git
+cd clickup_task_manager
 ```
 
 2. **Crear entorno virtual**
@@ -100,14 +108,14 @@ cp env.example .env
 python -c "from core.database import init_db; import asyncio; asyncio.run(init_db())"
 ```
 
-6. **Ejecutar la aplicaciÃ³n**
+6. **Ejecutar la aplicación**
 ```bash
 python main.py
 ```
 
-La aplicaciÃ³n estarÃ¡ disponible en `http://localhost:8000`
+La aplicación estará disponible en `http://localhost:8000`
 
-## ğŸ”§ ConfiguraciÃ³n
+## 🎯 Configuración
 
 ### Variables de entorno principales
 
@@ -118,24 +126,50 @@ CLICKUP_API_TOKEN=your_clickup_api_token_here
 # Base de datos
 DATABASE_URL=sqlite:///./clickup_manager.db
 
-# ConfiguraciÃ³n de la aplicaciÃ³n
+# Configuración de la aplicación
 DEBUG=True
 HOST=0.0.0.0
 PORT=8000
+
+# WhatsApp Evolution API (NUEVO)
+WHATSAPP_ENABLED=True
+WHATSAPP_EVOLUTION_URL=http://localhost:8080
+WHATSAPP_EVOLUTION_API_KEY=your_api_key_here
 ```
 
 ### Obtener API Token de ClickUp
 
 1. Ve a [ClickUp Settings](https://app.clickup.com/settings)
-2. Navega a "Apps" â†’ "API Token"
+2. Navega a "Apps" → "API Token"
 3. Crea un nuevo token con los permisos necesarios
 4. Copia el token a tu archivo `.env`
 
-## ğŸ“š Uso de la API
+## 📱 Uso del Dashboard
 
-### AutenticaciÃ³n
+### Acceder al Dashboard
 
-La API utiliza autenticaciÃ³n basada en tokens. Incluye tu API token de ClickUp en el header:
+1. Inicia el servidor: `python main.py`
+2. Abre tu navegador en: `http://localhost:8000`
+3. Navega al dashboard principal
+
+### Crear Tarea con Notificaciones WhatsApp
+
+1. Haz click en "Crear Nueva Tarea"
+2. Llena el formulario incluyendo:
+   - Nombre de la tarea
+   - Descripción (opcional)
+   - **📱 Número de Celular** ← **¡NUEVO!**
+   - Usuario asignado
+   - Estado, prioridad, fecha límite
+   - Lista y workspace de ClickUp
+3. El número de teléfono se incluirá automáticamente en la descripción
+4. Las notificaciones por WhatsApp se enviarán automáticamente
+
+## 🔌 Uso de la API
+
+### Autenticación
+
+La API utiliza autenticación basada en tokens. Incluye tu API token de ClickUp en el header:
 
 ```bash
 Authorization: your_clickup_api_token_here
@@ -149,7 +183,7 @@ Authorization: your_clickup_api_token_here
 POST /api/v1/tasks/
 {
   "name": "Nueva tarea",
-  "description": "DescripciÃ³n de la tarea",
+  "description": "Descripción de la tarea",
   "list_id": "list_id",
   "workspace_id": "workspace_id",
   "assignee_id": "user_id",
@@ -176,232 +210,14 @@ DELETE /api/v1/tasks/{task_id}
 # Obtener workspaces
 GET /api/v1/workspaces/
 
-# Obtener workspace especÃ­fico
+# Obtener workspace específico
 GET /api/v1/workspaces/{workspace_id}
 
 # Sincronizar workspace
 POST /api/v1/workspaces/{workspace_id}/sync
 ```
 
-#### Automatizaciones
-```bash
-# Crear automatizaciÃ³n
-POST /api/v1/automation/
-{
-  "name": "Asignar tareas urgentes",
-  "trigger_type": "task_created",
-  "trigger_conditions": {
-    "priority": 1
-  },
-  "actions": [
-    {
-      "type": "assign_user",
-      "user_id": "default_user_id"
-    }
-  ],
-  "workspace_id": "workspace_id"
-}
-
-# Ejecutar automatizaciÃ³n
-POST /api/v1/automation/{automation_id}/execute
-```
-
-#### Reportes
-```bash
-# Crear reporte
-POST /api/v1/reports/
-{
-  "name": "Reporte mensual",
-  "report_type": "task_summary",
-  "workspace_id": "workspace_id",
-  "date_range": {
-    "start_date": "2024-01-01",
-    "end_date": "2024-01-31"
-  }
-}
-
-# Generar reporte
-POST /api/v1/reports/{report_id}/generate
-```
-
-#### Integraciones
-```bash
-# Crear integraciÃ³n
-POST /api/v1/integrations/
-{
-  "name": "IntegraciÃ³n Salesforce",
-  "integration_type": "crm",
-  "provider": "salesforce",
-  "config": {
-    "instance_url": "https://your-instance.salesforce.com"
-  },
-  "credentials": {
-    "access_token": "your_access_token"
-  },
-  "workspace_id": "workspace_id"
-}
-
-# Probar integraciÃ³n
-POST /api/v1/integrations/{integration_id}/test
-{
-  "test_type": "connection"
-}
-```
-
-## ğŸ”„ Automatizaciones
-
-### Tipos de triggers disponibles
-
-- `task_created`: Cuando se crea una nueva tarea
-- `task_updated`: Cuando se actualiza una tarea
-- `task_completed`: Cuando se completa una tarea
-- `due_date_approaching`: Cuando se acerca la fecha lÃ­mite
-- `priority_changed`: Cuando cambia la prioridad
-
-### Tipos de acciones disponibles
-
-- `assign_user`: Asignar usuario a la tarea
-- `set_priority`: Cambiar prioridad
-- `add_tags`: Agregar etiquetas
-- `set_due_date`: Establecer fecha lÃ­mite
-- `send_notification`: Enviar notificaciÃ³n
-- `create_subtask`: Crear subtarea
-
-### Ejemplo de automatizaciÃ³n
-
-```json
-{
-  "name": "GestiÃ³n automÃ¡tica de tareas urgentes",
-  "trigger_type": "task_created",
-  "trigger_conditions": {
-    "priority": 1,
-    "workspace_id": "workspace_id"
-  },
-  "actions": [
-    {
-      "type": "assign_user",
-      "user_id": "manager_id"
-    },
-    {
-      "type": "add_tags",
-      "tags": ["urgente", "automÃ¡tico"]
-    },
-    {
-      "type": "set_due_date",
-      "days_from_now": 1
-    }
-  ]
-}
-```
-
-## ğŸ“Š Reportes
-
-### Tipos de reportes disponibles
-
-1. **Resumen de Tareas**: EstadÃ­sticas por estado, prioridad y asignaciÃ³n
-2. **Rendimiento de Usuarios**: AnÃ¡lisis de productividad por usuario
-3. **LÃ­nea de Tiempo**: AnÃ¡lisis temporal de tareas
-4. **Vista General del Workspace**: MÃ©tricas completas del workspace
-5. **AnÃ¡lisis Personalizado**: Reportes con filtros especÃ­ficos
-
-### Ejemplo de reporte de rendimiento
-
-```json
-{
-  "report_type": "user_performance",
-  "parameters": {
-    "date_range": "last_month",
-    "include_inactive": false
-  },
-  "summary": {
-    "total_users": 5,
-    "best_performer": "Juan PÃ©rez",
-    "avg_completion_rate": 85.2
-  },
-  "data": {
-    "user_performance": [
-      {
-        "user_name": "Juan PÃ©rez",
-        "total_tasks": 25,
-        "completed_tasks": 23,
-        "completion_rate": 92.0
-      }
-    ]
-  }
-}
-```
-
-## ğŸ”Œ Integraciones
-
-### CRMs soportados
-
-- **Salesforce**: SincronizaciÃ³n de leads y oportunidades
-- **HubSpot**: GestiÃ³n de contactos y deals
-- **Pipedrive**: Pipeline de ventas
-
-### Bases de datos
-
-- **PostgreSQL**: Almacenamiento de datos histÃ³ricos
-- **MySQL**: SincronizaciÃ³n de mÃ©tricas
-- **MongoDB**: Almacenamiento de documentos
-
-### Herramientas de productividad
-
-- **Slack**: Notificaciones automÃ¡ticas
-- **Microsoft Teams**: IntegraciÃ³n con canales
-- **Google Workspace**: SincronizaciÃ³n con Calendar y Drive
-
-## ğŸ§ª Testing
-
-### Ejecutar tests
-
-```bash
-# Tests unitarios
-pytest tests/unit/
-
-# Tests de integraciÃ³n
-pytest tests/integration/
-
-# Todos los tests
-pytest tests/
-
-# Con cobertura
-pytest --cov=. tests/
-```
-
-### Estructura de tests
-
-```
-tests/
-â”œâ”€â”€ unit/                 # Tests unitarios
-â”‚   â”œâ”€â”€ test_models.py
-â”‚   â”œâ”€â”€ test_schemas.py
-â”‚   â””â”€â”€ test_utils.py
-â”œâ”€â”€ integration/          # Tests de integraciÃ³n
-â”‚   â”œâ”€â”€ test_api.py
-â”‚   â””â”€â”€ test_clickup_client.py
-â””â”€â”€ conftest.py          # ConfiguraciÃ³n de tests
-```
-
-## ğŸ“ˆ Monitoreo y Logs
-
-### ConfiguraciÃ³n de logs
-
-```python
-# En core/config.py
-LOG_LEVEL = "INFO"
-LOG_FILE = "logs/app.log"
-```
-
-### Niveles de log
-
-- `DEBUG`: InformaciÃ³n detallada para desarrollo
-- `INFO`: InformaciÃ³n general de la aplicaciÃ³n
-- `WARNING`: Advertencias que no impiden la ejecuciÃ³n
-- `ERROR`: Errores que afectan la funcionalidad
-- `CRITICAL`: Errores crÃ­ticos que pueden detener la aplicaciÃ³n
-
-## ğŸš€ Despliegue
+## 🚀 Despliegue
 
 ### Docker
 
@@ -444,7 +260,43 @@ services:
     image: redis:6-alpine
 ```
 
-## ğŸ¤� ContribuciÃ³n
+## 🧪 Testing
+
+### Ejecutar tests
+
+```bash
+# Tests unitarios
+pytest tests/unit/
+
+# Tests de integración
+pytest tests/integration/
+
+# Todos los tests
+pytest tests/
+
+# Con cobertura
+pytest --cov=. tests/
+```
+
+## 📊 Monitoreo y Logs
+
+### Configuración de logs
+
+```python
+# En core/config.py
+LOG_LEVEL = "INFO"
+LOG_FILE = "logs/app.log"
+```
+
+### Niveles de log
+
+- `DEBUG`: Información detallada para desarrollo
+- `INFO`: Información general de la aplicación
+- `WARNING`: Advertencias que no impiden la ejecución
+- `ERROR`: Errores que afectan la funcionalidad
+- `CRITICAL`: Errores críticos que pueden detener la aplicación
+
+## 🤝 Contribución
 
 1. Fork el proyecto
 2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
@@ -452,42 +304,47 @@ services:
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abre un Pull Request
 
-## ğŸ“„ Licencia
+## 📄 Licencia
 
-Este proyecto estÃ¡ bajo la Licencia MIT. Ver el archivo `LICENSE` para mÃ¡s detalles.
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
 
-## ğŸ†˜ Soporte
+## 🆘 Soporte
 
-- **DocumentaciÃ³n**: [Wiki del proyecto](link-to-wiki)
+- **Documentación**: [Wiki del proyecto](link-to-wiki)
 - **Issues**: [GitHub Issues](link-to-issues)
 - **Email**: support@clickup-manager.com
 
-## ğŸ”® Roadmap
+## 🗺️ Roadmap
 
-### PrÃ³ximas caracterÃ­sticas
+### Próximas características
 
-- [ ] Dashboard web con grÃ¡ficos interactivos
+- [x] Dashboard web con interfaz moderna
+- [x] Campo de teléfono para notificaciones WhatsApp
+- [x] Sistema de notificaciones automáticas
+- [ ] Gráficos interactivos en tiempo real
 - [ ] Notificaciones push en tiempo real
-- [ ] IntegraciÃ³n con mÃ¡s CRMs
+- [ ] Integración con más CRMs
 - [ ] API GraphQL
 - [ ] Mobile app
 - [ ] Machine Learning para predicciones
 - [ ] Workflows visuales para automatizaciones
-- [ ] ExportaciÃ³n a Excel/PDF
-- [ ] IntegraciÃ³n con calendarios
+- [ ] Exportación a Excel/PDF
+- [ ] Integración con calendarios
 - [ ] Sistema de permisos granular
 
-### Mejoras tÃ©cnicas
+### Mejoras técnicas
 
 - [ ] Cache distribuido con Redis
 - [ ] Background jobs con Celery
-- [ ] MÃ©tricas con Prometheus
+- [ ] Métricas con Prometheus
 - [ ] Logs centralizados
 - [ ] CI/CD pipeline
 - [ ] Tests de carga
-- [ ] DocumentaciÃ³n automÃ¡tica
+- [ ] Documentación automática
 - [ ] Monitoreo de performance
 
 ---
 
-**ClickUp Project Manager** - Potenciando la productividad con automatizaciÃ³n inteligente ğŸš€
+**ClickUp Project Manager** - Potenciando la productividad con automatización inteligente 🚀
+
+*Última actualización: Campo de teléfono para notificaciones WhatsApp implementado ✅*
