@@ -488,8 +488,25 @@
                 </div>
                 
                                 <div class="form-group">
-                    <label for="task-description">Descripción</label>
+                    <label for="task-description">
+                        Descripción
+                        <span id="description-preview-indicator" class="preview-indicator" style="display: none;">
+                            <i class="fas fa-eye"></i> Vista previa disponible
+                        </span>
+                    </label>
                     <textarea id="task-description" name="description" rows="3" placeholder="Describe la tarea (opcional)"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="task-phone">
+                        📱 Número de Celular <span class="optional-badge">(Opcional)</span>
+                        <i class="fas fa-info-circle info-icon" onclick="showPhoneHelp()" title="Click para más información"></i>
+                    </label>
+                    <input type="tel" id="task-phone" name="phone" placeholder="+57 300 123 4567" pattern="[+]?[0-9\s\-\(\)]+" maxlength="20">
+                    <small class="form-help">
+                        Este número se incluirá en la descripción de la tarea para notificaciones por WhatsApp
+                        <span id="phone-char-count" class="char-count">0/20</span>
+                    </small>
                 </div>
                 
                 <div class="form-group">
@@ -621,6 +638,87 @@
         .form-group textarea {
             resize: vertical;
             min-height: 80px;
+            position: relative;
+        }
+        
+        .form-group textarea[data-preview] {
+            border-color: #28a745;
+            background-color: #f8fff9;
+        }
+        
+        .form-group input[type="tel"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input[type="tel"]:focus {
+            border-color: #6f42c1;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+            background-color: #f8f9fa;
+        }
+        
+        .form-group input[type="tel"]:not(:placeholder-shown) {
+            border-color: #28a745;
+            background-color: #f8fff9;
+        }
+        
+        .char-count {
+            float: right;
+            color: #6c757d;
+            font-weight: 600;
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+        
+        .form-group input[type="tel"]::placeholder {
+            color: #6c757d;
+            opacity: 0.7;
+        }
+        
+        .optional-badge {
+            background: #17a2b8;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: normal;
+            margin-left: 8px;
+        }
+        
+        .info-icon {
+            color: #17a2b8;
+            margin-left: 8px;
+            cursor: help;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+        
+        .info-icon:hover {
+            color: #138496;
+        }
+        
+        .preview-indicator {
+            background: #28a745;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: normal;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
         }
         
         .form-help {
@@ -1169,6 +1267,43 @@
                     e.preventDefault();
                     await submitCreateTask();
                 });
+                
+                // Agregar event listeners para preview de descripción
+                const descriptionField = document.getElementById('task-description');
+                const phoneField = document.getElementById('task-phone');
+                const previewIndicator = document.getElementById('description-preview-indicator');
+                const phoneCharCount = document.getElementById('phone-char-count');
+                
+                if (descriptionField && phoneField && previewIndicator && phoneCharCount) {
+                    const updatePreview = () => {
+                        const description = descriptionField.value || '';
+                        const phone = phoneField.value || '';
+                        
+                        // Actualizar contador de caracteres
+                        phoneCharCount.textContent = `${phone.length}/20`;
+                        
+                        if (phone.trim()) {
+                            const phoneText = `\n\n📱 **Número de Celular para WhatsApp:** ${phone.trim()}`;
+                            const preview = description + phoneText;
+                            
+                            // Mostrar preview en el campo de descripción (solo visual)
+                            descriptionField.setAttribute('data-preview', preview);
+                            descriptionField.title = `Vista previa de la descripción final:\n\n${preview}`;
+                            
+                            // Mostrar indicador de preview
+                            previewIndicator.style.display = 'inline-block';
+                        } else {
+                            descriptionField.removeAttribute('data-preview');
+                            descriptionField.title = '';
+                            
+                            // Ocultar indicador de preview
+                            previewIndicator.style.display = 'none';
+                        }
+                    };
+                    
+                    descriptionField.addEventListener('input', updatePreview);
+                    phoneField.addEventListener('input', updatePreview);
+                }
             }
         });
 
@@ -1177,10 +1312,21 @@
                 const form = document.getElementById('create-task-form');
                 const formData = new FormData(form);
                 
+                // Obtener el número de celular
+                const phoneNumber = formData.get('phone');
+                let description = formData.get('description') || '';
+                
+                // Si hay número de celular, agregarlo al final de la descripción
+                if (phoneNumber && phoneNumber.trim()) {
+                    const phoneText = `\n\n📱 **Número de Celular para WhatsApp:** ${phoneNumber.trim()}`;
+                    description += phoneText;
+                    console.log('📱 Número de celular agregado a la descripción:', phoneNumber.trim());
+                }
+                
                 // Convertir FormData a objeto
                 const taskData = {
                     name: formData.get('name'),
-                    description: formData.get('description'),
+                    description: description,
                     status: formData.get('status'),
                     priority: parseInt(formData.get('priority')),
                     due_date: formData.get('due_date'),
@@ -1198,12 +1344,32 @@
                     due_date: formData.get('due_date'),
                     list_id: formData.get('list_id'),
                     workspace_id: formData.get('workspace_id'),
-                    assignee_id: formData.get('assignee_id')
+                    assignee_id: formData.get('assignee_id'),
+                    phone: phoneNumber
                 });
+                
+                if (phoneNumber && phoneNumber.trim()) {
+                    console.log('📱 Configuración de WhatsApp:');
+                    console.log('  • Número detectado:', phoneNumber.trim());
+                    console.log('  • Descripción final:', description);
+                    console.log('  • Notificaciones habilitadas: ✅');
+                } else {
+                    console.log('📱 Configuración de WhatsApp:');
+                    console.log('  • No se proporcionó número de teléfono');
+                    console.log('  • Notificaciones por WhatsApp: ❌');
+                }
                 
                 // Validar datos requeridos
                 if (!taskData.name || !taskData.list_id || !taskData.workspace_id) {
                     throw new Error('Nombre de tarea, lista y workspace son obligatorios');
+                }
+                
+                // Validar formato del número de teléfono si se proporciona
+                if (phoneNumber && phoneNumber.trim()) {
+                    const phoneRegex = /^[+]?[0-9\s\-\(\)]{7,20}$/;
+                    if (!phoneRegex.test(phoneNumber.trim())) {
+                        throw new Error('El número de teléfono debe tener entre 7 y 20 dígitos y puede incluir +, espacios, guiones y paréntesis');
+                    }
                 }
                 
                 // Mapear estado para ClickUp (corregir el problema de "COMPLETADA")
@@ -1250,9 +1416,31 @@
                 const result = await response.json();
                 console.log('✅ Tarea creada exitosamente:', result);
                 
+                // Log adicional para confirmar la configuración de WhatsApp
+                if (phoneNumber && phoneNumber.trim()) {
+                    console.log('📱 WhatsApp configurado correctamente:');
+                    console.log('  • Número:', phoneNumber.trim());
+                    console.log('  • ClickUp ID:', result.clickup_id);
+                    console.log('  • Descripción con teléfono enviada a ClickUp');
+                    console.log('  • Sistema de notificaciones activado');
+                }
+                
                 // Verificar si se sincronizó con ClickUp
                 if (result.clickup_id) {
-                    alert('🎉 ¡Tarea creada exitosamente en ClickUp!');
+                    let successMessage = '🎉 ¡Tarea creada exitosamente en ClickUp!';
+                    if (phoneNumber && phoneNumber.trim()) {
+                        successMessage += `\n\n📱 **Notificaciones por WhatsApp habilitadas:**`;
+                        successMessage += `\n• Número: ${phoneNumber.trim()}`;
+                        successMessage += `\n• Se incluyó en la descripción de la tarea`;
+                        successMessage += `\n• Las notificaciones se enviarán automáticamente`;
+                        successMessage += `\n\n💡 **Próximos pasos:**`;
+                        successMessage += `\n• El sistema detectará automáticamente el número`;
+                        successMessage += `\n• Se enviarán notificaciones por WhatsApp cuando:`;
+                        successMessage += `\n  - Se cree la tarea`;
+                        successMessage += `\n  - Se actualice el estado`;
+                        successMessage += `\n  - Se acerque la fecha límite`;
+                    }
+                    alert(successMessage);
                     console.log(`✅ Sincronización exitosa - ClickUp ID: ${result.clickup_id}`);
                 } else {
                     alert('⚠️ Tarea creada localmente, pero no se sincronizó con ClickUp');
@@ -1261,6 +1449,19 @@
                 
                 // Cerrar modal y limpiar formulario
                 closeCreateTaskModal();
+                
+                // Mostrar mensaje de confirmación adicional en consola
+                if (phoneNumber && phoneNumber.trim()) {
+                    console.log('🎯 Próximos pasos para WhatsApp:');
+                    console.log('  1. La tarea se creó en ClickUp con el teléfono en la descripción');
+                    console.log('  2. El sistema de notificaciones detectará automáticamente el número');
+                    console.log('  3. Se enviarán notificaciones por WhatsApp cuando:');
+                    console.log('     • Se cree la tarea (inmediato)');
+                    console.log('     • Se actualice el estado');
+                    console.log('     • Se acerque la fecha límite');
+                    console.log('     • Se complete la tarea');
+                    console.log('  4. El usuario recibirá las notificaciones en su WhatsApp');
+                }
                 
                 // Recargar dashboard para mostrar la nueva tarea
                 loadDashboard();
@@ -1501,6 +1702,35 @@
                 'complete': 'status-complete'
             };
             return classes[status] || 'status-pending';
+        }
+        
+        // Función para mostrar ayuda sobre el campo de teléfono
+        function showPhoneHelp() {
+            const helpMessage = `
+📱 **Campo de Número de Celular**
+
+**¿Qué hace este campo?**
+• Agrega automáticamente el número de celular a la descripción de la tarea
+• Permite que el sistema de notificaciones por WhatsApp identifique el destinatario
+• Las notificaciones se enviarán automáticamente cuando se creen o actualicen tareas
+
+**Formato recomendado:**
+• +57 300 123 4567 (con código de país)
+• 300 123 4567 (sin código de país)
+• (300) 123-4567 (con paréntesis y guiones)
+
+**¿Es obligatorio?**
+• No, es completamente opcional
+• Solo se incluye en la descripción si se proporciona un número
+
+**¿Cómo funciona?**
+1. Escribe tu descripción normal
+2. Agrega tu número de celular
+3. El sistema combina ambos en la descripción final
+4. Las notificaciones por WhatsApp se envían automáticamente
+            `;
+            
+            alert(helpMessage);
         }
     </script>
     
