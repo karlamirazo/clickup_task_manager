@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     
     # Configuracion de ClickUp API
     CLICKUP_API_TOKEN: str = os.getenv("CLICKUP_API_TOKEN", "pk_156221125_GI1OKEUEW57LFWA8RYWHGIC54TL6XVVZ")
+    CLICKUP_WORKSPACE_ID: str = os.getenv("CLICKUP_WORKSPACE_ID", "9014943317")
     CLICKUP_WEBHOOK_SECRET: str = os.getenv("CLICKUP_WEBHOOK_SECRET", "")
     
     # Configuracion de autenticacion
@@ -86,6 +87,25 @@ class Settings(BaseSettings):
     SMTP_USE_TLS: bool = os.getenv("SMTP_USE_TLS", "True").lower() == "true"
     SMTP_USE_SSL: bool = os.getenv("SMTP_USE_SSL", "False").lower() == "true"
 
+    # Configuracion de WhatsApp Evolution API
+    WHATSAPP_ENABLED: bool = os.getenv("WHATSAPP_ENABLED", "True").lower() == "true"
+    WHATSAPP_EVOLUTION_URL: str = os.getenv("WHATSAPP_EVOLUTION_URL", "http://localhost:8080")
+    WHATSAPP_EVOLUTION_API_KEY: str = os.getenv("WHATSAPP_EVOLUTION_API_KEY", "")
+    WHATSAPP_INSTANCE_NAME: str = os.getenv("WHATSAPP_INSTANCE_NAME", "clickup-manager")
+    WHATSAPP_WEBHOOK_URL: str = os.getenv("WHATSAPP_WEBHOOK_URL", "http://localhost:8000/api/webhooks/whatsapp")
+    WHATSAPP_NOTIFICATIONS_ENABLED: bool = os.getenv("WHATSAPP_NOTIFICATIONS_ENABLED", "True").lower() == "true"
+    
+    # Configuracion de notificaciones de WhatsApp
+    WHATSAPP_TASK_CREATED: bool = os.getenv("WHATSAPP_TASK_CREATED", "True").lower() == "true"
+    WHATSAPP_TASK_UPDATED: bool = os.getenv("WHATSAPP_TASK_UPDATED", "True").lower() == "true"
+    WHATSAPP_TASK_COMPLETED: bool = os.getenv("WHATSAPP_TASK_COMPLETED", "True").lower() == "true"
+    WHATSAPP_TASK_DUE_SOON: bool = os.getenv("WHATSAPP_TASK_DUE_SOON", "True").lower() == "true"
+    WHATSAPP_TASK_OVERDUE: bool = os.getenv("WHATSAPP_TASK_OVERDUE", "True").lower() == "true"
+
+    # Configuracion del simulador de WhatsApp
+    WHATSAPP_SIMULATOR_ENABLED: bool = os.getenv("WHATSAPP_SIMULATOR_ENABLED", "True").lower() == "true"
+    WHATSAPP_SIMULATOR_DELAY: float = float(os.getenv("WHATSAPP_SIMULATOR_DELAY", "0.1"))
+    
     # Configuracion de Telegram Bot (DESHABILITADO)
     TELEGRAM_ENABLED: bool = os.getenv("TELEGRAM_ENABLED", "False").lower() == "true"
     TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
@@ -100,6 +120,7 @@ class Settings(BaseSettings):
     # Campos personalizados de ClickUp para obtener destinatarios desde tareas
     # Coma-separados; pueden ser nombres de campo o IDs de campo
     TASK_EMAIL_FIELDS: str = os.getenv("TASK_EMAIL_FIELDS", "Email")
+    TASK_WHATSAPP_FIELDS: str = os.getenv("TASK_WHATSAPP_FIELDS", "WhatsApp,Telefono,Phone")
     TASK_TELEGRAM_FIELDS: str = os.getenv("TASK_TELEGRAM_FIELDS", "")  # CAMPO ELIMINADO - Telegram deshabilitado
     TASK_SMS_FIELDS: str = os.getenv("TASK_SMS_FIELDS", "")  # Campo eliminado - SMS deshabilitado
     

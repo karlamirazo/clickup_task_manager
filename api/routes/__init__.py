@@ -2,7 +2,7 @@
 API routes for ClickUp Project Manager
 """
 
-from . import tasks, workspaces, lists, users, automation, reports, integrations, spaces, webhooks, dashboard, search
+from . import tasks, workspaces, lists, users, automation, reports, integrations, spaces, webhooks, dashboard, search, whatsapp
 
 __all__ = [
     "tasks",
@@ -15,5 +15,6 @@ __all__ = [
     "spaces",
     "webhooks",
     "dashboard",
-    "search"
+    "search",
+    "whatsapp"
 ]

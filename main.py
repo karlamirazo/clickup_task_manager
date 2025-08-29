@@ -134,6 +134,14 @@ app.include_router(search.router, prefix="/api/v1", tags=["search"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(notifications.router, prefix="/api/v1", tags=["notifications"])
 
+# WhatsApp Integration Routes
+try:
+    from api.routes import whatsapp
+    app.include_router(whatsapp.router, prefix="/api/v1", tags=["WhatsApp Integration"])
+    print("✅ WhatsApp integration routes loaded successfully")
+except ImportError as e:
+    print(f"⚠️ WhatsApp integration routes not available: {e}")
+
 # Optional authentication (commented for basic use)
 # try:
 #     from api.routes import auth
