@@ -26,14 +26,27 @@ from utils.deployment_logger import log_error_sync
 from langgraph_tools.simple_error_logging import log_error_with_graph
 
 # Configuración de logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('logs/railway_monitor.log'),
-        logging.StreamHandler()
-    ]
-)
+def setup_logging():
+    """Configura el logging con manejo inteligente de archivos"""
+    handlers = [logging.StreamHandler()]  # Siempre log a consola
+    
+    # Solo intentar crear archivo de log si estamos en desarrollo
+    try:
+        log_dir = Path('logs')
+        if not log_dir.exists():
+            log_dir.mkdir(exist_ok=True)
+        handlers.append(logging.FileHandler('logs/railway_monitor.log'))
+    except (OSError, PermissionError):
+        # En Railway u otros entornos de producción donde no podemos escribir archivos
+        pass
+    
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=handlers
+    )
+
+setup_logging()
 
 logger = logging.getLogger(__name__)
 
