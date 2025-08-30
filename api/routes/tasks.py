@@ -336,7 +336,7 @@ async def create_task_FINAL_VERSION(
             "description": task_data.description or "",
             "status": clickup_status,  # Estado ya mapeado para ClickUp
             "priority": task_data.priority or 3,
-            "due_date": int(datetime.strptime(task_data.due_date, "%Y-%m-%d").timestamp() * 1000) if task_data.due_date else None,
+            "due_date": int(datetime.strptime(task_data.due_date, "%Y-%m-%d").replace(hour=23, minute=59, second=59).timestamp() * 1000) if task_data.due_date else None,
             "assignees": [clickup_assignee_id] if clickup_assignee_id else [],  # Campo "Asignar a" → "Persona asignada"
             "custom_fields": custom_fields
         }
@@ -472,7 +472,7 @@ async def create_task_FINAL_VERSION(
             description=task_data.description or "",
             status=task_data.status or "to do",
             priority=task_data.priority or 3,
-            due_date=datetime.strptime(task_data.due_date, "%Y-%m-%d") if task_data.due_date else None,
+            due_date=datetime.strptime(task_data.due_date, "%Y-%m-%d").replace(hour=23, minute=59, second=59) if task_data.due_date else None,
             workspace_id=task_data.workspace_id,
             list_id=task_data.list_id,
             assignee_id=task_data.assignee_id,
@@ -488,6 +488,55 @@ async def create_task_FINAL_VERSION(
         db.refresh(new_task)
         
         print(f"✅ Tarea guardada en BD local con ID: {new_task.id}")
+        
+        # ===== ENVIO DE NOTIFICACIONES WHATSAPP =====
+        print(f"📱 Verificando notificaciones WhatsApp...")
+        try:
+            # Importar el servicio de WhatsApp
+            from core.whatsapp_client import WhatsAppNotificationService
+            from core.phone_extractor import extract_whatsapp_numbers_from_task
+            
+            # Crear instancia del servicio
+            whatsapp_service = WhatsAppNotificationService()
+            
+            if whatsapp_service.enabled:
+                # Extraer números de teléfono desde los custom_fields y description
+                task_info = {
+                    "description": task_data.description or "",
+                    "custom_fields": task_data.custom_fields or {}
+                }
+                
+                whatsapp_numbers = extract_whatsapp_numbers_from_task(task_info)
+                
+                if whatsapp_numbers:
+                    print(f"📱 Números WhatsApp encontrados: {whatsapp_numbers}")
+                    
+                    # Enviar notificación a cada número
+                    for phone_number in whatsapp_numbers:
+                        try:
+                            result = await whatsapp_service.send_task_notification(
+                                phone_number=phone_number,
+                                task_name=task_data.name,
+                                task_description=task_data.description or "",
+                                due_date=task_data.due_date,
+                                assignee_name=CLICKUP_USER_ID_TO_NAME.get(task_data.assignee_id, "Sin asignar")
+                            )
+                            
+                            if result.success:
+                                print(f"✅ WhatsApp enviado exitosamente a {phone_number}")
+                            else:
+                                print(f"❌ Error enviando WhatsApp a {phone_number}: {result.error}")
+                                
+                        except Exception as whatsapp_error:
+                            print(f"❌ Error enviando WhatsApp a {phone_number}: {whatsapp_error}")
+                else:
+                    print(f"ℹ️ No se encontraron números de WhatsApp en la tarea")
+            else:
+                print(f"ℹ️ Notificaciones WhatsApp deshabilitadas")
+                
+        except Exception as e:
+            print(f"⚠️ Error en el sistema de notificaciones WhatsApp: {e}")
+            # No fallar la creación de tarea por error en WhatsApp
         
         return new_task
         
