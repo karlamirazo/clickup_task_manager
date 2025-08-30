@@ -11,6 +11,7 @@ import aiohttp
 from pydantic import BaseModel, Field
 
 from .config import settings
+from .whatsapp_simulator import WhatsAppSimulator
 
 # Configurar logging
 logger = logging.getLogger(__name__)
@@ -223,6 +224,7 @@ class WhatsAppNotificationService:
     
     def __init__(self):
         self.client = WhatsAppClient()
+        self.simulator = WhatsAppSimulator() if settings.WHATSAPP_SIMULATOR_ENABLED else None
         self.enabled = settings.WHATSAPP_ENABLED and settings.WHATSAPP_NOTIFICATIONS_ENABLED
         
     async def send_task_notification(
@@ -240,6 +242,22 @@ class WhatsAppNotificationService:
                 success=False,
                 message="WhatsApp notifications disabled",
                 error="WhatsApp notifications are not enabled"
+            )
+        
+        # Usar simulador si está habilitado
+        if self.simulator and settings.WHATSAPP_SIMULATOR_ENABLED:
+            # Formatear el mensaje según el tipo de notificación
+            message = self._format_task_message(
+                task_title, task_description, notification_type, due_date, assignee
+            )
+            
+            clean_phone = self._clean_phone_number(phone_number)
+            result = await self.simulator.send_text_message(clean_phone, message)
+            
+            return WhatsAppResponse(
+                success=result.get("success", True),
+                message=f"📱 SIMULADOR: {result.get('message', 'Mensaje enviado')}",
+                data=result
             )
         
         # Formatear el mensaje según el tipo de notificación

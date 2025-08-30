@@ -376,8 +376,7 @@ class WhatsAppClickUpIntegrator:
                 task_description=task_info.task_description,
                 notification_type=notification_type,
                 due_date=task_info.due_date,
-                assignee=task_info.assignee,
-                custom_message=custom_message
+                assignee=task_info.assignee
             )
             
             return {

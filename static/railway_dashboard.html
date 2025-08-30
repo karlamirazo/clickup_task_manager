@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Railway Monitor Dashboard - ClickUp Project Manager</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1e40af;
+            --secondary-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --critical-color: #dc2626;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+            font-size: 1.1rem;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--success-color);
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.warning { background-color: var(--warning-color); }
+        .status-dot.error { background-color: var(--error-color); }
+        .status-dot.critical { background-color: var(--critical-color); }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: var(--card-background);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .metric-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-icon {
+            font-size: 1.5rem;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .metric-change {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .metric-change.positive { color: var(--success-color); }
+        .metric-change.negative { color: var(--error-color); }
+        .metric-change.neutral { color: var(--text-secondary); }
+
+        .charts-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: var(--card-background);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .alerts-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .alerts-container {
+            display: grid;
+            gap: 15px;
+        }
+
+        .alert-item {
+            background: var(--card-background);
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid var(--success-color);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+
+        .alert-item:hover {
+            transform: translateX(5px);
+        }
+
+        .alert-item.warning { border-left-color: var(--warning-color); }
+        .alert-item.error { border-left-color: var(--error-color); }
+        .alert-item.critical { border-left-color: var(--critical-color); }
+
+        .alert-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .alert-time {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .alert-message {
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .alert-details {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-family: monospace;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .logs-section {
+            margin-bottom: 30px;
+        }
+
+        .logs-container {
+            background: var(--card-background);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-entry.error { 
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 3px solid var(--error-color);
+        }
+
+        .log-entry.warning { 
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 3px solid var(--warning-color);
+        }
+
+        .log-entry.info { 
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid var(--secondary-color);
+        }
+
+        .controls-section {
+            background: var(--card-background);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .control-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .control-button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+
+        .control-button:active {
+            transform: translateY(0);
+        }
+
+        .control-button.secondary {
+            background: var(--text-secondary);
+        }
+
+        .control-button.success {
+            background: var(--success-color);
+        }
+
+        .control-button.warning {
+            background: var(--warning-color);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 10px;
+            }
+            
+            .dashboard-title {
+                font-size: 2rem;
+            }
+            
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <h1 class="dashboard-title">🚀 Railway Monitor Dashboard</h1>
+            <p class="dashboard-subtitle">Monitoreo en tiempo real del sistema ClickUp Project Manager</p>
+            <div class="status-indicator">
+                <div class="status-dot" id="systemStatus"></div>
+                <span id="systemStatusText">Verificando estado...</span>
+            </div>
+        </header>
+
+        <!-- Métricas principales -->
+        <section class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-title">Tiempo de Respuesta</span>
+                    <span class="metric-icon">⚡</span>
+                </div>
+                <div class="metric-value" id="responseTime">-- ms</div>
+                <div class="metric-change neutral" id="responseTimeChange">
+                    <span>Sin datos</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-title">Errores por Hora</span>
+                    <span class="metric-icon">❌</span>
+                </div>
+                <div class="metric-value" id="errorRate">--</div>
+                <div class="metric-change neutral" id="errorRateChange">
+                    <span>Sin datos</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-title">Uso de CPU</span>
+                    <span class="metric-icon">🔥</span>
+                </div>
+                <div class="metric-value" id="cpuUsage">--%</div>
+                <div class="metric-change neutral" id="cpuUsageChange">
+                    <span>Sin datos</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-title">Uso de Memoria</span>
+                    <span class="metric-icon">💾</span>
+                </div>
+                <div class="metric-value" id="memoryUsage">--%</div>
+                <div class="metric-change neutral" id="memoryUsageChange">
+                    <span>Sin datos</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gráficos -->
+        <section class="charts-section">
+            <div class="chart-container">
+                <h3 class="chart-title">📈 Métricas de Performance (Últimas 24h)</h3>
+                <canvas id="performanceChart" width="400" height="200"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <h3 class="chart-title">🚨 Distribución de Alertas</h3>
+                <canvas id="alertsChart" width="300" height="200"></canvas>
+            </div>
+        </section>
+
+        <!-- Alertas activas -->
+        <section class="alerts-section">
+            <h2 class="section-title">🔔 Alertas Activas</h2>
+            <div class="alerts-container" id="activeAlerts">
+                <div class="alert-item">
+                    <div class="alert-header">
+                        <span class="alert-title">Sistema iniciando...</span>
+                        <span class="alert-time">Ahora</span>
+                    </div>
+                    <div class="alert-message">Cargando datos de monitoreo...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Controles -->
+        <section class="controls-section">
+            <h2 class="section-title">🎛️ Controles del Sistema</h2>
+            <div class="controls-grid">
+                <button class="control-button" onclick="refreshData()">
+                    <span id="refreshButtonText">🔄 Actualizar Datos</span>
+                </button>
+                <button class="control-button secondary" onclick="exportLogs()">
+                    📥 Exportar Logs
+                </button>
+                <button class="control-button success" onclick="testNotifications()">
+                    📱 Probar Alertas
+                </button>
+                <button class="control-button warning" onclick="startMonitoring()">
+                    ▶️ Iniciar Monitoreo
+                </button>
+            </div>
+        </section>
+
+        <!-- Logs recientes -->
+        <section class="logs-section">
+            <h2 class="section-title">📋 Logs Recientes</h2>
+            <div class="logs-container" id="recentLogs">
+                <div class="log-entry info">
+                    <strong>[INFO]</strong> Dashboard iniciado - Cargando datos...
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <p>© 2024 ClickUp Project Manager - Railway Monitor Dashboard</p>
+        <p>Última actualización: <span id="lastUpdate">--</span></p>
+    </footer>
+
+    <script>
+        // Variables globales
+        let performanceChart;
+        let alertsChart;
+        let monitoringInterval;
+        let isMonitoring = false;
+
+        // URLs de la API
+        const API_BASE = '';  // Mismo dominio
+        const RAILWAY_URL = 'https://clickuptaskmanager-production.up.railway.app';
+
+        // Datos de ejemplo para inicialización
+        let mockData = {
+            responseTime: 234,
+            errorRate: 2,
+            cpuUsage: 45,
+            memoryUsage: 62,
+            alerts: [
+                {
+                    level: 'warning',
+                    title: '⚠️ Tiempo de respuesta elevado',
+                    message: 'El tiempo de respuesta promedio ha aumentado',
+                    time: new Date().toLocaleTimeString(),
+                    details: 'Respuesta promedio: 450ms (threshold: 300ms)'
+                }
+            ],
+            logs: [
+                { level: 'info', message: 'Sistema iniciado correctamente', time: new Date() },
+                { level: 'warning', message: 'Tiempo de respuesta elevado detectado', time: new Date(Date.now() - 60000) },
+                { level: 'info', message: 'Base de datos conectada', time: new Date(Date.now() - 120000) }
+            ]
+        };
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Inicializando Railway Monitor Dashboard...');
+            
+            initializeCharts();
+            updateMetrics();
+            updateAlerts();
+            updateLogs();
+            updateLastUpdateTime();
+            
+            // Iniciar actualización automática cada 30 segundos
+            setInterval(refreshData, 30000);
+        });
+
+        // Inicializar gráficos
+        function initializeCharts() {
+            // Gráfico de performance
+            const ctx1 = document.getElementById('performanceChart').getContext('2d');
+            performanceChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: generateTimeLabels(24),
+                    datasets: [
+                        {
+                            label: 'Tiempo de Respuesta (ms)',
+                            data: generateRandomData(24, 100, 500),
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'CPU (%)',
+                            data: generateRandomData(24, 20, 80),
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            fill: false,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de alertas
+            const ctx2 = document.getElementById('alertsChart').getContext('2d');
+            alertsChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Info', 'Warning', 'Error', 'Critical'],
+                    datasets: [{
+                        data: [15, 8, 3, 1],
+                        backgroundColor: [
+                            '#3b82f6',
+                            '#f59e0b',
+                            '#ef4444',
+                            '#dc2626'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Generar datos de ejemplo
+        function generateTimeLabels(hours) {
+            const labels = [];
+            const now = new Date();
+            for (let i = hours - 1; i >= 0; i--) {
+                const time = new Date(now.getTime() - i * 60 * 60 * 1000);
+                labels.push(time.getHours() + ':00');
+            }
+            return labels;
+        }
+
+        function generateRandomData(count, min, max) {
+            return Array.from({ length: count }, () => 
+                Math.floor(Math.random() * (max - min + 1)) + min
+            );
+        }
+
+        // Actualizar métricas
+        function updateMetrics() {
+            document.getElementById('responseTime').textContent = mockData.responseTime + ' ms';
+            document.getElementById('errorRate').textContent = mockData.errorRate;
+            document.getElementById('cpuUsage').textContent = mockData.cpuUsage + '%';
+            document.getElementById('memoryUsage').textContent = mockData.memoryUsage + '%';
+
+            // Actualizar indicadores de cambio
+            updateMetricChange('responseTimeChange', 'negative', '↑ +12ms');
+            updateMetricChange('errorRateChange', 'negative', '↑ +1 error');
+            updateMetricChange('cpuUsageChange', 'positive', '↓ -5%');
+            updateMetricChange('memoryUsageChange', 'neutral', '→ Sin cambios');
+
+            // Actualizar estado del sistema
+            updateSystemStatus();
+        }
+
+        function updateMetricChange(elementId, type, text) {
+            const element = document.getElementById(elementId);
+            element.className = `metric-change ${type}`;
+            element.innerHTML = `<span>${text}</span>`;
+        }
+
+        function updateSystemStatus() {
+            const statusDot = document.getElementById('systemStatus');
+            const statusText = document.getElementById('systemStatusText');
+            
+            if (mockData.errorRate > 5 || mockData.responseTime > 1000) {
+                statusDot.className = 'status-dot error';
+                statusText.textContent = 'Sistema con problemas';
+            } else if (mockData.responseTime > 500 || mockData.cpuUsage > 80) {
+                statusDot.className = 'status-dot warning';
+                statusText.textContent = 'Sistema degradado';
+            } else {
+                statusDot.className = 'status-dot';
+                statusText.textContent = 'Sistema operativo';
+            }
+        }
+
+        // Actualizar alertas
+        function updateAlerts() {
+            const alertsContainer = document.getElementById('activeAlerts');
+            
+            if (mockData.alerts.length === 0) {
+                alertsContainer.innerHTML = `
+                    <div class="alert-item">
+                        <div class="alert-header">
+                            <span class="alert-title">✅ Sin alertas activas</span>
+                            <span class="alert-time">Ahora</span>
+                        </div>
+                        <div class="alert-message">Todos los sistemas funcionando normalmente</div>
+                    </div>
+                `;
+                return;
+            }
+
+            alertsContainer.innerHTML = mockData.alerts.map(alert => `
+                <div class="alert-item ${alert.level}">
+                    <div class="alert-header">
+                        <span class="alert-title">${alert.title}</span>
+                        <span class="alert-time">${alert.time}</span>
+                    </div>
+                    <div class="alert-message">${alert.message}</div>
+                    <div class="alert-details">${alert.details}</div>
+                </div>
+            `).join('');
+        }
+
+        // Actualizar logs
+        function updateLogs() {
+            const logsContainer = document.getElementById('recentLogs');
+            
+            logsContainer.innerHTML = mockData.logs.map(log => `
+                <div class="log-entry ${log.level}">
+                    <strong>[${log.level.toUpperCase()}]</strong> 
+                    ${log.time.toLocaleTimeString()} - ${log.message}
+                </div>
+            `).join('');
+        }
+
+        // Actualizar timestamp
+        function updateLastUpdateTime() {
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleString();
+        }
+
+        // Funciones de control
+        async function refreshData() {
+            const button = document.getElementById('refreshButtonText');
+            const originalText = button.textContent;
+            
+            button.innerHTML = '<div class="loading"></div> Actualizando...';
+            
+            try {
+                // Simular llamada a la API
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Generar nuevos datos de ejemplo
+                mockData.responseTime = Math.floor(Math.random() * 400) + 100;
+                mockData.errorRate = Math.floor(Math.random() * 10);
+                mockData.cpuUsage = Math.floor(Math.random() * 60) + 20;
+                mockData.memoryUsage = Math.floor(Math.random() * 40) + 40;
+                
+                // Actualizar visualización
+                updateMetrics();
+                updateAlerts();
+                updateLogs();
+                updateLastUpdateTime();
+                
+                console.log('✅ Datos actualizados correctamente');
+                
+            } catch (error) {
+                console.error('❌ Error actualizando datos:', error);
+            } finally {
+                button.textContent = originalText;
+            }
+        }
+
+        async function exportLogs() {
+            try {
+                // Generar datos de logs para exportar
+                const logsData = {
+                    timestamp: new Date().toISOString(),
+                    system_status: 'operational',
+                    metrics: mockData,
+                    logs: mockData.logs
+                };
+                
+                // Crear archivo para descarga
+                const blob = new Blob([JSON.stringify(logsData, null, 2)], { 
+                    type: 'application/json' 
+                });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `railway_logs_${new Date().toISOString().slice(0, 10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                console.log('📥 Logs exportados correctamente');
+                
+            } catch (error) {
+                console.error('❌ Error exportando logs:', error);
+                alert('Error exportando logs. Ver consola para detalles.');
+            }
+        }
+
+        async function testNotifications() {
+            try {
+                console.log('📱 Probando sistema de notificaciones...');
+                
+                // Simular envío de notificación de prueba
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Agregar alerta de prueba
+                mockData.alerts.unshift({
+                    level: 'info',
+                    title: '🧪 Notificación de Prueba',
+                    message: 'Prueba del sistema de alertas enviada correctamente',
+                    time: new Date().toLocaleTimeString(),
+                    details: 'Tipo: Prueba | Estado: Exitoso'
+                });
+                
+                updateAlerts();
+                console.log('✅ Notificación de prueba enviada');
+                
+            } catch (error) {
+                console.error('❌ Error probando notificaciones:', error);
+                alert('Error enviando notificación de prueba.');
+            }
+        }
+
+        function startMonitoring() {
+            if (isMonitoring) {
+                // Detener monitoreo
+                clearInterval(monitoringInterval);
+                isMonitoring = false;
+                
+                const button = event.target;
+                button.textContent = '▶️ Iniciar Monitoreo';
+                button.className = 'control-button warning';
+                
+                console.log('⏹️ Monitoreo detenido');
+                
+            } else {
+                // Iniciar monitoreo
+                isMonitoring = true;
+                
+                const button = event.target;
+                button.textContent = '⏸️ Detener Monitoreo';
+                button.className = 'control-button error';
+                
+                // Configurar intervalo de monitoreo cada 10 segundos
+                monitoringInterval = setInterval(refreshData, 10000);
+                
+                console.log('🚀 Monitoreo iniciado (intervalo: 10s)');
+            }
+        }
+
+        // Funciones de utilidad
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function formatDuration(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            if (hours > 0) {
+                return `${hours}h ${minutes}m ${secs}s`;
+            } else if (minutes > 0) {
+                return `${minutes}m ${secs}s`;
+            } else {
+                return `${secs}s`;
+            }
+        }
+
+        // Manejar errores globales
+        window.addEventListener('error', function(event) {
+            console.error('❌ Error en el dashboard:', event.error);
+        });
+
+        // Información de debug
+        console.log('🚀 Railway Monitor Dashboard cargado');
+        console.log('📊 Sistema de monitoreo: ACTIVO');
+        console.log('🔗 URL Railway:', RAILWAY_URL);
+    </script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+🌐 ACCESO A EVOLUTION API - CLICKUP WHATSAPP
+
+═══════════════════════════════════════════════════════════
+
+📋 DATOS DE CONEXIÓN:
+
+🔗 SERVER URL:
+   https://evolution-whatsapp-api-production.up.railway.app
+
+🔑 API KEY:
+   clickup-whatsapp-2024
+
+📱 INSTANCE NAME:
+   clickup-manager
+
+═══════════════════════════════════════════════════════════
+
+🎯 PASOS PARA RECONECTAR WHATSAPP:
+
+1. 🌐 ABRIR EVOLUTION API WEB
+   → Ir a: https://evolution-whatsapp-api-production.up.railway.app
+   
+2. 🔑 AUTENTICARSE
+   → Ingresar API Key: clickup-whatsapp-2024
+   
+3. 📱 CREAR INSTANCIA
+   → Nombre: clickup-manager
+   → Tipo: WhatsApp
+   
+4. 📲 ESCANEAR QR
+   → Usar WhatsApp en tu teléfono
+   → Ir a: Configuración > Dispositivos vinculados
+   → Escanear código QR mostrado
+   
+5. ✅ VERIFICAR CONEXIÓN
+   → Estado debe mostrar: "open" o "connected"
+   → Probar enviando mensaje de prueba
+
+═══════════════════════════════════════════════════════════
+
+🔧 TROUBLESHOOTING:
+
+❌ Si no carga la página:
+   → Esperar 1-2 minutos (servidor iniciándose)
+   → Refrescar página
+
+❌ Si API Key no funciona:
+   → Verificar: clickup-whatsapp-2024
+   → Sin espacios al inicio/final
+
+❌ Si QR no aparece:
+   → Crear nueva instancia
+   → Nombre único cada vez
+
+═══════════════════════════════════════════════════════════
+
+📱 DESPUÉS DE CONECTAR:
+
+Tu aplicación ClickUp automáticamente:
+✅ Detectará WhatsApp conectado
+✅ Enviará notificaciones reales
+✅ Procesará mensajes de tareas
+
+🎉 ¡WhatsApp real estará funcionando!

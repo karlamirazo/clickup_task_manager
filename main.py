@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 import os
 
-from api.routes import tasks, workspaces, lists, users, automation, reports, integrations, spaces, webhooks, dashboard, search, auth, notifications
+from api.routes import tasks, workspaces, lists, users, automation, reports, integrations, spaces, webhooks, dashboard, search, auth, notifications, railway_monitor
 from core.config import settings
 from core.database import init_db
 
@@ -133,6 +133,7 @@ app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboar
 app.include_router(search.router, prefix="/api/v1", tags=["search"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(notifications.router, prefix="/api/v1", tags=["notifications"])
+app.include_router(railway_monitor.router)
 
 # WhatsApp Integration Routes
 try:
@@ -198,6 +199,20 @@ async def read_users_tasks_table():
     response.headers["Expires"] = "0"
     response.headers["Last-Modified"] = "Thu, 01 Jan 1970 00:00:00 GMT"
     response.headers["ETag"] = f'"{hash("users_tasks_table.html")}"'
+    
+    return response
+
+@app.get("/railway-monitor", response_class=HTMLResponse)
+async def read_railway_monitor():
+    """Dashboard de monitoreo de Railway"""
+    response = FileResponse("static/railway_dashboard.html")
+    
+    # AGGRESSIVE NO CACHE HEADERS
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    response.headers["Last-Modified"] = "Thu, 01 Jan 1970 00:00:00 GMT"
+    response.headers["ETag"] = f'"{hash("railway_dashboard.html")}"'
     
     return response
 
