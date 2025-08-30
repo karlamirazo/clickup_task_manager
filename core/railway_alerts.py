@@ -18,7 +18,7 @@ from enum import Enum
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.config import settings
-from utils.notifications import send_email_notification
+from utils.notifications import send_email_async
 from core.whatsapp_client import WhatsAppClient
 from langgraph_tools.simple_error_logging import log_error_with_graph
 
@@ -317,10 +317,10 @@ class RailwayAlertsManager:
         </html>
         """
         
-        await send_email_notification(
-            to_email=settings.SMTP_FROM,  # Enviar a admin
+        await send_email_async(
+            to_addresses=[settings.SMTP_FROM],  # Enviar a admin
             subject=subject,
-            body=formatted_message,
+            text_body=formatted_message,
             html_body=html_content
         )
     
