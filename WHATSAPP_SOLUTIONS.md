@@ -99,3 +99,4 @@ Tu aplicación está **100% funcional** con el simulador. Puedes:
 3. **Usar ambos** (simulador para dev, real para producción)
 
 ¿Qué prefieres hacer?
+
