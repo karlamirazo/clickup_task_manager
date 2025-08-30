@@ -90,9 +90,9 @@ class Settings(BaseSettings):
 
     # Configuracion de WhatsApp Evolution API
     WHATSAPP_ENABLED: bool = os.getenv("WHATSAPP_ENABLED", "True").lower() == "true"
-    WHATSAPP_EVOLUTION_URL: str = os.getenv("WHATSAPP_EVOLUTION_URL", "http://localhost:8080")
-    WHATSAPP_EVOLUTION_API_KEY: str = os.getenv("WHATSAPP_EVOLUTION_API_KEY", "")
-    WHATSAPP_INSTANCE_NAME: str = os.getenv("WHATSAPP_INSTANCE_NAME", "clickup_whatsapp")
+    WHATSAPP_EVOLUTION_URL: str = os.getenv("WHATSAPP_EVOLUTION_URL", "https://evolution-api-production-9d5d.up.railway.app")
+    WHATSAPP_EVOLUTION_API_KEY: str = os.getenv("WHATSAPP_EVOLUTION_API_KEY", "clickup-evolution-v223")
+    WHATSAPP_INSTANCE_NAME: str = os.getenv("WHATSAPP_INSTANCE_NAME", "clickup-v23")
     WHATSAPP_WEBHOOK_URL: str = os.getenv("WHATSAPP_WEBHOOK_URL", "http://localhost:8000/api/webhooks/whatsapp")
     WHATSAPP_NOTIFICATIONS_ENABLED: bool = os.getenv("WHATSAPP_NOTIFICATIONS_ENABLED", "True").lower() == "true"
     
@@ -104,7 +104,7 @@ class Settings(BaseSettings):
     WHATSAPP_TASK_OVERDUE: bool = os.getenv("WHATSAPP_TASK_OVERDUE", "True").lower() == "true"
 
     # Configuracion del simulador de WhatsApp
-    WHATSAPP_SIMULATOR_ENABLED: bool = os.getenv("WHATSAPP_SIMULATOR_ENABLED", "True").lower() == "true"
+    WHATSAPP_SIMULATOR_ENABLED: bool = os.getenv("WHATSAPP_SIMULATOR_ENABLED", "False").lower() == "true"
     WHATSAPP_SIMULATOR_DELAY: float = float(os.getenv("WHATSAPP_SIMULATOR_DELAY", "0.1"))
     
     # Configuracion de Telegram Bot (DESHABILITADO)
