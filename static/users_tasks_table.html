@@ -912,15 +912,15 @@
             
             if (filteredData.length === 0) {
                 console.warn('⚠️ No hay datos filtrados para mostrar');
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="empty-state">
-                            <i class="fas fa-search"></i>
-                            <h3>No se encontraron resultados</h3>
-                            <p>Intenta ajustar los filtros de búsqueda</p>
-                        </td>
-                    </tr>
-                `;
+                                 tbody.innerHTML = `
+                     <tr>
+                         <td colspan="7" class="empty-state">
+                             <i class="fas fa-search"></i>
+                             <h3>No se encontraron resultados</h3>
+                             <p>Intenta ajustar los filtros de búsqueda</p>
+                         </td>
+                     </tr>
+                 `;
                 document.getElementById('pagination').style.display = 'none';
                 return;
             }
@@ -971,16 +971,16 @@
                             <small style="color: #6c757d;">${item.space_name}</small>
                         </div>
                     </td>
-                    <td>
-                        <div class="task-actions">
-                            <button class="btn btn-sm btn-outline-primary" onclick="editTask('${item.task_id}')" title="Editar tarea">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTask('${item.task_id}')" title="Eliminar tarea">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
+                                         <td>
+                         <div class="task-actions">
+                             <button class="btn btn-sm btn-outline-primary" onclick="editTask('${item.id}')" title="Editar tarea">
+                                 <i class="fas fa-edit"></i>
+                             </button>
+                             <button class="btn btn-sm btn-outline-danger" onclick="deleteTask('${item.id}')" title="Eliminar tarea">
+                                 <i class="fas fa-trash"></i>
+                             </button>
+                         </div>
+                     </td>
                 </tr>
             `).join('');
 
