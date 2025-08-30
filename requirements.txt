@@ -31,3 +31,4 @@ email-validator>=2.1.0  # Requerido para EmailStr de Pydantic
 sentence-transformers>=2.2.0  # Requerido para el motor de búsqueda RAG
 qrcode[pil]>=7.4.2  # Requerido para generar códigos QR de WhatsApp
 Pillow>=10.0.0  # Requerido para procesamiento de imágenes de QR
+psutil>=5.9.0  # Requerido para monitoreo del sistema Railway
