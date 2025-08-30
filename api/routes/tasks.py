@@ -19,6 +19,16 @@ from models.task import Task
 from user_mapping_config import get_clickup_user_id, CLICKUP_USER_MAPPING, CLICKUP_USER_ID_TO_NAME
 from langgraph_tools.sync_workflow import run_sync_workflow
 
+# ===== SCHEMA PARA ACTUALIZAR TAREAS =====
+class TaskUpdate(BaseModel):
+    """Schema for updating a task"""
+    name: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = None
+    priority: Optional[int] = None
+    due_date: Optional[Union[datetime, str]] = None
+    assignee_id: Optional[str] = None
+
 # ===== SISTEMA DE LOGGING AUTOMATICO CON LANGGRAPH =====
 import sys
 import os
