@@ -1309,6 +1309,113 @@ async def delete_task(task_id: str, db: Session = Depends(get_db)):
             detail=f"Error eliminando tarea: {str(e)}"
         )
 
+# ===== ENDPOINT PUT PARA ACTUALIZAR TAREAS =====
+@router.put("/{task_id}", response_model=TaskResponse)
+async def update_task(
+    task_id: str, 
+    task_update: TaskUpdate, 
+    db: Session = Depends(get_db),
+    clickup_client: ClickUpClient = Depends(get_clickup_client)
+):
+    """Actualizar una tarea existente en ClickUp y BD local"""
+    try:
+        print(f"✏️ Actualizando tarea ID: {task_id}")
+        print(f"📋 Datos de actualización: {task_update.dict()}")
+        
+        # 1. Buscar la tarea por ID local o ID de ClickUp
+        task = None
+        
+        # Intentar buscar por ID local (numérico)
+        if task_id.isdigit():
+            task = db.query(Task).filter(Task.id == int(task_id)).first()
+        
+        # Si no se encuentra, buscar por ID de ClickUp
+        if not task:
+            task = db.query(Task).filter(Task.clickup_id == task_id).first()
+        
+        if not task:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Tarea no encontrada con ID: {task_id}"
+            )
+        
+        print(f"   📋 Tarea encontrada: {task.name} (ClickUp ID: {task.clickup_id})")
+        
+        # 2. Actualizar en ClickUp si tiene ID de ClickUp
+        if task.clickup_id:
+            try:
+                print(f"   🔄 Actualizando en ClickUp...")
+                
+                # Preparar datos para ClickUp
+                clickup_update_data = {}
+                
+                if task_update.name is not None:
+                    clickup_update_data["name"] = task_update.name
+                
+                if task_update.description is not None:
+                    clickup_update_data["description"] = task_update.description
+                
+                if task_update.status is not None:
+                    clickup_update_data["status"] = task_update.status
+                
+                if task_update.priority is not None:
+                    clickup_update_data["priority"] = task_update.priority
+                
+                if task_update.due_date is not None:
+                    clickup_update_data["due_date"] = task_update.due_date
+                
+                if clickup_update_data:
+                    print(f"   📋 Datos para ClickUp: {clickup_update_data}")
+                    await clickup_client.update_task(task.clickup_id, clickup_update_data)
+                    print(f"   ✅ Tarea actualizada en ClickUp exitosamente")
+                else:
+                    print(f"   ℹ️ No hay datos para actualizar en ClickUp")
+                    
+            except Exception as clickup_error:
+                print(f"   ⚠️ Error actualizando en ClickUp: {clickup_error}")
+                # Continuar con actualización local incluso si falla ClickUp
+        
+        # 3. Actualizar en base de datos local
+        print(f"   🔄 Actualizando en BD local...")
+        
+        if task_update.name is not None:
+            task.name = task_update.name
+        
+        if task_update.description is not None:
+            task.description = task_update.description
+        
+        if task_update.status is not None:
+            task.status = task_update.status
+        
+        if task_update.priority is not None:
+            task.priority = task_update.priority
+        
+        if task_update.due_date is not None:
+            if isinstance(task_update.due_date, str):
+                try:
+                    task.due_date = datetime.fromisoformat(task_update.due_date.replace('Z', '+00:00'))
+                except:
+                    task.due_date = None
+            else:
+                task.due_date = task_update.due_date
+        
+        task.updated_at = datetime.now()
+        task.is_synced = True
+        
+        db.commit()
+        print(f"   ✅ Tarea actualizada en BD local exitosamente")
+        
+        return task
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error actualizando tarea: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error actualizando tarea: {str(e)}"
+        )
+
 # ===== ENDPOINT GENERICO {task_id} - DEBE IR AL FINAL =====
 @router.get("/{task_id}", response_model=TaskResponse)
 async def get_task(task_id: str, db: Session = Depends(get_db)):
