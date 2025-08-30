@@ -5,15 +5,10 @@ Este archivo mapea IDs de usuarios de ClickUp con nombres legibles
 
 # Mapeo de ID de ClickUp a nombres de usuario
 CLICKUP_USER_MAPPING = {
-    # IMPORTANTE: Agrega aquí los IDs reales de ClickUp de tu workspace
-    # Para obtener los IDs: 
-    # 1. Ve a https://app.clickup.com/api y haz GET a /team/{workspace_id}/members
-    # 2. O revisa los IDs en las tareas existentes de ClickUp
-    # Ejemplo formato:
-    # "9014943317": "Karla Mirazo",  # Reemplazar con ID real
-    
-    # TEMP: Mapeo de ejemplo - DEBES REEMPLAZAR CON TUS IDs REALES
-    "usuario_ejemplo": "Usuario de Ejemplo"
+    "88442049": "Josef Santiago Scarfo",
+    "88425547": "Karla Rosas", 
+    "88425546": "Veronica Mirazo",
+    "156221125": "Karla Ve",
 }
 
 # Mapeo inverso: ID a nombre
