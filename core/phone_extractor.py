@@ -48,7 +48,7 @@ class PhoneNumberExtractor:
             "whatsapp_link": r'wa\.me/(\d{10,15})',
             
             # Formato con texto descriptivo: WhatsApp: [número]
-            "whatsapp_labeled": r'(?:WhatsApp|WA|Teléfono|Phone|Cel|Móvil):\s*(\+?\d{1,4}\s*\d{6,15})',
+            "whatsapp_labeled": r'(?:WhatsApp|WA|Teléfono|Phone|Cel|Móvil|Tel):\s*(\+?[\d\s\-\(\)]{7,20})',
         }
         
         # Códigos de país comunes para validación
@@ -196,6 +196,11 @@ class PhoneNumberExtractor:
             return normalized
         elif normalized.startswith('52') and len(normalized) >= 12:
             return f"+{normalized}"
+        elif normalized.startswith('1') and len(normalized) == 11:
+            return f"+{normalized}"
+        elif len(normalized) == 10 and not normalized.startswith('0'):
+            # Números de 10 dígitos sin código de país - asumir México
+            return f"+52{normalized}"
         elif len(normalized) >= 10:
             return f"+{normalized}"
         else:

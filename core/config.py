@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     # Configuracion de ClickUp API
     CLICKUP_API_TOKEN: str = os.getenv("CLICKUP_API_TOKEN", "pk_156221125_GI1OKEUEW57LFWA8RYWHGIC54TL6XVVZ")
     CLICKUP_WORKSPACE_ID: str = os.getenv("CLICKUP_WORKSPACE_ID", "9014943317")
+    CLICKUP_SPACE_ID: str = os.getenv("CLICKUP_SPACE_ID", "90143983983")  # ID real del space
     CLICKUP_WEBHOOK_SECRET: str = os.getenv("CLICKUP_WEBHOOK_SECRET", "")
     
     # Configuracion de autenticacion
@@ -103,7 +104,7 @@ class Settings(BaseSettings):
     WHATSAPP_TASK_OVERDUE: bool = os.getenv("WHATSAPP_TASK_OVERDUE", "True").lower() == "true"
 
     # Configuracion del simulador de WhatsApp
-    WHATSAPP_SIMULATOR_ENABLED: bool = os.getenv("WHATSAPP_SIMULATOR_ENABLED", "False").lower() == "true"
+    WHATSAPP_SIMULATOR_ENABLED: bool = os.getenv("WHATSAPP_SIMULATOR_ENABLED", "True").lower() == "true"
     WHATSAPP_SIMULATOR_DELAY: float = float(os.getenv("WHATSAPP_SIMULATOR_DELAY", "0.1"))
     
     # Configuracion de Telegram Bot (DESHABILITADO)
