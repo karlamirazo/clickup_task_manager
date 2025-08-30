@@ -1090,18 +1090,72 @@ async def sync_tasks_simple(
                 print(f"   ❌ Error syncing espacio {space_name}: {e}")
                 continue
         
-        # Commit final
+        # ===== LIMPIAR TAREAS OBSOLETAS =====
+        print(f"🧹 Iniciando limpieza de tareas obsoletas...")
+        
+        # Obtener todas las tareas de ClickUp en el workspace
+        all_clickup_task_ids = set()
+        for space in spaces:
+            space_id = space.get("id")
+            try:
+                lists = await clickup_client.get_lists(space_id)
+                for list_info in lists:
+                    list_id = list_info.get("id")
+                    try:
+                        tasks = await clickup_client.get_tasks(list_id)
+                        for task_data in tasks:
+                            all_clickup_task_ids.add(task_data.get("id"))
+                    except Exception as e:
+                        print(f"   ⚠️ Error obteniendo tareas de lista {list_id}: {e}")
+                        continue
+            except Exception as e:
+                print(f"   ⚠️ Error obteniendo listas de espacio {space_id}: {e}")
+                continue
+        
+        print(f"   📊 Tareas encontradas en ClickUp: {len(all_clickup_task_ids)}")
+        
+        # Obtener todas las tareas de la BD local del workspace
+        local_tasks = db.query(Task).filter(Task.workspace_id == workspace_id).all()
+        print(f"   📊 Tareas en BD local: {len(local_tasks)}")
+        
+        # Identificar tareas obsoletas (que están en BD local pero no en ClickUp)
+        obsolete_tasks = []
+        for local_task in local_tasks:
+            if local_task.clickup_id not in all_clickup_task_ids:
+                obsolete_tasks.append(local_task)
+        
+        total_tasks_deleted = 0
+        if obsolete_tasks:
+            print(f"   🗑️ Encontradas {len(obsolete_tasks)} tareas obsoletas para eliminar:")
+            for obsolete_task in obsolete_tasks:
+                print(f"      🗑️ Eliminando: {obsolete_task.name} (ID: {obsolete_task.clickup_id})")
+                db.delete(obsolete_task)
+                total_tasks_deleted += 1
+        else:
+            print(f"   ✅ No hay tareas obsoletas para eliminar")
+        
+        # Commit final con limpieza
         db.commit()
         
         result = {
-            "message": "Sincronizacion simple completada",
+            "message": "Sincronizacion completa realizada",
             "total_tasks_synced": total_tasks_synced,
             "total_tasks_created": total_tasks_created,
             "total_tasks_updated": total_tasks_updated,
-            "workspace_id": workspace_id
+            "total_tasks_deleted": total_tasks_deleted,
+            "workspace_id": workspace_id,
+            "clickup_tasks_found": len(all_clickup_task_ids),
+            "local_tasks_before": len(local_tasks),
+            "local_tasks_after": len(local_tasks) - total_tasks_deleted
         }
         
-        print(f"✅ Sincronizacion simple completada: {result}")
+        print(f"✅ Sincronizacion completa finalizada: {result}")
+        print(f"📊 RESUMEN:")
+        print(f"   • Tareas en ClickUp: {len(all_clickup_task_ids)}")
+        print(f"   • Tareas creadas en BD: {total_tasks_created}")
+        print(f"   • Tareas actualizadas en BD: {total_tasks_updated}")
+        print(f"   • Tareas obsoletas eliminadas: {total_tasks_deleted}")
+        print(f"   • Total procesadas: {total_tasks_synced}")
         return result
         
     except Exception as e:
