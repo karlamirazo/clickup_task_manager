@@ -19,16 +19,6 @@ from models.task import Task
 from user_mapping_config import get_clickup_user_id, CLICKUP_USER_MAPPING, CLICKUP_USER_ID_TO_NAME
 from langgraph_tools.sync_workflow import run_sync_workflow
 
-# ===== SCHEMA PARA ACTUALIZAR TAREAS =====
-class TaskUpdate(BaseModel):
-    """Schema for updating a task"""
-    name: Optional[str] = None
-    description: Optional[str] = None
-    status: Optional[str] = None
-    priority: Optional[int] = None
-    due_date: Optional[Union[datetime, str]] = None
-    assignee_id: Optional[str] = None
-
 # ===== SISTEMA DE LOGGING AUTOMATICO CON LANGGRAPH =====
 import sys
 import os
@@ -570,6 +560,265 @@ async def create_task_FINAL_VERSION(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error crear la tarea: {str(e)}"
+        )
+
+# ===== ENDPOINT PUT PARA ACTUALIZAR TAREAS =====
+@router.put("/{task_id}", response_model=TaskResponse)
+async def update_task(
+    task_id: str,
+    task_update: TaskUpdate,
+    db: Session = Depends(get_db),
+    clickup_client: ClickUpClient = Depends(get_clickup_client)
+):
+    """Actualizar tarea en ClickUp y sincronizar localmente"""
+    print(f"🔄 Actualizando tarea: {task_id}")
+    print(f"📋 Datos de actualización: {task_update.dict(exclude_unset=True)}")
+    
+    try:
+        # Buscar la tarea en la base de datos local
+        local_task = db.query(Task).filter(Task.clickup_id == task_id).first()
+        if not local_task:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Tarea {task_id} no encontrada en la base de datos local"
+            )
+        
+        # Preparar datos para actualización en ClickUp
+        clickup_update_data = {}
+        
+        # Mapear campos básicos
+        if task_update.name is not None:
+            clickup_update_data["name"] = task_update.name
+        if task_update.description is not None:
+            clickup_update_data["description"] = task_update.description
+        if task_update.priority is not None:
+            clickup_update_data["priority"] = task_update.priority
+        if task_update.due_date is not None:
+            # Convertir due_date a timestamp de ClickUp
+            if isinstance(task_update.due_date, str):
+                try:
+                    due_date_obj = datetime.strptime(task_update.due_date, "%Y-%m-%d")
+                    clickup_update_data["due_date"] = int(due_date_obj.replace(hour=23, minute=59, second=59).timestamp() * 1000)
+                except ValueError:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Formato de fecha inválido. Use YYYY-MM-DD"
+                    )
+            elif isinstance(task_update.due_date, datetime):
+                clickup_update_data["due_date"] = int(task_update.due_date.timestamp() * 1000)
+            elif isinstance(task_update.due_date, int):
+                clickup_update_data["due_date"] = task_update.due_date
+        
+        # Mapear estado si se proporciona
+        if task_update.status is not None:
+            status_mapping = {
+                "to do": "pendiente",
+                "todo": "pendiente", 
+                "pending": "pendiente",
+                "pendiente": "pendiente",
+                "in progress": "en curso",
+                "in_progress": "en curso",
+                "en curso": "en curso",
+                "en progreso": "en progreso",
+                "working": "en curso",
+                "active": "en curso",
+                "review": "en curso",
+                "testing": "en curso",
+                "complete": "completado",
+                "completed": "completado",
+                "completado": "completado",
+                "done": "completado"
+            }
+            clickup_status = status_mapping.get(task_update.status.lower(), "pendiente")
+            clickup_update_data["status"] = clickup_status
+            print(f"   🔄 Estado mapeado: {task_update.status} -> {clickup_status}")
+        
+        # Mapear asignado si se proporciona
+        if task_update.assignee_id is not None:
+            clickup_assignee_id = None
+            if task_update.assignee_id in CLICKUP_USER_ID_TO_NAME:
+                clickup_assignee_id = task_update.assignee_id
+            elif task_update.assignee_id in CLICKUP_USER_MAPPING:
+                clickup_assignee_id = CLICKUP_USER_MAPPING[task_update.assignee_id]
+            
+            if clickup_assignee_id:
+                clickup_update_data["assignees"] = [clickup_assignee_id]
+                print(f"   👤 Asignado actualizado: {task_update.assignee_id} -> {clickup_assignee_id}")
+            else:
+                print(f"   ⚠️ Usuario '{task_update.assignee_id}' no encontrado en el mapeo")
+        
+        # Actualizar en ClickUp si hay cambios
+        if clickup_update_data:
+            print(f"🚀 Enviando actualización a ClickUp: {clickup_update_data}")
+            try:
+                clickup_response = await clickup_client.update_task(task_id, clickup_update_data)
+                print(f"✅ Tarea actualizada exitosamente en ClickUp")
+            except Exception as e:
+                print(f"❌ Error actualizando en ClickUp: {e}")
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"Error actualizando tarea en ClickUp: {str(e)}"
+                )
+        else:
+            print(f"ℹ️ No hay cambios para enviar a ClickUp")
+        
+        # Actualizar campos personalizados si se proporcionan
+        if task_update.custom_fields:
+            print(f"📝 Actualizando campos personalizados...")
+            try:
+                # Verificar si la lista tiene campos personalizados configurados
+                if has_custom_fields(local_task.list_id):
+                    update_result = await update_custom_fields_direct(
+                        clickup_client, 
+                        task_id, 
+                        local_task.list_id, 
+                        task_update.custom_fields
+                    )
+                    
+                    success_count = update_result.get('success_count', 0)
+                    error_count = update_result.get('error_count', 0)
+                    
+                    print(f"✅ Campos personalizados actualizados: {success_count} exitosos, {error_count} errores")
+                    
+                    if error_count > 0:
+                        print(f"⚠️ Errores en campos personalizados: {update_result.get('errors', [])}")
+                else:
+                    print(f"ℹ️ La lista no tiene campos personalizados configurados")
+            except Exception as e:
+                print(f"⚠️ Error actualizando campos personalizados: {e}")
+                # No fallar la actualización por error en campos personalizados
+        
+        # Actualizar base de datos local
+        if task_update.name is not None:
+            local_task.name = task_update.name
+        if task_update.description is not None:
+            local_task.description = task_update.description
+        if task_update.status is not None:
+            local_task.status = task_update.status
+        if task_update.priority is not None:
+            local_task.priority = task_update.priority
+        if task_update.due_date is not None:
+            if isinstance(task_update.due_date, str):
+                local_task.due_date = datetime.strptime(task_update.due_date, "%Y-%m-%d")
+            elif isinstance(task_update.due_date, datetime):
+                local_task.due_date = task_update.due_date
+            elif isinstance(task_update.due_date, int):
+                local_task.due_date = datetime.fromtimestamp(task_update.due_date / 1000)
+        if task_update.assignee_id is not None:
+            local_task.assignee_id = task_update.assignee_id
+        if task_update.custom_fields is not None:
+            local_task.custom_fields = task_update.custom_fields
+        
+        local_task.updated_at = datetime.now()
+        local_task.is_synced = True
+        local_task.last_sync = datetime.now()
+        
+        db.commit()
+        db.refresh(local_task)
+        
+        print(f"✅ Tarea actualizada exitosamente en base de datos local")
+        
+        # ===== ENVIO DE NOTIFICACIONES WHATSAPP =====
+        print(f"📱 Verificando notificaciones WhatsApp...")
+        try:
+            from core.whatsapp_client import WhatsAppNotificationService
+            from core.phone_extractor import extract_whatsapp_numbers_from_task
+            
+            whatsapp_service = WhatsAppNotificationService()
+            
+            if whatsapp_service.enabled:
+                # Extraer números de teléfono desde la descripción y campos personalizados
+                task_info = {
+                    "description": local_task.description or "",
+                    "custom_fields": local_task.custom_fields or {}
+                }
+                
+                whatsapp_numbers = extract_whatsapp_numbers_from_task(task_info)
+                
+                if whatsapp_numbers:
+                    print(f"📱 Números WhatsApp encontrados: {whatsapp_numbers}")
+                    
+                    # Enviar notificación de actualización a cada número
+                    for phone_number in whatsapp_numbers:
+                        try:
+                            result = await whatsapp_service.send_task_notification(
+                                phone_number=phone_number,
+                                task_name=local_task.name,
+                                task_description=local_task.description or "",
+                                due_date=local_task.due_date.isoformat() if local_task.due_date else None,
+                                assignee_name=CLICKUP_USER_ID_TO_NAME.get(local_task.assignee_id, "Sin asignar"),
+                                notification_type="updated"
+                            )
+                            
+                            if result.success:
+                                print(f"✅ WhatsApp de actualización enviado exitosamente a {phone_number}")
+                            else:
+                                print(f"❌ Error enviando WhatsApp de actualización a {phone_number}: {result.error}")
+                                
+                        except Exception as whatsapp_error:
+                            print(f"❌ Error enviando WhatsApp de actualización a {phone_number}: {whatsapp_error}")
+                else:
+                    print(f"ℹ️ No se encontraron números de WhatsApp en la tarea")
+            else:
+                print(f"ℹ️ Notificaciones WhatsApp deshabilitadas")
+                
+        except Exception as e:
+            print(f"⚠️ Error en el sistema de notificaciones WhatsApp: {e}")
+            # No fallar la actualización por error en WhatsApp
+        
+        # Convertir a TaskResponse para la respuesta
+        from api.schemas.task import TaskResponse
+        
+        response_data = {
+            "id": local_task.id,
+            "clickup_id": local_task.clickup_id,
+            "name": local_task.name,
+            "description": local_task.description,
+            "status": local_task.status,
+            "priority": local_task.priority,
+            "due_date": local_task.due_date,
+            "start_date": local_task.start_date,
+            "assignee_id": local_task.assignee_id,
+            "assignee_name": CLICKUP_USER_ID_TO_NAME.get(local_task.assignee_id, "Sin asignar"),
+            "list_name": "Lista",  # TODO: Obtener nombre real de la lista
+            "workspace_name": "Workspace",  # TODO: Obtener nombre real del workspace
+            "tags": local_task.tags,
+            "custom_fields": local_task.custom_fields,
+            "workspace_id": local_task.workspace_id,
+            "list_id": local_task.list_id,
+            "creator_id": local_task.creator_id,
+            "created_at": local_task.created_at,
+            "updated_at": local_task.updated_at,
+            "attachments": local_task.attachments,
+            "comments": local_task.comments,
+            "is_synced": local_task.is_synced,
+            "last_sync": local_task.last_sync
+        }
+        
+        return TaskResponse(**response_data)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error al actualizar la tarea: {e}")
+        
+        # ===== LOGGING AUTOMATICO CON LANGGRAPH =====
+        try:
+            log_error_with_graph({
+                "error_description": f"Error actualizar tarea: {str(e)}",
+                "solution_description": "Verificar CLICKUP_API_TOKEN y datos de entrada",
+                "context_info": f"Tarea: {task_id}, Datos: {task_update.dict(exclude_unset=True)}",
+                "deployment_id": "railway-production",
+                "environment": "production",
+                "severity": "high",
+                "status": "pending"
+            })
+        except Exception as logging_error:
+            print(f"⚠️ Error en logging automatico: {logging_error}")
+        
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al actualizar la tarea: {str(e)}"
         )
 
 # ===== ENDPOINT PARA DIAGNOSTICAR PROBLEMAS DE CAMPOS PERSONALIZADOS =====
@@ -1317,116 +1566,6 @@ async def delete_task(task_id: str, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error eliminando tarea: {str(e)}"
-        )
-
-# ===== ENDPOINT PUT PARA ACTUALIZAR TAREAS =====
-@router.put("/{task_id}", response_model=TaskResponse)
-async def update_task(
-    task_id: str, 
-    task_update: TaskUpdate, 
-    db: Session = Depends(get_db),
-    clickup_client: ClickUpClient = Depends(get_clickup_client)
-):
-    """Actualizar una tarea existente en ClickUp y BD local"""
-    try:
-        print(f"✏️ Actualizando tarea ID: {task_id}")
-        print(f"📋 Datos de actualización: {task_update.dict()}")
-        
-        # 1. Buscar la tarea por ID local o ID de ClickUp
-        task = None
-        
-        # Intentar buscar por ID local (numérico)
-        if task_id.isdigit():
-            task = db.query(Task).filter(Task.id == int(task_id)).first()
-        
-        # Si no se encuentra, buscar por ID de ClickUp
-        if not task:
-            task = db.query(Task).filter(Task.clickup_id == task_id).first()
-        
-        if not task:
-            print(f"   ❌ Tarea no encontrada con ID: {task_id}")
-            print(f"   🔍 Buscando por ID local: {task_id.isdigit()}")
-            print(f"   🔍 Buscando por ClickUp ID: {task_id}")
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Tarea no encontrada con ID: {task_id}"
-            )
-        
-        print(f"   📋 Tarea encontrada: {task.name} (ClickUp ID: {task.clickup_id})")
-        
-        # 2. Actualizar en ClickUp si tiene ID de ClickUp
-        if task.clickup_id:
-            try:
-                print(f"   🔄 Actualizando en ClickUp...")
-                
-                # Preparar datos para ClickUp
-                clickup_update_data = {}
-                
-                if task_update.name is not None:
-                    clickup_update_data["name"] = task_update.name
-                
-                if task_update.description is not None:
-                    clickup_update_data["description"] = task_update.description
-                
-                if task_update.status is not None:
-                    clickup_update_data["status"] = task_update.status
-                
-                if task_update.priority is not None:
-                    clickup_update_data["priority"] = task_update.priority
-                
-                if task_update.due_date is not None:
-                    clickup_update_data["due_date"] = task_update.due_date
-                
-                if clickup_update_data:
-                    print(f"   📋 Datos para ClickUp: {clickup_update_data}")
-                    await clickup_client.update_task(task.clickup_id, clickup_update_data)
-                    print(f"   ✅ Tarea actualizada en ClickUp exitosamente")
-                else:
-                    print(f"   ℹ️ No hay datos para actualizar en ClickUp")
-                    
-            except Exception as clickup_error:
-                print(f"   ⚠️ Error actualizando en ClickUp: {clickup_error}")
-                # Continuar con actualización local incluso si falla ClickUp
-        
-        # 3. Actualizar en base de datos local
-        print(f"   🔄 Actualizando en BD local...")
-        
-        if task_update.name is not None:
-            task.name = task_update.name
-        
-        if task_update.description is not None:
-            task.description = task_update.description
-        
-        if task_update.status is not None:
-            task.status = task_update.status
-        
-        if task_update.priority is not None:
-            task.priority = task_update.priority
-        
-        if task_update.due_date is not None:
-            if isinstance(task_update.due_date, str):
-                try:
-                    task.due_date = datetime.fromisoformat(task_update.due_date.replace('Z', '+00:00'))
-                except:
-                    task.due_date = None
-            else:
-                task.due_date = task_update.due_date
-        
-        task.updated_at = datetime.now()
-        task.is_synced = True
-        
-        db.commit()
-        print(f"   ✅ Tarea actualizada en BD local exitosamente")
-        
-        return task
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"❌ Error actualizando tarea: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error actualizando tarea: {str(e)}"
         )
 
 # ===== ENDPOINT GENERICO {task_id} - DEBE IR AL FINAL =====
