@@ -1344,6 +1344,9 @@ async def update_task(
             task = db.query(Task).filter(Task.clickup_id == task_id).first()
         
         if not task:
+            print(f"   ❌ Tarea no encontrada con ID: {task_id}")
+            print(f"   🔍 Buscando por ID local: {task_id.isdigit()}")
+            print(f"   🔍 Buscando por ClickUp ID: {task_id}")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Tarea no encontrada con ID: {task_id}"
