@@ -139,6 +139,10 @@ app.include_router(railway_monitor.router)
 try:
     from api.routes import whatsapp
     app.include_router(whatsapp.router, prefix="/api/v1", tags=["WhatsApp Integration"])
+
+# WhatsApp Diagnostics
+from api.routes import whatsapp_diagnostics
+app.include_router(whatsapp_diagnostics.router, prefix="/api/v1", tags=["WhatsApp Diagnostics"])
     print("✅ WhatsApp integration routes loaded successfully")
 except ImportError as e:
     print(f"⚠️ WhatsApp integration routes not available: {e}")

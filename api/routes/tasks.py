@@ -493,12 +493,12 @@ async def create_task_FINAL_VERSION(
         # ===== ENVIO DE NOTIFICACIONES WHATSAPP =====
         print(f"📱 Verificando notificaciones WhatsApp...")
         try:
-            # Importar el servicio de WhatsApp
-            from core.whatsapp_client import WhatsAppNotificationService
+            # Importar el servicio robusto de WhatsApp
+            from core.robust_whatsapp_service import get_robust_whatsapp_service
             from core.phone_extractor import extract_whatsapp_numbers_from_task
             
-            # Crear instancia del servicio
-            whatsapp_service = WhatsAppNotificationService()
+            # Crear instancia del servicio robusto
+            whatsapp_service = await get_robust_whatsapp_service()
             
             if whatsapp_service.enabled:
                 # Extraer números de teléfono desde los custom_fields y description
@@ -512,21 +512,27 @@ async def create_task_FINAL_VERSION(
                 if whatsapp_numbers:
                     print(f"📱 Números WhatsApp encontrados: {whatsapp_numbers}")
                     
-                    # Enviar notificación a cada número
+                    # Enviar notificación a cada número usando servicio robusto
                     for phone_number in whatsapp_numbers:
                         try:
-                            result = await whatsapp_service.send_task_notification(
+                            result = await whatsapp_service.send_message_with_retries(
                                 phone_number=phone_number,
+                                message=task_data.description or "",
+                                message_type="text",
+                                notification_type="created",
                                 task_name=task_data.name,
-                                task_description=task_data.description or "",
                                 due_date=task_data.due_date,
                                 assignee_name=CLICKUP_USER_ID_TO_NAME.get(task_data.assignee_id, "Sin asignar")
                             )
                             
                             if result.success:
                                 print(f"✅ WhatsApp enviado exitosamente a {phone_number}")
+                                if result.used_fallback:
+                                    print(f"   🔄 Usado simulador como fallback")
+                                print(f"   📊 Intentos: {len(result.attempts)}, Duración: {result.total_duration_ms:.0f}ms")
                             else:
-                                print(f"❌ Error enviando WhatsApp a {phone_number}: {result.error}")
+                                print(f"❌ Error enviando WhatsApp a {phone_number}: {result.error_summary}")
+                                print(f"   📊 Intentos: {len(result.attempts)}, Duración: {result.total_duration_ms:.0f}ms")
                                 
                         except Exception as whatsapp_error:
                             print(f"❌ Error enviando WhatsApp a {phone_number}: {whatsapp_error}")
@@ -722,10 +728,10 @@ async def update_task(
         # ===== ENVIO DE NOTIFICACIONES WHATSAPP =====
         print(f"📱 Verificando notificaciones WhatsApp...")
         try:
-            from core.whatsapp_client import WhatsAppNotificationService
+            from core.robust_whatsapp_service import get_robust_whatsapp_service
             from core.phone_extractor import extract_whatsapp_numbers_from_task
             
-            whatsapp_service = WhatsAppNotificationService()
+            whatsapp_service = await get_robust_whatsapp_service()
             
             if whatsapp_service.enabled:
                 # Extraer números de teléfono desde la descripción y campos personalizados
@@ -739,22 +745,27 @@ async def update_task(
                 if whatsapp_numbers:
                     print(f"📱 Números WhatsApp encontrados: {whatsapp_numbers}")
                     
-                    # Enviar notificación de actualización a cada número
+                    # Enviar notificación de actualización a cada número usando servicio robusto
                     for phone_number in whatsapp_numbers:
                         try:
-                            result = await whatsapp_service.send_task_notification(
+                            result = await whatsapp_service.send_message_with_retries(
                                 phone_number=phone_number,
+                                message=local_task.description or "",
+                                message_type="text",
+                                notification_type="updated",
                                 task_name=local_task.name,
-                                task_description=local_task.description or "",
                                 due_date=local_task.due_date.isoformat() if local_task.due_date else None,
-                                assignee_name=CLICKUP_USER_ID_TO_NAME.get(local_task.assignee_id, "Sin asignar"),
-                                notification_type="updated"
+                                assignee_name=CLICKUP_USER_ID_TO_NAME.get(local_task.assignee_id, "Sin asignar")
                             )
                             
                             if result.success:
                                 print(f"✅ WhatsApp de actualización enviado exitosamente a {phone_number}")
+                                if result.used_fallback:
+                                    print(f"   🔄 Usado simulador como fallback")
+                                print(f"   📊 Intentos: {len(result.attempts)}, Duración: {result.total_duration_ms:.0f}ms")
                             else:
-                                print(f"❌ Error enviando WhatsApp de actualización a {phone_number}: {result.error}")
+                                print(f"❌ Error enviando WhatsApp de actualización a {phone_number}: {result.error_summary}")
+                                print(f"   📊 Intentos: {len(result.attempts)}, Duración: {result.total_duration_ms:.0f}ms")
                                 
                         except Exception as whatsapp_error:
                             print(f"❌ Error enviando WhatsApp de actualización a {phone_number}: {whatsapp_error}")
