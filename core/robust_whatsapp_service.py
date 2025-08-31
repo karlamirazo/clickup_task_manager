@@ -49,12 +49,12 @@ class MessageAttempt:
 class MessageResult:
     """Resultado final del envío de mensaje"""
     success: bool
-    message_id: Optional[str] = None
     phone_number: str
     final_status: MessageStatus
     attempts: List[MessageAttempt]
     total_duration_ms: float
     used_fallback: bool
+    message_id: Optional[str] = None
     final_response: Optional[WhatsAppResponse] = None
     error_summary: Optional[str] = None
 
@@ -279,7 +279,8 @@ class RobustWhatsAppService:
             
             total_duration = (time.time() - start_time) * 1000
             
-            if simulator_response.success:
+            # Verificar si el simulador devolvió un resultado exitoso
+            if isinstance(simulator_response, dict) and simulator_response.get("status") == "success":
                 logger.info(f"✅ Mensaje enviado exitosamente usando simulador")
                 
                 # Actualizar estadísticas
@@ -290,30 +291,30 @@ class RobustWhatsAppService:
                     attempt_number=len(attempts) + 1,
                     timestamp=datetime.now(),
                     status=MessageStatus.FALLBACK,
-                    response=simulator_response,
+                    response=None,  # El simulador no devuelve WhatsAppResponse
                     duration_ms=total_duration
                 )
                 attempts.append(attempt_record)
                 
                 return MessageResult(
                     success=True,
-                    message_id=simulator_response.data.get('id') if simulator_response.data else None,
+                    message_id=simulator_response.get("data", {}).get("id") if simulator_response.get("data") else None,
                     phone_number=phone_number,
                     final_status=MessageStatus.FALLBACK,
                     attempts=attempts,
                     total_duration_ms=total_duration,
                     used_fallback=True,
-                    final_response=simulator_response
+                    final_response=None
                 )
             else:
-                logger.error(f"❌ Simulador también falló: {simulator_response.error}")
+                logger.error(f"❌ Simulador falló: {simulator_response}")
                 
                 attempt_record = MessageAttempt(
                     attempt_number=len(attempts) + 1,
                     timestamp=datetime.now(),
                     status=MessageStatus.FAILED,
-                    response=simulator_response,
-                    error=simulator_response.error,
+                    response=None,
+                    error=str(simulator_response),
                     duration_ms=total_duration
                 )
                 attempts.append(attempt_record)
@@ -327,8 +328,8 @@ class RobustWhatsAppService:
                     attempts=attempts,
                     total_duration_ms=total_duration,
                     used_fallback=True,
-                    final_response=simulator_response,
-                    error_summary="Fallback al simulador también falló"
+                    final_response=None,
+                    error_summary="Fallback al simulador falló"
                 )
                 
         except Exception as e:
