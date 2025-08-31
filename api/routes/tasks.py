@@ -507,7 +507,10 @@ async def create_task_FINAL_VERSION(
                     "custom_fields": task_data.custom_fields or {}
                 }
                 
-                whatsapp_numbers = extract_whatsapp_numbers_from_task(task_info)
+                whatsapp_numbers = extract_whatsapp_numbers_from_task(
+                    task_description=task_data.description or "",
+                    task_title=task_data.name
+                )
                 
                 if whatsapp_numbers:
                     print(f"📱 Números WhatsApp encontrados: {whatsapp_numbers}")
@@ -745,7 +748,10 @@ async def update_task(
                     "custom_fields": local_task.custom_fields or {}
                 }
                 
-                whatsapp_numbers = extract_whatsapp_numbers_from_task(task_info)
+                whatsapp_numbers = extract_whatsapp_numbers_from_task(
+                    task_description=local_task.description or "",
+                    task_title=local_task.name
+                )
                 
                 if whatsapp_numbers:
                     print(f"📱 Números WhatsApp encontrados: {whatsapp_numbers}")
