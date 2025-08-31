@@ -33,6 +33,16 @@ class WhatsAppSimulator:
         self.connection_time = None
         self.instance_name = "whatsapp-simulator"
         
+        # Conectar automáticamente
+        asyncio.create_task(self._auto_connect())
+    
+    async def _auto_connect(self):
+        """Conecta automáticamente el simulador"""
+        try:
+            await self.connect()
+        except Exception as e:
+            logger.error(f"❌ Error en conexión automática: {e}")
+    
     async def connect(self) -> Dict[str, Any]:
         """Simula la conexión a WhatsApp"""
         logger.info("🔄 Simulando conexión a WhatsApp...")
@@ -99,8 +109,9 @@ class WhatsAppSimulator:
         await asyncio.sleep(0.5)
         
         # Crear mensaje simulado
+        message_id = f"sim_{len(self.messages_sent) + 1}_{int(datetime.now().timestamp())}"
         simulated_message = SimulatedMessage(
-            id=f"msg_{len(self.messages_sent) + 1}_{int(datetime.now().timestamp())}",
+            id=message_id,
             phone_number=phone_number,
             message=message,
             timestamp=datetime.now()
@@ -108,16 +119,28 @@ class WhatsAppSimulator:
         
         self.messages_sent.append(simulated_message)
         
-        logger.info(f"✅ Mensaje simulado enviado a {phone_number}")
+        logger.info(f"✅ Mensaje simulado enviado exitosamente: {message_id}")
         
         return {
             "status": "success",
-            "message": "Mensaje enviado exitosamente (simulado)",
-            "message_id": simulated_message.id,
-            "phone_number": phone_number,
-            "timestamp": simulated_message.timestamp.isoformat(),
-            "simulated": True
+            "message": "Mensaje simulado enviado exitosamente",
+            "data": {
+                "id": message_id,
+                "phone_number": phone_number,
+                "message": message,
+                "timestamp": simulated_message.timestamp.isoformat(),
+                "status": "sent"
+            }
         }
+    
+    async def send_message(self, phone_number: str, message: str, message_type: str = "text") -> Dict[str, Any]:
+        """Método genérico para enviar mensajes (compatible con el servicio robusto)"""
+        if message_type == "text":
+            return await self.send_text_message(phone_number, message)
+        else:
+            # Para otros tipos de mensaje, usar texto como fallback
+            logger.warning(f"⚠️ Tipo de mensaje '{message_type}' no soportado, usando texto como fallback")
+            return await self.send_text_message(phone_number, message)
     
     async def send_media_message(self, phone_number: str, media_url: str, caption: str = "") -> Dict[str, Any]:
         """Simula el envío de un mensaje multimedia"""

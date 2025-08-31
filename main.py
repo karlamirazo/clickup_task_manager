@@ -143,7 +143,7 @@ try:
     # WhatsApp Diagnostics
     from api.routes import whatsapp_diagnostics
     app.include_router(whatsapp_diagnostics.router, prefix="/api/v1", tags=["WhatsApp Diagnostics"])
-    print("✅ WhatsApp integration routes loaded successfully")
+    print("✅ WhatsApp integration routes loaded successfully - Version 2025-08-31")
 except ImportError as e:
     print(f"⚠️ WhatsApp integration routes not available: {e}")
 

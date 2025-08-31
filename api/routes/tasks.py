@@ -582,13 +582,18 @@ async def update_task(
     print(f"📋 Datos de actualización: {task_update.dict(exclude_unset=True)}")
     
     try:
-        # Buscar la tarea en la base de datos local
-        local_task = db.query(Task).filter(Task.clickup_id == task_id).first()
+        # Buscar la tarea en la base de datos local - CORREGIDO: buscar por ID local, no clickup_id
+        local_task = db.query(Task).filter(Task.id == int(task_id)).first()
         if not local_task:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Tarea {task_id} no encontrada en la base de datos local"
-            )
+            # Intentar buscar por clickup_id como fallback
+            local_task = db.query(Task).filter(Task.clickup_id == task_id).first()
+            if not local_task:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Tarea {task_id} no encontrada en la base de datos local"
+                )
+        
+        print(f"✅ Tarea encontrada en BD local: {local_task.name} (ID: {local_task.id}, ClickUp ID: {local_task.clickup_id})")
         
         # Preparar datos para actualización en ClickUp
         clickup_update_data = {}
@@ -658,7 +663,7 @@ async def update_task(
         if clickup_update_data:
             print(f"🚀 Enviando actualización a ClickUp: {clickup_update_data}")
             try:
-                clickup_response = await clickup_client.update_task(task_id, clickup_update_data)
+                clickup_response = await clickup_client.update_task(local_task.clickup_id, clickup_update_data)
                 print(f"✅ Tarea actualizada exitosamente en ClickUp")
             except Exception as e:
                 print(f"❌ Error actualizando en ClickUp: {e}")
@@ -677,7 +682,7 @@ async def update_task(
                 if has_custom_fields(local_task.list_id):
                     update_result = await update_custom_fields_direct(
                         clickup_client, 
-                        task_id, 
+                        local_task.clickup_id, 
                         local_task.list_id, 
                         task_update.custom_fields
                     )
@@ -754,21 +759,21 @@ async def update_task(
                                 message_type="text",
                                 notification_type="updated",
                                 task_name=local_task.name,
-                                due_date=local_task.due_date.isoformat() if local_task.due_date else None,
+                                due_date=local_task.due_date.strftime("%Y-%m-%d") if local_task.due_date else None,
                                 assignee_name=CLICKUP_USER_ID_TO_NAME.get(local_task.assignee_id, "Sin asignar")
                             )
                             
                             if result.success:
-                                print(f"✅ WhatsApp de actualización enviado exitosamente a {phone_number}")
+                                print(f"✅ WhatsApp enviado exitosamente a {phone_number}")
                                 if result.used_fallback:
                                     print(f"   🔄 Usado simulador como fallback")
                                 print(f"   📊 Intentos: {len(result.attempts)}, Duración: {result.total_duration_ms:.0f}ms")
                             else:
-                                print(f"❌ Error enviando WhatsApp de actualización a {phone_number}: {result.error_summary}")
+                                print(f"❌ Error enviando WhatsApp a {phone_number}: {result.error_summary}")
                                 print(f"   📊 Intentos: {len(result.attempts)}, Duración: {result.total_duration_ms:.0f}ms")
                                 
                         except Exception as whatsapp_error:
-                            print(f"❌ Error enviando WhatsApp de actualización a {phone_number}: {whatsapp_error}")
+                            print(f"❌ Error enviando WhatsApp a {phone_number}: {whatsapp_error}")
                 else:
                     print(f"ℹ️ No se encontraron números de WhatsApp en la tarea")
             else:
@@ -778,9 +783,7 @@ async def update_task(
             print(f"⚠️ Error en el sistema de notificaciones WhatsApp: {e}")
             # No fallar la actualización por error en WhatsApp
         
-        # Convertir a TaskResponse para la respuesta
-        from api.schemas.task import TaskResponse
-        
+        # Preparar respuesta
         response_data = {
             "id": local_task.id,
             "clickup_id": local_task.clickup_id,
@@ -788,23 +791,16 @@ async def update_task(
             "description": local_task.description,
             "status": local_task.status,
             "priority": local_task.priority,
-            "due_date": local_task.due_date,
-            "start_date": local_task.start_date,
-            "assignee_id": local_task.assignee_id,
-            "assignee_name": CLICKUP_USER_ID_TO_NAME.get(local_task.assignee_id, "Sin asignar"),
-            "list_name": "Lista",  # TODO: Obtener nombre real de la lista
-            "workspace_name": "Workspace",  # TODO: Obtener nombre real del workspace
-            "tags": local_task.tags,
-            "custom_fields": local_task.custom_fields,
+            "due_date": local_task.due_date.isoformat() if local_task.due_date else None,
             "workspace_id": local_task.workspace_id,
             "list_id": local_task.list_id,
+            "assignee_id": local_task.assignee_id,
             "creator_id": local_task.creator_id,
-            "created_at": local_task.created_at,
-            "updated_at": local_task.updated_at,
-            "attachments": local_task.attachments,
-            "comments": local_task.comments,
+            "custom_fields": local_task.custom_fields,
+            "created_at": local_task.created_at.isoformat(),
+            "updated_at": local_task.updated_at.isoformat(),
             "is_synced": local_task.is_synced,
-            "last_sync": local_task.last_sync
+            "last_sync": local_task.last_sync.isoformat() if local_task.last_sync else None
         }
         
         return TaskResponse(**response_data)
@@ -818,8 +814,8 @@ async def update_task(
         try:
             log_error_with_graph({
                 "error_description": f"Error actualizar tarea: {str(e)}",
-                "solution_description": "Verificar CLICKUP_API_TOKEN y datos de entrada",
-                "context_info": f"Tarea: {task_id}, Datos: {task_update.dict(exclude_unset=True)}",
+                "solution_description": "Verificar datos de entrada y conexión con ClickUp",
+                "context_info": f"Tarea ID: {task_id}, Datos: {task_update.dict(exclude_unset=True)}",
                 "deployment_id": "railway-production",
                 "environment": "production",
                 "severity": "high",

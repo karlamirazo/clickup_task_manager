@@ -88,6 +88,22 @@ class RobustWhatsAppService:
         logger.info(f"   🔄 Máximo reintentos: {self.max_retries}")
         logger.info(f"   ⏱️ Delay base: {self.base_retry_delay}s")
     
+    @property
+    def enabled(self) -> bool:
+        """Verifica si el servicio está habilitado"""
+        try:
+            from .config import settings
+            return (
+                settings.WHATSAPP_ENABLED and 
+                settings.WHATSAPP_NOTIFICATIONS_ENABLED and
+                bool(settings.WHATSAPP_EVOLUTION_URL) and
+                bool(settings.WHATSAPP_EVOLUTION_API_KEY) and
+                bool(settings.WHATSAPP_INSTANCE_NAME)
+            )
+        except Exception as e:
+            logger.warning(f"⚠️ Error verificando configuración de WhatsApp: {e}")
+            return False
+    
     async def send_message_with_retries(
         self,
         phone_number: str,
