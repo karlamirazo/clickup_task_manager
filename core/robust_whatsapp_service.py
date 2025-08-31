@@ -149,11 +149,11 @@ class RobustWhatsAppService:
                 # Enviar mensaje usando el servicio principal
                 response = await self.whatsapp_service.send_task_notification(
                     phone_number=phone_number,
-                    task_name=kwargs.get('task_name', 'Tarea'),
+                    task_title=kwargs.get('task_name', 'Tarea'),
                     task_description=message,
+                    notification_type=notification_type,
                     due_date=kwargs.get('due_date'),
-                    assignee_name=kwargs.get('assignee_name', 'Sin asignar'),
-                    notification_type=notification_type
+                    assignee=kwargs.get('assignee_name', 'Sin asignar')
                 )
                 
                 attempt_duration = (time.time() - attempt_start) * 1000
