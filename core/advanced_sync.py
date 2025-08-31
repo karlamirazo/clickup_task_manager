@@ -484,14 +484,34 @@ class AdvancedSyncService:
             deleted_task_ids = local_task_ids - current_task_ids_set
             
             if deleted_task_ids:
-                # Marcar como eliminadas (o eliminar completamente)
-                deleted_count = db.query(Task).filter(
-                    Task.clickup_id.in_(deleted_task_ids)
-                ).delete(synchronize_session=False)
+                # Filtrar tareas recién creadas (menos de 5 minutos) para no eliminarlas
+                now = datetime.now()
+                recently_created_tasks = db.query(Task).filter(
+                    Task.clickup_id.in_(deleted_task_ids),
+                    Task.created_at >= now - timedelta(minutes=5)  # No eliminar tareas recién creadas
+                ).all()
                 
-                db.commit()
-                sync_logger.info(f"ðŸ—‘ï¸� Eliminadas {deleted_count} tareas que ya no existen en ClickUp")
-                return deleted_count
+                # Solo eliminar tareas que no son recién creadas
+                safe_to_delete_ids = deleted_task_ids - {task.clickup_id for task in recently_created_tasks}
+                
+                if safe_to_delete_ids:
+                    deleted_count = db.query(Task).filter(
+                        Task.clickup_id.in_(safe_to_delete_ids)
+                    ).delete(synchronize_session=False)
+                    
+                    db.commit()
+                    sync_logger.info(f"🗑️ Eliminadas {deleted_count} tareas que ya no existen en ClickUp")
+                    
+                    # Log de tareas recién creadas que se preservaron
+                    if recently_created_tasks:
+                        sync_logger.info(f"🆕 Preservadas {len(recently_created_tasks)} tareas recién creadas (menos de 5 minutos)")
+                        for task in recently_created_tasks:
+                            sync_logger.info(f"   📝 Preservada: {task.name} (ID: {task.clickup_id}, Creada: {task.created_at})")
+                    
+                    return deleted_count
+                else:
+                    sync_logger.info(f"🆕 Todas las tareas aparentemente 'eliminadas' son recién creadas, preservándolas")
+                    return 0
             
             return 0
             
