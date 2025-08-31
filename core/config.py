@@ -89,6 +89,7 @@ class Settings(BaseSettings):
     SMTP_USE_SSL: bool = os.getenv("SMTP_USE_SSL", "False").lower() == "true"
 
     # Configuracion de WhatsApp Evolution API
+    # FORZANDO DEPLOY PARA USAR VARIABLES DE RAILWAY - 2025-08-31
     WHATSAPP_ENABLED: bool = os.getenv("WHATSAPP_ENABLED", "True").lower() == "true"
     WHATSAPP_EVOLUTION_URL: str = os.getenv("WHATSAPP_EVOLUTION_URL", "https://evolution-api-production-9d5d.up.railway.app")
     WHATSAPP_EVOLUTION_API_KEY: str = os.getenv("WHATSAPP_EVOLUTION_API_KEY", "clickup-evolution-v223")
