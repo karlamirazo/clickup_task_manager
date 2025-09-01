@@ -309,12 +309,24 @@ class WhatsAppNotificationService:
             message += f"👤 Asignado a: {assignee}\n"
         
         if due_date:
-            if notification_type == "due_soon":
-                message += f"⏰ Vence pronto: {due_date.strftime('%d/%m/%Y %H:%M')}\n"
-            elif notification_type == "overdue":
-                message += f"🚨 Vencida desde: {due_date.strftime('%d/%m/%Y %H:%M')}\n"
-            else:
-                message += f"📅 Fecha límite: {due_date.strftime('%d/%m/%Y %H:%M')}\n"
+            # Convertir due_date a datetime si es string
+            try:
+                if isinstance(due_date, str):
+                    # Intentar parsear la fecha si es string
+                    if due_date:
+                        due_date = datetime.fromisoformat(due_date.replace('Z', '+00:00'))
+                    else:
+                        due_date = None
+                
+                if due_date and hasattr(due_date, 'strftime'):
+                    if notification_type == "due_soon":
+                        message += f"⏰ Vence pronto: {due_date.strftime('%d/%m/%Y %H:%M')}\n"
+                    elif notification_type == "overdue":
+                        message += f"🚨 Vencida desde: {due_date.strftime('%d/%m/%Y %H:%M')}\n"
+                    else:
+                        message += f"📅 Fecha límite: {due_date.strftime('%d/%m/%Y %H:%M')}\n"
+            except Exception as e:
+                logger.warning(f"Error formateando fecha: {e}, omitiendo fecha del mensaje")
         
         message += f"\n🔗 Ver en ClickUp: https://app.clickup.com"
         
