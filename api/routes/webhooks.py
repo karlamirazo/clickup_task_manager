@@ -119,7 +119,8 @@ class WebhookProcessor:
                     # )
                     webhook_logger.info(f"🔇 NOTIFICACIONES DESHABILITADAS TEMPORALMENTE para cambio {event_type} en tarea {task_id}")
                     
-                    webhook_logger.info(f"‚úÖ {change_type} actualizado para tarea {task_id}")
+                    # change_type está comentado, usar event_type directamente
+                    webhook_logger.info(f"✅ Evento {event_type} procesado para tarea {task_id}")
         
         except Exception as e:
             webhook_logger.error(f"‚ùå Error procesando evento {event_type} para tarea {task_id}: {e}")
