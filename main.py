@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 import os
 
-from api.routes import tasks, workspaces, lists, users, automation, reports, integrations, spaces, webhooks, dashboard, search, auth, whatsapp, notifications, railway_monitor
+from api.routes import tasks, workspaces, lists, users, automation, reports, integrations, spaces, webhooks, dashboard, search, auth, whatsapp, railway_monitor
 from core.config import settings
 from core.database import init_db
 
@@ -132,7 +132,7 @@ app.include_router(webhooks.router, prefix="/api/v1/webhooks", tags=["webhooks"]
 app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboard"])
 app.include_router(search.router, prefix="/api/v1", tags=["search"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
-app.include_router(notifications.router, prefix="/api/v1", tags=["notifications"])
+# app.include_router(notifications.router, prefix="/api/v1", tags=["notifications"])
 app.include_router(railway_monitor.router)
 
 # WhatsApp Integration Routes
