@@ -314,6 +314,87 @@ def extract_whatsapp_numbers_from_task(task_description: str, task_title: str = 
     
     return phone_extractor.extract_all_phones(search_text)
 
+def extract_whatsapp_numbers_from_task_with_custom_fields(
+    task_description: str, 
+    task_title: str = "", 
+    custom_fields: dict = None
+) -> List[str]:
+    """
+    Función MEJORADA para extraer números de WhatsApp de una tarea de ClickUp
+    Incluye búsqueda en custom_fields, especialmente en el campo "Número de Celular"
+    
+    Args:
+        task_description: Descripción de la tarea
+        task_title: Título de la tarea (opcional)
+        custom_fields: Diccionario de campos personalizados de ClickUp
+        
+    Returns:
+        Lista de números de teléfono únicos encontrados
+    """
+    all_numbers = []
+    
+    # 1. Buscar en el campo "Número de Celular" (prioridad alta)
+    if custom_fields:
+        # Buscar por diferentes variaciones del nombre del campo
+        phone_field_names = [
+            "Número de Celular",
+            "Numero de Celular", 
+            "Número de Teléfono",
+            "Numero de Telefono",
+            "Celular",
+            "Teléfono",
+            "Telefono",
+            "WhatsApp",
+            "Phone",
+            "Mobile",
+            "Cel"
+        ]
+        
+        for field_name in phone_field_names:
+            if field_name in custom_fields:
+                field_value = custom_fields[field_name]
+                if field_value:
+                    print(f"📱 Campo '{field_name}' encontrado: {field_value}")
+                    # Extraer números del valor del campo
+                    field_numbers = phone_extractor.extract_all_phones(str(field_value))
+                    if field_numbers:
+                        print(f"   ✅ Números extraídos del campo '{field_name}': {field_numbers}")
+                        all_numbers.extend(field_numbers)
+                    else:
+                        print(f"   ⚠️ No se encontraron números en el campo '{field_name}'")
+                break  # Solo usar el primer campo que encontremos
+        
+        # 2. Buscar en otros campos personalizados que puedan contener números
+        for field_name, field_value in custom_fields.items():
+            if field_name.lower() not in [name.lower() for name in phone_field_names]:
+                if isinstance(field_value, str) and any(char.isdigit() for char in field_value):
+                    # Solo procesar campos que contengan números
+                    field_numbers = phone_extractor.extract_all_phones(str(field_value))
+                    if field_numbers:
+                        print(f"📱 Números encontrados en campo '{field_name}': {field_numbers}")
+                        all_numbers.extend(field_numbers)
+    
+    # 3. Buscar en descripción y título (como respaldo)
+    search_text = f"{task_title}\n{task_description}" if task_title else task_description
+    if search_text.strip():
+        desc_numbers = phone_extractor.extract_all_phones(search_text)
+        if desc_numbers:
+            print(f"📱 Números encontrados en descripción/título: {desc_numbers}")
+            all_numbers.extend(desc_numbers)
+    
+    # 4. Eliminar duplicados y normalizar
+    unique_numbers = []
+    seen = set()
+    
+    for number in all_numbers:
+        normalized = phone_extractor._normalize_number(number)
+        if normalized not in seen:
+            seen.add(normalized)
+            unique_numbers.append(number)
+    
+    print(f"📱 Total de números únicos encontrados: {unique_numbers}")
+    return unique_numbers
+
 def get_primary_whatsapp_number(task_description: str, task_title: str = "") -> Optional[str]:
     """
     Obtiene el número de WhatsApp principal de una tarea

@@ -495,7 +495,7 @@ async def create_task_FINAL_VERSION(
         try:
             # Importar el servicio robusto de WhatsApp
             from core.robust_whatsapp_service import get_robust_whatsapp_service
-            from core.phone_extractor import extract_whatsapp_numbers_from_task
+            from core.phone_extractor import extract_whatsapp_numbers_from_task_with_custom_fields
             
             # Crear instancia del servicio robusto
             whatsapp_service = await get_robust_whatsapp_service()
@@ -507,9 +507,10 @@ async def create_task_FINAL_VERSION(
                     "custom_fields": task_data.custom_fields or {}
                 }
                 
-                whatsapp_numbers = extract_whatsapp_numbers_from_task(
+                whatsapp_numbers = extract_whatsapp_numbers_from_task_with_custom_fields(
                     task_description=task_data.description or "",
-                    task_title=task_data.name
+                    task_title=task_data.name,
+                    custom_fields=task_data.custom_fields
                 )
                 
                 if whatsapp_numbers:
@@ -737,7 +738,7 @@ async def update_task(
         print(f"📱 Verificando notificaciones WhatsApp...")
         try:
             from core.robust_whatsapp_service import get_robust_whatsapp_service
-            from core.phone_extractor import extract_whatsapp_numbers_from_task
+            from core.phone_extractor import extract_whatsapp_numbers_from_task_with_custom_fields
             
             whatsapp_service = await get_robust_whatsapp_service()
             
@@ -748,9 +749,10 @@ async def update_task(
                     "custom_fields": local_task.custom_fields or {}
                 }
                 
-                whatsapp_numbers = extract_whatsapp_numbers_from_task(
+                whatsapp_numbers = extract_whatsapp_numbers_from_task_with_custom_fields(
                     task_description=local_task.description or "",
-                    task_title=local_task.name
+                    task_title=local_task.name,
+                    custom_fields=local_task.custom_fields
                 )
                 
                 if whatsapp_numbers:
