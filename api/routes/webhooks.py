@@ -71,12 +71,11 @@ class WebhookProcessor:
                     local_task = await WebhookProcessor._create_task_from_webhook(task_data, db)
                     webhook_logger.info(f"‚úÖ Tarea {task_id} creada desde webhook")
                 
-                # TEMPORALMENTE DESHABILITADO: Programar notificaciones en background
-                # background_tasks.add_task(
-                #     WebhookProcessor._send_task_notifications,
-                #     "created", local_task, task_data
-                # )
-                webhook_logger.info(f"🔇 NOTIFICACIONES DESHABILITADAS TEMPORALMENTE para tarea creada {task_id}")
+                # Programar notificaciones en background
+                background_tasks.add_task(
+                    WebhookProcessor._send_task_notifications,
+                    "created", local_task, task_data
+                )
                 
             elif event_type == "taskUpdated":
                 if local_task:
@@ -87,21 +86,19 @@ class WebhookProcessor:
                     local_task = await WebhookProcessor._create_task_from_webhook(task_data, db)
                     webhook_logger.info(f"‚úÖ Tarea {task_id} creada desde webhook de actualizacion")
                 
-                # TEMPORALMENTE DESHABILITADO: Programar notificaciones en background
-                # background_tasks.add_task(
-                #     WebhookProcessor._send_task_notifications,
-                #     "updated", local_task, task_data
-                # )
-                webhook_logger.info(f"🔇 NOTIFICACIONES DESHABILITADAS TEMPORALMENTE para tarea actualizada {task_id}")
+                # Programar notificaciones en background
+                background_tasks.add_task(
+                    WebhookProcessor._send_task_notifications,
+                    "updated", local_task, task_data
+                )
                 
             elif event_type == "taskDeleted":
                 if local_task:
-                                    # TEMPORALMENTE DESHABILITADO: Programar notificaciones antes de eliminar
-                # background_tasks.add_task(
-                #     WebhookProcessor._send_task_notifications,
-                #     "deleted", local_task, task_data
-                # )
-                webhook_logger.info(f"🔇 NOTIFICACIONES DESHABILITADAS TEMPORALMENTE para tarea eliminada {task_id}")
+                    # Programar notificaciones antes de eliminar
+                    background_tasks.add_task(
+                        WebhookProcessor._send_task_notifications,
+                        "deleted", local_task, task_data
+                    )
                     
                     db.delete(local_task)
                     db.commit()
@@ -111,13 +108,12 @@ class WebhookProcessor:
                 if local_task:
                     await WebhookProcessor._update_task_from_webhook(local_task, task_data, db)
                     
-                    # TEMPORALMENTE DESHABILITADO: Enviar notificacion especifica del cambio
-                    # change_type = event_type.replace("task", "").replace("Updated", "").lower()
-                    # background_tasks.add_task(
-                    #     WebhookProcessor._send_task_notifications,
-                    #     f"updated_{change_type}", local_task, task_data
-                    # )
-                    webhook_logger.info(f"🔇 NOTIFICACIONES DESHABILITADAS TEMPORALMENTE para cambio {event_type} en tarea {task_id}")
+                    # Enviar notificacion especifica del cambio
+                    change_type = event_type.replace("task", "").replace("Updated", "").lower()
+                    background_tasks.add_task(
+                        WebhookProcessor._send_task_notifications,
+                        f"updated_{change_type}", local_task, task_data
+                    )
                     
                     # change_type está comentado, usar event_type directamente
                     webhook_logger.info(f"✅ Evento {event_type} procesado para tarea {task_id}")
