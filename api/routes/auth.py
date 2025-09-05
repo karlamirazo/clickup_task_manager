@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 
 from core.database import get_db
-from core.auth import AuthManager, RoleManager, require_auth, require_permission, optional_auth
+from auth.auth import AuthManager, RoleManager, require_auth, require_permission, optional_auth
 from models.user import User
 # Modelos Pydantic locales para evitar importaciones incorrectas
 class UserResponse(BaseModel):

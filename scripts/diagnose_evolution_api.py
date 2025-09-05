@@ -17,9 +17,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
     from core.config import settings
-    from core.evolution_api_config import get_evolution_config, is_production_ready
-    from core.whatsapp_client import WhatsAppClient, WhatsAppNotificationService
-    from core.whatsapp_simulator import WhatsAppSimulator
+    from integrations.evolution_api.config import get_evolution_config, is_production_ready
+    from integrations.whatsapp.client import WhatsAppClient, WhatsAppNotificationService
+    from integrations.whatsapp.simulator import WhatsAppSimulator
 except ImportError as e:
     print(f"❌ Error importando módulos: {e}")
     print("💡 Asegúrate de estar en el directorio del proyecto")

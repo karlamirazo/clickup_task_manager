@@ -8,8 +8,8 @@ from typing import Dict, List, Optional, Any
 from pydantic import BaseModel, Field
 import logging
 
-from core.whatsapp_client import WhatsAppNotificationService, WhatsAppClient
-from core.whatsapp_integrator import WhatsAppClickUpIntegrator
+from integrations.whatsapp.client import WhatsAppNotificationService, WhatsAppClient
+from integrations.whatsapp.integrator import WhatsAppClickUpIntegrator
 from core.phone_extractor import extract_whatsapp_numbers_from_task, get_primary_whatsapp_number
 from core.config import settings
 

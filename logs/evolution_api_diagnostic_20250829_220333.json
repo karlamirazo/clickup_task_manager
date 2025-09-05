@@ -1,0 +1,32 @@
+{
+  "timestamp": "2025-08-29T22:03:33.210410",
+  "environment": "development",
+  "evolution_api_diagnostic": {
+    "configuration_status": {
+      "WHATSAPP_ENABLED": "configured",
+      "WHATSAPP_NOTIFICATIONS_ENABLED": "configured",
+      "WHATSAPP_EVOLUTION_URL": "default",
+      "WHATSAPP_EVOLUTION_API_KEY": "configured",
+      "WHATSAPP_INSTANCE_NAME": "default",
+      "WHATSAPP_WEBHOOK_URL": "configured",
+      "WHATSAPP_SIMULATOR_ENABLED": "default"
+    },
+    "connectivity_test": true,
+    "notification_service": true,
+    "phone_validation": true,
+    "simulator_status": false,
+    "docker_status": true
+  },
+  "summary": {
+    "total_tests": 7,
+    "passed_tests": 5,
+    "overall_status": "issues_detected"
+  },
+  "recommendations": [
+    {
+      "priority": "low",
+      "issue": "Simulador no funciona correctamente",
+      "solution": "Verificar configuración del simulador en settings"
+    }
+  ]
+}

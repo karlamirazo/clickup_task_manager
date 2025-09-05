@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Tabla - ClickUp Project Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Prueba de Funcionalidad - Tabla de Usuarios y Tareas</h1>
+    
+    <div class="test-section info">
+        <h3>📋 Información del Test</h3>
+        <p>Esta página prueba la funcionalidad básica de las APIs necesarias para la tabla de usuarios y tareas.</p>
+    </div>
+
+    <div class="test-section">
+        <h3>🔍 Test de APIs</h3>
+        <button class="btn-primary" onclick="testUsersAPI()">Test API Usuarios</button>
+        <button class="btn-primary" onclick="testTasksAPI()">Test API Tareas</button>
+        <button class="btn-primary" onclick="testSpacesAPI()">Test API Espacios</button>
+        <button class="btn-success" onclick="testAllAPIs()">Test Todas las APIs</button>
+        <button class="btn-danger" onclick="clearResults()">Limpiar Resultados</button>
+    </div>
+
+    <div id="results"></div>
+
+    <div class="test-section">
+        <h3>📊 Datos de Prueba</h3>
+        <div id="data-display"></div>
+    </div>
+
+    <script>
+        const resultsDiv = document.getElementById('results');
+        const dataDisplay = document.getElementById('data-display');
+
+        function addResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-section ${type}`;
+            div.innerHTML = `<h4>${type.toUpperCase()}</h4><p>${message}</p>`;
+            resultsDiv.appendChild(div);
+        }
+
+        function clearResults() {
+            resultsDiv.innerHTML = '';
+            dataDisplay.innerHTML = '';
+        }
+
+        async function testUsersAPI() {
+            try {
+                addResult('🔄 Probando API de usuarios...', 'info');
+                const response = await fetch('/api/v1/users/?workspace_id=9014943317');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult(`✅ API de usuarios funcionando. Usuarios encontrados: ${data.users?.length || 0}`, 'success');
+                    displayUsers(data.users || []);
+                } else {
+                    addResult(`❌ Error en API de usuarios: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Error al conectar con API de usuarios: ${error.message}`, 'error');
+            }
+        }
+
+        async function testTasksAPI() {
+            try {
+                addResult('🔄 Probando API de tareas...', 'info');
+                const response = await fetch('/api/v1/tasks/?include_closed=true&page=0&limit=10');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult(`✅ API de tareas funcionando. Tareas encontradas: ${data.length || 0}`, 'success');
+                    displayTasks(data || []);
+                } else {
+                    addResult(`❌ Error en API de tareas: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Error al conectar con API de tareas: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSpacesAPI() {
+            try {
+                addResult('🔄 Probando API de espacios...', 'info');
+                const response = await fetch('/api/v1/workspaces/9014943317/spaces');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult(`✅ API de espacios funcionando. Espacios encontrados: ${data.spaces?.length || 0}`, 'success');
+                    displaySpaces(data.spaces || []);
+                } else {
+                    addResult(`❌ Error en API de espacios: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Error al conectar con API de espacios: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAllAPIs() {
+            addResult('🚀 Iniciando test completo de todas las APIs...', 'info');
+            await testUsersAPI();
+            await testTasksAPI();
+            await testSpacesAPI();
+            addResult('✅ Test completo finalizado', 'success');
+        }
+
+        function displayUsers(users) {
+            if (users.length === 0) {
+                dataDisplay.innerHTML += '<p>No hay usuarios para mostrar</p>';
+                return;
+            }
+
+            let html = '<h4>👥 Usuarios:</h4><table><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Activo</th></tr>';
+            users.forEach(user => {
+                html += `<tr><td>${user.id}</td><td>${user.username}</td><td>${user.email}</td><td>${user.active ? '✅' : '❌'}</td></tr>`;
+            });
+            html += '</table>';
+            dataDisplay.innerHTML += html;
+        }
+
+        function displayTasks(tasks) {
+            if (tasks.length === 0) {
+                dataDisplay.innerHTML += '<p>No hay tareas para mostrar</p>';
+                return;
+            }
+
+            let html = '<h4>📋 Tareas:</h4><table><tr><th>ID</th><th>Nombre</th><th>Estado</th><th>Prioridad</th><th>Asignado a</th></tr>';
+            tasks.forEach(task => {
+                html += `<tr><td>${task.id}</td><td>${task.name}</td><td>${task.status}</td><td>${task.priority}</td><td>${task.assignee_id}</td></tr>`;
+            });
+            html += '</table>';
+            dataDisplay.innerHTML += html;
+        }
+
+        function displaySpaces(spaces) {
+            if (spaces.length === 0) {
+                dataDisplay.innerHTML += '<p>No hay espacios para mostrar</p>';
+                return;
+            }
+
+            let html = '<h4>🏢 Espacios:</h4><table><tr><th>ID</th><th>Nombre</th><th>Listas</th></tr>';
+            spaces.forEach(space => {
+                const listCount = space.lists ? space.lists.length : 0;
+                html += `<tr><td>${space.id}</td><td>${space.name}</td><td>${listCount}</td></tr>`;
+            });
+            html += '</table>';
+            dataDisplay.innerHTML += html;
+        }
+
+        // Auto-test al cargar la página
+        window.addEventListener('load', () => {
+            addResult('🚀 Página cargada. Haz clic en "Test Todas las APIs" para comenzar.', 'info');
+        });
+    </script>
+</body>
+</html>

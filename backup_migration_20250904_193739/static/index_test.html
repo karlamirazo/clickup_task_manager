@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClickUp Project Manager - Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-tasks"></i> ClickUp Project Manager</h1>
+                <p>Agente Inteligente para gestión de tareas</p>
+            </div>
+            <div class="status-indicator">
+                <span id="connection-status" class="status-badge">
+                    <i class="fas fa-circle"></i> Conectando...
+                </span>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="dashboard">
+                <i class="fas fa-home"></i> Dashboard
+            </button>
+            <button class="tab-btn" data-tab="tasks">
+                <i class="fas fa-tasks"></i> Tareas
+            </button>
+            <button class="tab-btn" data-tab="workspaces">
+                <i class="fas fa-building"></i> Workspaces
+            </button>
+            <button class="tab-btn" data-tab="automation">
+                <i class="fas fa-magic"></i> Automatización
+            </button>
+            <button class="tab-btn" data-tab="reports">
+                <i class="fas fa-chart-bar"></i> Reportes
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-info-circle"></i> Estado del Sistema</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="status-item">
+                                <span>API ClickUp:</span>
+                                <span id="clickup-status" class="status">Verificando...</span>
+                            </div>
+                            <div class="status-item">
+                                <span>Base de Datos:</span>
+                                <span id="db-status" class="status">Verificando...</span>
+                            </div>
+                            <div class="status-item">
+                                <span>Servidor:</span>
+                                <span id="server-status" class="status">Verificando...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-pie"></i> Estadísticas Rápidas</h3>
+                            <button class="btn btn-sm btn-outline-primary" onclick="refreshDashboardCounters()" title="Actualizar contadores">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-number" id="total-tasks">-</div>
+                                    <div class="stat-label">Tareas Totales</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number" id="pending-tasks">-</div>
+                                    <div class="stat-label">Pendientes</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number" id="completed-tasks">-</div>
+                                    <div class="stat-label">Completadas</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-bolt"></i> Acciones Rápidas</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="quick-actions">
+                                <button class="btn btn-primary" onclick="syncAllTasks()">
+                                    <i class="fas fa-sync-alt"></i> Sincronizar
+                                </button>
+                                <button class="btn btn-secondary" onclick="refreshDashboardCounters()">
+                                    <i class="fas fa-refresh"></i> Actualizar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks Tab -->
+            <div id="tasks" class="tab-content">
+                <div class="tasks-header">
+                    <h2><i class="fas fa-tasks"></i> Gestión de Tareas</h2>
+                    <div class="tasks-actions">
+                        <button class="btn btn-primary" onclick="syncAllTasks()">
+                            <i class="fas fa-sync-alt"></i> Sincronizar
+                        </button>
+                        <button class="btn btn-secondary" onclick="loadTasks()">
+                            <i class="fas fa-refresh"></i> Recargar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="tasks-container">
+                    <div id="tasks-list" class="tasks-list">
+                        <div class="loading">Cargando tareas...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workspaces Tab -->
+            <div id="workspaces" class="tab-content">
+                <div class="section-header">
+                    <h2><i class="fas fa-building"></i> Workspaces</h2>
+                </div>
+                <div id="workspaces-list" class="workspaces-list">
+                    <div class="loading">Cargando workspaces...</div>
+                </div>
+            </div>
+
+            <!-- Automation Tab -->
+            <div id="automation" class="tab-content">
+                <div class="section-header">
+                    <h2><i class="fas fa-magic"></i> Automatización</h2>
+                </div>
+                <div id="automation-list" class="automation-list">
+                    <div class="loading">Cargando automatizaciones...</div>
+                </div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div id="reports" class="tab-content">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-bar"></i> Reportes</h2>
+                </div>
+                <div class="reports-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Reporte de Tareas</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>Generar reportes de tareas y estadísticas</p>
+                            <button class="btn btn-primary">Generar Reporte</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Notifications -->
+    <div id="notifications" class="notifications"></div>
+
+    <script>
+        // Configuración de la API para el servidor de prueba
+        const API_BASE = '/api';
+        
+        // Función para mostrar notificaciones
+        function showNotification(message, type = 'info') {
+            const notifications = document.getElementById('notifications');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()">&times;</button>
+            `;
+            notifications.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Cargar tareas
+        async function loadTasks() {
+            console.log('INFO: Cargando tareas...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/tasks`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const tasks = await response.json();
+                console.log('SUCCESS: Tareas cargadas:', tasks.length);
+                
+                // Mostrar las tareas
+                displayTasks(tasks);
+                
+                // Actualizar contadores del dashboard
+                updateDashboardCounters(tasks);
+                
+            } catch (error) {
+                console.error('ERROR: Error cargando tareas:', error);
+                showNotification(
+                    `Error cargando tareas: ${error.message}`,
+                    'error'
+                );
+                
+                // Mostrar mensaje de error en la interfaz
+                const tasksList = document.getElementById('tasks-list');
+                if (tasksList) {
+                    tasksList.innerHTML = `
+                        <div class="error">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Error cargando tareas: ${error.message}
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Mostrar tareas
+        function displayTasks(tasksToShow) {
+            console.log('INFO: displayTasks llamada con:', tasksToShow.length, 'tareas');
+            
+            const tasksList = document.getElementById('tasks-list');
+            
+            if (!tasksList) {
+                console.error('ERROR: No se encontró el elemento tasks-list');
+                return;
+            }
+            
+            if (!Array.isArray(tasksToShow) || tasksToShow.length === 0) {
+                console.log('INFO: No hay tareas para mostrar');
+                tasksList.innerHTML = '<div class="empty-state">No hay tareas disponibles</div>';
+                return;
+            }
+            
+            console.log('SUCCESS: Generando HTML para', tasksToShow.length, 'tareas');
+            
+            const tasksHTML = tasksToShow.map(task => {
+                console.log('DEBUG: Procesando tarea:', task.name, 'ID:', task.id);
+                
+                return `
+                    <div class="task-item">
+                        <div class="task-header">
+                            <div>
+                                <div class="task-title">${task.name || 'Sin título'}</div>
+                                <div class="task-description">${task.description || 'Sin descripción'}</div>
+                            </div>
+                            <div class="task-actions">
+                                <button class="btn btn-secondary" onclick="editTask('${task.id}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger" onclick="deleteTask('${task.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="task-meta">
+                            <span><i class="fas fa-tag"></i> ${task.status || 'Sin estado'}</span>
+                            <span><i class="fas fa-flag"></i> Prioridad ${task.priority || 'N/A'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            console.log('SUCCESS: HTML generado, actualizando DOM');
+            tasksList.innerHTML = tasksHTML;
+            console.log('SUCCESS: Tareas mostradas correctamente');
+        }
+
+        // Actualizar contadores del dashboard
+        function updateDashboardCounters(tasks) {
+            const totalTasks = tasks.length;
+            const completedTasks = tasks.filter(t => (t.status || '').toLowerCase() === 'complete').length;
+            const pendingTasks = totalTasks - completedTasks;
+
+            const totalEl = document.getElementById('total-tasks');
+            const pendingEl = document.getElementById('pending-tasks');
+            const completedEl = document.getElementById('completed-tasks');
+            
+            if (totalEl) totalEl.textContent = totalTasks;
+            if (pendingEl) pendingEl.textContent = pendingTasks;
+            if (completedEl) completedEl.textContent = completedTasks;
+        }
+
+        // Función para actualizar manualmente los contadores del dashboard
+        async function refreshDashboardCounters() {
+            console.log('INFO: Actualizando contadores del dashboard...');
+            
+            try {
+                // Mostrar indicador de carga en el botón
+                const refreshBtn = document.querySelector('[onclick="refreshDashboardCounters()"]');
+                if (refreshBtn) {
+                    const originalContent = refreshBtn.innerHTML;
+                    refreshBtn.disabled = true;
+                    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    
+                    // Recargar tareas para actualizar contadores
+                    await loadTasks();
+                    
+                    // Restaurar botón
+                    refreshBtn.disabled = false;
+                    refreshBtn.innerHTML = originalContent;
+                    
+                    showNotification('Contadores actualizados correctamente', 'success');
+                }
+            } catch (error) {
+                console.error('Error actualizando contadores:', error);
+                showNotification('Error al actualizar contadores', 'error');
+                
+                // Restaurar botón en caso de error
+                const refreshBtn = document.querySelector('[onclick="refreshDashboardCounters()"]');
+                if (refreshBtn) {
+                    refreshBtn.disabled = false;
+                    refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
+                }
+            }
+        }
+
+        // Sincronizar tareas
+        async function syncAllTasks() {
+            console.log('INFO: Sincronizando tareas...');
+            
+            try {
+                const button = document.querySelector('[onclick="syncAllTasks()"]');
+                if (button) {
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
+                }
+                
+                // Simular sincronización
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Recargar tareas
+                await loadTasks();
+                
+                showNotification('Sincronización completada', 'success');
+                
+            } catch (error) {
+                console.error('ERROR: Error en sincronización:', error);
+                showNotification(
+                    `Error en sincronización: ${error.message}`,
+                    'error'
+                );
+            } finally {
+                // Restaurar el botón
+                const button = document.querySelector('[onclick="syncAllTasks()"]');
+                if (button) {
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-sync-alt"></i> Sincronizar';
+                }
+            }
+        }
+
+        // Cargar workspaces
+        async function loadWorkspaces() {
+            console.log('INFO: Cargando workspaces...');
+            
+            const workspacesList = document.getElementById('workspaces-list');
+            workspacesList.innerHTML = '<div class="loading">Cargando workspaces...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/workspaces`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const workspaces = data.workspaces || [];
+                    displayWorkspaces(workspaces);
+                } else {
+                    workspacesList.innerHTML = '<div class="error">Error cargando workspaces</div>';
+                }
+            } catch (error) {
+                console.error('Error cargando workspaces:', error);
+                workspacesList.innerHTML = '<div class="error">Error de conexión</div>';
+            }
+        }
+
+        // Mostrar workspaces
+        function displayWorkspaces(workspacesToShow) {
+            const workspacesList = document.getElementById('workspaces-list');
+            
+            if (workspacesToShow.length === 0) {
+                workspacesList.innerHTML = '<div class="empty-state">No hay workspaces disponibles</div>';
+                return;
+            }
+            
+            const workspacesHTML = workspacesToShow.map(workspace => `
+                <div class="workspace-item">
+                    <h3>${workspace.name || 'Sin nombre'}</h3>
+                    <p>ID: ${workspace.id || 'N/A'}</p>
+                </div>
+            `).join('');
+            
+            workspacesList.innerHTML = workspacesHTML;
+        }
+
+        // Cargar automatizaciones
+        async function loadAutomations() {
+            console.log('INFO: Cargando automatizaciones...');
+            
+            const automationList = document.getElementById('automation-list');
+            automationList.innerHTML = '<div class="loading">Cargando automatizaciones...</div>';
+            
+            try {
+                // Simular carga de automatizaciones
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                automationList.innerHTML = '<div class="empty-state">No hay automatizaciones configuradas</div>';
+            } catch (error) {
+                console.error('Error cargando automatizaciones:', error);
+                automationList.innerHTML = '<div class="error">Error de conexión</div>';
+            }
+        }
+
+        // Cambiar entre pestañas
+        function switchTab(tabName) {
+            // Ocultar todas las pestañas
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => tab.classList.remove('active'));
+            
+            // Desactivar todos los botones
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Mostrar la pestaña seleccionada
+            const selectedTab = document.getElementById(tabName);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+            
+            // Activar el botón seleccionado
+            const selectedButton = document.querySelector(`[data-tab="${tabName}"]`);
+            if (selectedButton) {
+                selectedButton.classList.add('active');
+            }
+            
+            // Cargar datos según la pestaña
+            switch(tabName) {
+                case 'dashboard':
+                    loadTasks();
+                    break;
+                case 'tasks':
+                    loadTasks();
+                    break;
+                case 'workspaces':
+                    loadWorkspaces();
+                    break;
+                case 'automation':
+                    loadAutomations();
+                    break;
+            }
+        }
+
+        // Inicializar cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('INFO: Página cargada, inicializando...');
+            
+            // Configurar eventos de pestañas
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    switchTab(tabName);
+                });
+            });
+            
+            // Cargar datos iniciales
+            loadTasks();
+            
+            // Verificar estado de conexión
+            checkConnectionStatus();
+            
+            console.log('SUCCESS: Página inicializada correctamente');
+        });
+
+        // Verificar estado de conexión
+        async function checkConnectionStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Actualizar indicador de estado
+                    const statusElement = document.getElementById('connection-status');
+                    if (statusElement) {
+                        statusElement.className = 'status-badge connected';
+                        statusElement.innerHTML = '<i class="fas fa-circle"></i> Conectado';
+                    }
+                    
+                    console.log('SUCCESS: Estado de conexión verificado');
+                }
+            } catch (error) {
+                console.warn('WARNING: No se pudo verificar el estado de conexión:', error);
+                
+                // Mostrar estado desconectado
+                const statusElement = document.getElementById('connection-status');
+                if (statusElement) {
+                    statusElement.className = 'status-badge disconnected';
+                    statusElement.innerHTML = '<i class="fas fa-circle"></i> Desconectado';
+                }
+            }
+        }
+
+        // Funciones placeholder para acciones
+        function editTask(taskId) {
+            showNotification(`Editando tarea ${taskId}`, 'info');
+        }
+
+        function deleteTask(taskId) {
+            showNotification(`Eliminando tarea ${taskId}`, 'info');
+        }
+    </script>
+</body>
+</html>

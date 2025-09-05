@@ -10,7 +10,7 @@ import os
 # Añadir el directorio actual al path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from core.clickup_client import ClickUpClient
+from integrations.clickup.client import ClickUpClient
 from core.config import settings
 
 async def test_clickup_sync():

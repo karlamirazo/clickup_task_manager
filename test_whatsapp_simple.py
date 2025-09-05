@@ -24,7 +24,7 @@ async def test_whatsapp_simple():
         print(f"   📱 Instancia: {settings.WHATSAPP_INSTANCE_NAME}")
         
         # 2. Verificar servicio robusto
-        from core.robust_whatsapp_service import get_robust_whatsapp_service
+        from integrations.whatsapp.service import get_robust_whatsapp_service
         print(f"\n🛡️ Obteniendo servicio robusto...")
         
         whatsapp_service = await get_robust_whatsapp_service()

@@ -10,7 +10,7 @@ import asyncio
 # Agregar el directorio raíz al path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from core.clickup_client import ClickUpClient
+from integrations.clickup.client import ClickUpClient
 from core.config import settings
 
 async def refresh_custom_field_ids():

@@ -1,0 +1,18 @@
+{
+  "total_tasks": 3,
+  "completed_tasks": 0,
+  "pending_tasks": 3,
+  "status_distribution": {
+    "pendiente": 2,
+    "en curso": 1
+  },
+  "priority_distribution": {
+    "4": 2,
+    "1": 1
+  },
+  "assignee_distribution": {
+    "88425547": 2,
+    "88425546": 1
+  },
+  "generated_at": "2025-08-13T03:57:00.098702"
+}

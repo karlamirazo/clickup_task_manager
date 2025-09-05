@@ -14,7 +14,7 @@ import json
 import asyncio
 
 from core.database import get_db
-from core.clickup_client import ClickUpClient, get_clickup_client
+from integrations.clickup.client import ClickUpClient, get_clickup_client
 from models.task import Task
 from user_mapping_config import get_clickup_user_id, CLICKUP_USER_MAPPING, CLICKUP_USER_ID_TO_NAME
 from langgraph_tools.sync_workflow import run_sync_workflow
@@ -23,7 +23,7 @@ from api.schemas.task import TaskUpdate, TaskResponse
 # ===== SISTEMA DE LOGGING AUTOMATICO CON LANGGRAPH =====
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 from langgraph_tools.simple_error_logging import log_error_with_graph
 
 # ===== CONFIGURACION DE CAMPOS PERSONALIZADOS =====
@@ -61,7 +61,7 @@ def get_custom_field_id(list_id: str, field_name: str) -> str:
 async def get_user_email_from_clickup(assignee_id: str, workspace_id: str) -> Optional[str]:
     """Obtener el email de un usuario desde ClickUp"""
     try:
-        from core.clickup_client import ClickUpClient
+        from integrations.clickup.client import ClickUpClient
         from core.config import settings
         
         if not settings.CLICKUP_API_TOKEN:
@@ -494,7 +494,7 @@ async def create_task_FINAL_VERSION(
         print(f"📱 Verificando notificaciones WhatsApp...")
         try:
             # Importar el servicio robusto de WhatsApp
-            from core.robust_whatsapp_service import get_robust_whatsapp_service
+            from integrations.whatsapp.service import get_robust_whatsapp_service
             from core.phone_extractor import extract_whatsapp_numbers_from_task_with_custom_fields
             
             # Crear instancia del servicio robusto
@@ -737,7 +737,7 @@ async def update_task(
         # ===== ENVIO DE NOTIFICACIONES WHATSAPP =====
         print(f"📱 Verificando notificaciones WhatsApp...")
         try:
-            from core.robust_whatsapp_service import get_robust_whatsapp_service
+            from integrations.whatsapp.service import get_robust_whatsapp_service
             from core.phone_extractor import extract_whatsapp_numbers_from_task_with_custom_fields
             
             whatsapp_service = await get_robust_whatsapp_service()
@@ -1001,7 +1001,7 @@ async def sync_tasks_emergency(workspace_id: str = Query(None, description="ID d
         
         # Usar el sistema simplificado con manejo de errores mejorado
         try:
-            from core.simple_sync import simple_sync_service
+            from integrations.clickup.simple_sync import simple_sync_service
             
             # Configurar timeout más largo para emergencia
             result = await asyncio.wait_for(
@@ -1107,7 +1107,7 @@ async def sync_tasks(workspace_id: str = Query(None, description="ID del workspa
         
         # Usar el nuevo sistema de sincronización simplificado
         try:
-            from core.simple_sync import simple_sync_service
+            from integrations.clickup.simple_sync import simple_sync_service
             result = await simple_sync_service.sync_workspace_tasks(workspace_id)
             print(f"✅ Sincronización completada: {result}")
             return result
@@ -1252,7 +1252,7 @@ async def debug_endpoint():
         
         # Verificar ClickUp API
         try:
-            from core.clickup_client import ClickUpClient
+            from integrations.clickup.client import ClickUpClient
             client = ClickUpClient(settings.CLICKUP_API_TOKEN)
             workspaces = await client.get_workspaces()
             clickup_status = f"✅ Conectado ({len(workspaces)} workspaces)"

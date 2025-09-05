@@ -70,7 +70,7 @@ async def test_different_statuses():
                         
                         # Verificar el estado en ClickUp
                         try:
-                            from core.clickup_client import ClickUpClient
+                            from integrations.clickup.client import ClickUpClient
                             client = ClickUpClient()
                             task_details = await client.get_task(task_id)
                             

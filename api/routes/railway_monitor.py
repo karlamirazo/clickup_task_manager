@@ -17,8 +17,8 @@ from pydantic import BaseModel
 # Configurar path para importar módulos del proyecto
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from core.railway_log_monitor import RailwayLogMonitor
-from core.railway_alerts import alerts_manager, Alert, AlertLevel, AlertType
+from monitoring.railway.log_monitor import RailwayLogMonitor
+from monitoring.railway.alerts import alerts_manager, Alert, AlertLevel, AlertType
 from core.config import settings
 
 # Crear router

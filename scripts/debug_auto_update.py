@@ -64,7 +64,7 @@ async def debug_auto_update():
                     import os
                     import sys
                     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-                    from core.clickup_client import ClickUpClient
+                    from integrations.clickup.client import ClickUpClient
                     
                     client = ClickUpClient()
                     task_details = await client.get_task(task_id)

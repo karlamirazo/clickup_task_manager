@@ -14,10 +14,10 @@ from datetime import datetime
 # Agregar el directorio raíz al path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from core.evolution_api_config import get_evolution_config, is_production_ready
-from core.production_whatsapp_service import get_production_service
-from core.evolution_webhook_manager import get_webhook_manager
-from core.automated_notification_manager import get_automated_manager
+from integrations.evolution_api.config import get_evolution_config, is_production_ready
+from integrations.whatsapp.production_service import get_production_service
+from integrations.evolution_api.webhook_manager import get_webhook_manager
+from notifications.automated_manager import get_automated_manager
 from core.config import settings
 
 # Configurar logging
@@ -191,7 +191,7 @@ class EvolutionAPISetup:
             whatsapp_service = await get_production_service()
             
             # Crear notificación de prueba
-            from core.production_whatsapp_service import ProductionNotification
+            from integrations.whatsapp.production_service import ProductionNotification
             
             test_notification = ProductionNotification(
                 id="test_message",
@@ -299,8 +299,8 @@ class EvolutionAPISetup:
         """Limpia los recursos"""
         try:
             # Detener servicios
-            from core.evolution_webhook_manager import webhook_manager
-            from core.automated_notification_manager import automated_manager
+            from integrations.evolution_api.webhook_manager import webhook_manager
+            from notifications.automated_manager import automated_manager
             
             if webhook_manager.is_processing:
                 await webhook_manager.stop()

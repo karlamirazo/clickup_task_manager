@@ -7,7 +7,7 @@ import asyncio
 async def ver_tareas_reales():
     """Ver EXACTAMENTE qué tareas hay en ClickUp"""
     try:
-        from core.clickup_client import ClickUpClient
+        from integrations.clickup.client import ClickUpClient
         
         client = ClickUpClient()
         workspace_id = "9014943317"

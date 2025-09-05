@@ -12,7 +12,7 @@ async def clean_database_emergency():
     print("=" * 60)
     
     try:
-        from core.clickup_client import ClickUpClient
+        from integrations.clickup.client import ClickUpClient
         from core.database import get_db
         from models.task import Task
         

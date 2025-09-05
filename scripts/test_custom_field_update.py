@@ -11,7 +11,7 @@ from datetime import datetime
 # Agregar el directorio raiz al path para importar modulos
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from core.clickup_client import ClickUpClient
+from integrations.clickup.client import ClickUpClient
 from custom_field_config import get_custom_field_id
 
 async def test_custom_field_update():

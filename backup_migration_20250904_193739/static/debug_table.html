@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Tabla - ClickUp Project Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .debug-title { font-weight: bold; color: #333; margin-bottom: 10px; }
+        .debug-content { background: #f5f5f5; padding: 10px; border-radius: 3px; font-family: monospace; white-space: pre-wrap; }
+        .error { color: red; }
+        .success { color: green; }
+        .warning { color: orange; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug de Tabla de Usuarios y Tareas</h1>
+    
+    <div class="debug-section">
+        <div class="debug-title">📋 Estado del Servidor</div>
+        <div class="debug-content" id="server-status">Verificando...</div>
+        <button onclick="checkServer()">Verificar Servidor</button>
+    </div>
+    
+    <div class="debug-section">
+        <div class="debug-title">📊 Datos de Tareas</div>
+        <div class="debug-content" id="tasks-data">No cargado</div>
+        <button onclick="loadTasks()">Cargar Tareas</button>
+    </div>
+    
+    <div class="debug-section">
+        <div class="debug-title">👥 Datos de Usuarios</div>
+        <div class="debug-content" id="users-data">No cargado</div>
+        <button onclick="loadUsers()">Cargar Usuarios</button>
+    </div>
+    
+    <div class="debug-section">
+        <div class="debug-title">🏢 Datos de Espacios</div>
+        <div class="debug-content" id="spaces-data">No cargado</div>
+        <button onclick="loadSpaces()">Cargar Espacios</button>
+    </div>
+    
+    <div class="debug-section">
+        <div class="debug-title">🎨 Renderizado de Tabla</div>
+        <div class="debug-content" id="table-render">No renderizado</div>
+        <button onclick="renderDebugTable()">Renderizar Tabla</button>
+    </div>
+
+    <script>
+        let debugData = {
+            tasks: null,
+            users: null,
+            spaces: null
+        };
+
+        async function checkServer() {
+            const statusDiv = document.getElementById('server-status');
+            statusDiv.innerHTML = 'Verificando servidor...';
+            
+            try {
+                const response = await fetch('/health');
+                if (response.ok) {
+                    statusDiv.innerHTML = '✅ Servidor funcionando correctamente en puerto 8000';
+                    statusDiv.className = 'debug-content success';
+                } else {
+                    statusDiv.innerHTML = `❌ Servidor respondió con estado: ${response.status}`;
+                    statusDiv.className = 'debug-content error';
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `❌ Error conectando al servidor: ${error.message}`;
+                statusDiv.className = 'debug-content error';
+            }
+        }
+
+        async function loadTasks() {
+            const dataDiv = document.getElementById('tasks-data');
+            dataDiv.innerHTML = 'Cargando tareas...';
+            
+            try {
+                const response = await fetch('/api/v1/tasks/?include_closed=true&page=0&limit=1000');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                debugData.tasks = data;
+                
+                dataDiv.innerHTML = `✅ Tareas cargadas: ${Array.isArray(data) ? data.length : 'No es array'}\n\nDatos:\n${JSON.stringify(data, null, 2)}`;
+                dataDiv.className = 'debug-content success';
+            } catch (error) {
+                dataDiv.innerHTML = `❌ Error cargando tareas: ${error.message}`;
+                dataDiv.className = 'debug-content error';
+            }
+        }
+
+        async function loadUsers() {
+            const dataDiv = document.getElementById('users-data');
+            dataDiv.innerHTML = 'Cargando usuarios...';
+            
+            try {
+                const response = await fetch('/api/v1/users/?workspace_id=9014943317');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                debugData.users = data;
+                
+                dataDiv.innerHTML = `✅ Usuarios cargados: ${Array.isArray(data) ? data.length : 'No es array'}\n\nDatos:\n${JSON.stringify(data, null, 2)}`;
+                dataDiv.className = 'debug-content success';
+            } catch (error) {
+                dataDiv.innerHTML = `❌ Error cargando usuarios: ${error.message}`;
+                dataDiv.className = 'debug-content error';
+            }
+        }
+
+        async function loadSpaces() {
+            const dataDiv = document.getElementById('spaces-data');
+            dataDiv.innerHTML = 'Cargando espacios...';
+            
+            try {
+                const response = await fetch('/api/v1/workspaces/9014943317/spaces');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                debugData.spaces = data;
+                
+                dataDiv.innerHTML = `✅ Espacios cargados: ${Array.isArray(data) ? data.length : 'No es array'}\n\nDatos:\n${JSON.stringify(data, null, 2)}`;
+                dataDiv.className = 'debug-content success';
+            } catch (error) {
+                dataDiv.innerHTML = `❌ Error cargando espacios: ${error.message}`;
+                dataDiv.className = 'debug-content error';
+            }
+        }
+
+        function renderDebugTable() {
+            const renderDiv = document.getElementById('table-render');
+            
+            if (!debugData.tasks || !debugData.users || !debugData.spaces) {
+                renderDiv.innerHTML = '⚠️ Primero debes cargar todos los datos';
+                renderDiv.className = 'debug-content warning';
+                return;
+            }
+            
+            try {
+                // Procesar datos como en la tabla original
+                const tasks = Array.isArray(debugData.tasks) ? debugData.tasks : (debugData.tasks.tasks || []);
+                const users = Array.isArray(debugData.users) ? debugData.users : (debugData.users.users || []);
+                const spaces = Array.isArray(debugData.spaces) ? debugData.spaces : (debugData.spaces.spaces || []);
+                
+                // Crear mapeo de usuarios
+                const userMap = {};
+                users.forEach(user => {
+                    const userId = user.id || user.clickup_id;
+                    if (userId) {
+                        userMap[userId] = {
+                            id: userId,
+                            name: user.username || user.name || 'Usuario',
+                            email: user.email || 'N/A'
+                        };
+                    }
+                });
+                
+                // Agregar usuarios adicionales
+                const additionalUsers = {
+                    '88425547': { id: '88425547', name: 'Usuario Sistema', email: 'sistema@clickup.com' },
+                    'system': { id: 'system', name: 'Sistema', email: 'sistema@clickup.com' }
+                };
+                Object.assign(userMap, additionalUsers);
+                
+                // Procesar tareas
+                const processedTasks = tasks.map(task => {
+                    const user = userMap[task.assignee_id] || { name: 'Sin asignar', email: 'N/A' };
+                    return {
+                        ...task,
+                        user_name: user.name,
+                        user_email: user.email
+                    };
+                });
+                
+                renderDiv.innerHTML = `✅ Tabla renderizada correctamente\n\n` +
+                    `📊 Resumen:\n` +
+                    `- Tareas originales: ${tasks.length}\n` +
+                    `- Tareas procesadas: ${processedTasks.length}\n` +
+                    `- Usuarios mapeados: ${Object.keys(userMap).length}\n` +
+                    `- Espacios: ${spaces.length}\n\n` +
+                    `🔍 Primeras 3 tareas procesadas:\n${JSON.stringify(processedTasks.slice(0, 3), null, 2)}`;
+                renderDiv.className = 'debug-content success';
+                
+            } catch (error) {
+                renderDiv.innerHTML = `❌ Error renderizando tabla: ${error.message}\n\nStack: ${error.stack}`;
+                renderDiv.className = 'debug-content error';
+            }
+        }
+
+        // Verificar servidor al cargar la página
+        window.addEventListener('load', checkServer);
+    </script>
+</body>
+</html>

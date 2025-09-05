@@ -109,7 +109,7 @@ async def diagnose_whatsapp_complete():
         # 6. VERIFICAR SERVICIO ROBUSTO
         print(f"\n🛡️ 6. VERIFICANDO SERVICIO ROBUSTO:")
         try:
-            from core.robust_whatsapp_service import get_robust_whatsapp_service
+            from integrations.whatsapp.service import get_robust_whatsapp_service
             
             whatsapp_service = await get_robust_whatsapp_service()
             print(f"   📱 Servicio habilitado: {whatsapp_service.enabled}")

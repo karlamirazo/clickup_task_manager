@@ -1,6 +1,0 @@
----
-alwaysApply: true
----
-    trigger: manual_or_error_event
-    action: "Usar el nodo log_error_to_postgres_and_summary en LangGraph"---
-

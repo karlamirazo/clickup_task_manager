@@ -10,7 +10,7 @@ import os
 # Añadir el directorio actual al path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from core.whatsapp_client import WhatsAppNotificationService
+from integrations.whatsapp.client import WhatsAppNotificationService
 
 async def test_whatsapp_real():
     """Probar notificación WhatsApp real"""

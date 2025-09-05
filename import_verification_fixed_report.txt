@@ -1,0 +1,29 @@
+================================================================================
+📊 REPORTE DE VERIFICACIÓN DE IMPORTS (CORREGIDO)
+================================================================================
+📁 Total de archivos Python: 190
+📦 Total de imports: 1508
+✅ Imports exitosos: 373
+❌ Imports fallidos: 5
+
+❌ ERRORES DE IMPORT:
+----------------------------------------
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\railway_monitor.py
+📦 Módulo: core.railway_log_monitor.RailwayLogMonitor (from)
+💥 Error: No module named 'psutil'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\webhooks.py
+📦 Módulo: api.routes.tasks._priority_to_int (from)
+💥 Error: Module 'api.routes.tasks' has no attribute '_priority_to_int'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\webhooks.py
+📦 Módulo: api.routes.tasks._priority_to_int (from)
+💥 Error: Module 'api.routes.tasks' has no attribute '_priority_to_int'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\advanced_sync.py
+📦 Módulo: api.routes.tasks._priority_to_int (from)
+💥 Error: Module 'api.routes.tasks' has no attribute '_priority_to_int'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\start_railway_monitoring.py
+📦 Módulo: core.railway_log_monitor.RailwayLogMonitor (from)
+💥 Error: No module named 'psutil'

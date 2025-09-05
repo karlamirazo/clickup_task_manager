@@ -12,7 +12,7 @@ from datetime import datetime
 # Agregar el directorio raiz al path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from core.clickup_client import ClickUpClient
+from integrations.clickup.client import ClickUpClient
 from core.database import get_db
 from models.task import Task
 from sqlalchemy.orm import Session

@@ -8,7 +8,7 @@ import asyncio
 async def limpiar_solo_2_tareas():
     """Limpiar base de datos para que solo tenga las 2 tareas abiertas"""
     try:
-        from core.clickup_client import ClickUpClient
+        from integrations.clickup.client import ClickUpClient
         from core.database import get_db
         from models.task import Task
         

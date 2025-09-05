@@ -16,8 +16,8 @@ from sqlalchemy.orm import Session
 from core.config import settings
 from core.database import get_db
 from models.task import Task
-from utils.advanced_notifications import notification_service
-from utils.notifications import extract_contacts_from_custom_fields
+from notifications.advanced_manager import notification_service
+from notifications.manager import extract_contacts_from_custom_fields
 
 # Configurar logging
 webhook_logger = logging.getLogger("webhooks")

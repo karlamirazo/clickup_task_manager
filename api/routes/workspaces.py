@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 
 from core.database import get_db
-from core.clickup_client import ClickUpClient
+from integrations.clickup.client import ClickUpClient
 from models.workspace import Workspace
 from api.schemas.workspace import WorkspaceResponse, WorkspaceList
 

@@ -55,7 +55,7 @@ async def test_whatsapp_notification():
         # 2. Probar el servicio robusto de WhatsApp
         print(f"\n2️⃣ PROBANDO SERVICIO ROBUSTO DE WHATSAPP...")
         
-        from core.robust_whatsapp_service import get_robust_whatsapp_service
+        from integrations.whatsapp.service import get_robust_whatsapp_service
         
         whatsapp_service = await get_robust_whatsapp_service()
         

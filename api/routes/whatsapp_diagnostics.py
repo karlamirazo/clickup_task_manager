@@ -9,8 +9,8 @@ from typing import Dict, Any, Optional
 from pydantic import BaseModel, Field
 import logging
 
-from core.robust_whatsapp_service import get_robust_whatsapp_service, RobustWhatsAppService
-from core.evolution_api_config import get_evolution_config
+from integrations.whatsapp.service import get_robust_whatsapp_service, RobustWhatsAppService
+from integrations.evolution_api.config import get_evolution_config
 from core.config import settings
 
 # Configurar logging
@@ -114,7 +114,7 @@ async def test_whatsapp_message(
         if test_request.use_fallback:
             # Usar simulador directamente
             logger.info("🔄 Usando simulador directamente para prueba")
-            from core.whatsapp_simulator import WhatsAppSimulator
+            from integrations.whatsapp.simulator import WhatsAppSimulator
             
             simulator = WhatsAppSimulator()
             result = await simulator.send_message(
@@ -314,7 +314,7 @@ async def force_whatsapp_fallback(
         logger.info(f"🔄 Forzando fallback al simulador para {test_request.phone_number}")
         
         # Usar simulador directamente
-        from core.whatsapp_simulator import WhatsAppSimulator
+        from integrations.whatsapp.simulator import WhatsAppSimulator
         
         simulator = WhatsAppSimulator()
         result = await simulator.send_message(

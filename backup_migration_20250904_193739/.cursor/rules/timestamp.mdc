@@ -1,0 +1,7 @@
+---
+description:"Formato obligatorio de timestamp y metadatos al inicio de cada tarea"
+globs:"**/*"  # Aplica a todos los archivos y comandos
+alwaysApply: true
+---
+*MANDATORY: Al comienzo de **cada tarea o paso**, se **DEBE** declarar claramente un timestamp actualizado (YYYYMMDD HH:MM, PowerShell: `Get-Date`) en UTC -6, junto con el rol actual (Director, Documentation, Coding/Development, Production, etc agent), y el *nombre del modelo, tamaño del modelo, tipo de modelo y su revisión (fecha de actualización). Los estatutos de cada rol deben estar en `knowledge/agents/charters/`, búscalos si no están ya en contexto. Este requisito es **no negociable** y debe cumplirse **sin excepción**.
+

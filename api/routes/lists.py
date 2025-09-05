@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from core.database import get_db
-from core.clickup_client import ClickUpClient
+from integrations.clickup.client import ClickUpClient
 
 router = APIRouter()
 clickup_client = ClickUpClient()

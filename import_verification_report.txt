@@ -1,0 +1,1505 @@
+================================================================================
+📊 REPORTE DE VERIFICACIÓN DE IMPORTS
+================================================================================
+📁 Total de archivos Python: 189
+📦 Total de imports: 1496
+✅ Imports exitosos: 39
+❌ Imports fallidos: 339
+🔧 sys.path.append() encontrados: 53
+
+❌ ERRORES DE IMPORT:
+----------------------------------------
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\check_correct_lists.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\check_correct_lists.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\check_local_tasks.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\check_local_tasks.py
+📦 Módulo: models.task.Task
+💥 Error: No module named 'models.task.Task'; 'models.task' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\check_post_deploy.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\check_task_34.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\check_task_34.py
+📦 Módulo: models.task.Task
+💥 Error: No module named 'models.task.Task'; 'models.task' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\crear_tarea_con_telefono.py
+📦 Módulo: core.phone_extractor.extract_whatsapp_numbers_from_task
+💥 Error: No module named 'core.phone_extractor.extract_whatsapp_numbers_from_task'; 'core.phone_extractor' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\crear_tarea_con_telefono.py
+📦 Módulo: core.phone_extractor.get_primary_whatsapp_number
+💥 Error: No module named 'core.phone_extractor.get_primary_whatsapp_number'; 'core.phone_extractor' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\diagnose_whatsapp_complete.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\diagnose_whatsapp_complete.py
+📦 Módulo: core.phone_extractor.extract_whatsapp_numbers_from_task
+💥 Error: No module named 'core.phone_extractor.extract_whatsapp_numbers_from_task'; 'core.phone_extractor' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\diagnose_whatsapp_notifications.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\limpiar_solo_2_tareas.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\limpiar_solo_2_tareas.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\limpiar_solo_2_tareas.py
+📦 Módulo: models.task.Task
+💥 Error: No module named 'models.task.Task'; 'models.task' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: fastapi.FastAPI
+💥 Error: No module named 'fastapi.FastAPI'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: fastapi.Request
+💥 Error: No module named 'fastapi.Request'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: fastapi.HTTPException
+💥 Error: No module named 'fastapi.HTTPException'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: fastapi.middleware.cors.CORSMiddleware
+💥 Error: No module named 'fastapi.middleware.cors.CORSMiddleware'; 'fastapi.middleware.cors' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: fastapi.staticfiles.StaticFiles
+💥 Error: No module named 'fastapi.staticfiles.StaticFiles'; 'fastapi.staticfiles' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: fastapi.responses.HTMLResponse
+💥 Error: No module named 'fastapi.responses.HTMLResponse'; 'fastapi.responses' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: fastapi.responses.FileResponse
+💥 Error: No module named 'fastapi.responses.FileResponse'; 'fastapi.responses' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: core.database.init_db
+💥 Error: No module named 'core.database.init_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: core.database.engine
+💥 Error: No module named 'core.database.engine'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: core.database.engine
+💥 Error: No module named 'core.database.engine'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: fastapi.responses.JSONResponse
+💥 Error: No module named 'fastapi.responses.JSONResponse'; 'fastapi.responses' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: core.search_engine.search_engine
+💥 Error: No module named 'core.search_engine.search_engine'; 'core.search_engine' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: core.database.init_db
+💥 Error: No module named 'core.database.init_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: core.database.engine
+💥 Error: No module named 'core.database.engine'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: core.database.engine
+💥 Error: No module named 'core.database.engine'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: core.database.Base
+💥 Error: No module named 'core.database.Base'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: core.database.SessionLocal
+💥 Error: No module named 'core.database.SessionLocal'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: models.task.Task
+💥 Error: No module named 'models.task.Task'; 'models.task' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: core.database.engine
+💥 Error: No module named 'core.database.engine'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: models.Task
+💥 Error: No module named 'models.Task'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: models.Workspace
+💥 Error: No module named 'models.Workspace'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: models.User
+💥 Error: No module named 'models.User'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: models.Automation
+💥 Error: No module named 'models.Automation'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: models.Report
+💥 Error: No module named 'models.Report'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: models.Integration
+💥 Error: No module named 'models.Integration'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: models.NotificationLog
+💥 Error: No module named 'models.NotificationLog'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: langgraph_tools.simple_error_logging.log_error_with_graph
+💥 Error: No module named 'langgraph_tools.simple_error_logging.log_error_with_graph'; 'langgraph_tools.simple_error_logging' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: langgraph_tools.simple_error_logging.log_error_with_graph
+💥 Error: No module named 'langgraph_tools.simple_error_logging.log_error_with_graph'; 'langgraph_tools.simple_error_logging' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py
+📦 Módulo: langgraph_tools.simple_error_logging.log_error_with_graph
+💥 Error: No module named 'langgraph_tools.simple_error_logging.log_error_with_graph'; 'langgraph_tools.simple_error_logging' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\setup_evolution_api.py
+📦 Módulo: core.evolution_api_config.get_evolution_config
+💥 Error: No module named 'core.evolution_api_config.get_evolution_config'; 'core.evolution_api_config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\setup_evolution_api.py
+📦 Módulo: core.evolution_api_config.is_production_ready
+💥 Error: No module named 'core.evolution_api_config.is_production_ready'; 'core.evolution_api_config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\setup_evolution_api.py
+📦 Módulo: core.production_whatsapp_service.get_production_service
+💥 Error: No module named 'core.production_whatsapp_service.get_production_service'; 'core.production_whatsapp_service' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\setup_evolution_api.py
+📦 Módulo: core.evolution_webhook_manager.get_webhook_manager
+💥 Error: No module named 'core.evolution_webhook_manager.get_webhook_manager'; 'core.evolution_webhook_manager' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\setup_evolution_api.py
+📦 Módulo: core.automated_notification_manager.get_automated_manager
+💥 Error: No module named 'core.automated_notification_manager.get_automated_manager'; 'core.automated_notification_manager' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\setup_evolution_api.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\setup_evolution_api.py
+📦 Módulo: core.production_whatsapp_service.ProductionNotification
+💥 Error: No module named 'core.production_whatsapp_service.ProductionNotification'; 'core.production_whatsapp_service' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\setup_evolution_api.py
+📦 Módulo: core.evolution_webhook_manager.webhook_manager
+💥 Error: No module named 'core.evolution_webhook_manager.webhook_manager'; 'core.evolution_webhook_manager' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\setup_evolution_api.py
+📦 Módulo: core.automated_notification_manager.automated_manager
+💥 Error: No module named 'core.automated_notification_manager.automated_manager'; 'core.automated_notification_manager' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\sync_local_with_railway.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\sync_local_with_railway.py
+📦 Módulo: models.task.Task
+💥 Error: No module named 'models.task.Task'; 'models.task' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\test_update_sync.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\test_update_sync.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\test_whatsapp_notification.py
+📦 Módulo: core.phone_extractor.extract_whatsapp_numbers_from_task_with_custom_fields
+💥 Error: No module named 'core.phone_extractor.extract_whatsapp_numbers_from_task_with_custom_fields'; 'core.phone_extractor' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\test_whatsapp_simple.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\ver_tareas_reales.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\auth.py
+📦 Módulo: fastapi.APIRouter
+💥 Error: No module named 'fastapi.APIRouter'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\auth.py
+📦 Módulo: fastapi.Depends
+💥 Error: No module named 'fastapi.Depends'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\auth.py
+📦 Módulo: fastapi.HTTPException
+💥 Error: No module named 'fastapi.HTTPException'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\auth.py
+📦 Módulo: fastapi.status
+💥 Error: No module named 'fastapi.status'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\auth.py
+📦 Módulo: fastapi.BackgroundTasks
+💥 Error: No module named 'fastapi.BackgroundTasks'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\auth.py
+📦 Módulo: fastapi.security.OAuth2PasswordRequestForm
+💥 Error: No module named 'fastapi.security.OAuth2PasswordRequestForm'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\auth.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\auth.py
+📦 Módulo: core.auth.AuthManager
+💥 Error: No module named 'core.auth.AuthManager'; 'core.auth' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\auth.py
+📦 Módulo: core.auth.RoleManager
+💥 Error: No module named 'core.auth.RoleManager'; 'core.auth' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\auth.py
+📦 Módulo: core.auth.require_auth
+💥 Error: No module named 'core.auth.require_auth'; 'core.auth' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\auth.py
+📦 Módulo: core.auth.require_permission
+💥 Error: No module named 'core.auth.require_permission'; 'core.auth' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\auth.py
+📦 Módulo: core.auth.optional_auth
+💥 Error: No module named 'core.auth.optional_auth'; 'core.auth' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\auth.py
+📦 Módulo: models.user.User
+💥 Error: No module named 'models.user.User'; 'models.user' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\automation.py
+📦 Módulo: fastapi.APIRouter
+💥 Error: No module named 'fastapi.APIRouter'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\automation.py
+📦 Módulo: fastapi.Depends
+💥 Error: No module named 'fastapi.Depends'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\automation.py
+📦 Módulo: fastapi.HTTPException
+💥 Error: No module named 'fastapi.HTTPException'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\automation.py
+📦 Módulo: fastapi.Query
+💥 Error: No module named 'fastapi.Query'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\automation.py
+📦 Módulo: fastapi.status
+💥 Error: No module named 'fastapi.status'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\automation.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\automation.py
+📦 Módulo: models.automation.Automation
+💥 Error: No module named 'models.automation.Automation'; 'models.automation' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\automation.py
+📦 Módulo: api.schemas.automation.AutomationCreate
+💥 Error: No module named 'api.schemas.automation.AutomationCreate'; 'api.schemas.automation' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\automation.py
+📦 Módulo: api.schemas.automation.AutomationUpdate
+💥 Error: No module named 'api.schemas.automation.AutomationUpdate'; 'api.schemas.automation' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\automation.py
+📦 Módulo: api.schemas.automation.AutomationResponse
+💥 Error: No module named 'api.schemas.automation.AutomationResponse'; 'api.schemas.automation' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\automation.py
+📦 Módulo: api.schemas.automation.AutomationList
+💥 Error: No module named 'api.schemas.automation.AutomationList'; 'api.schemas.automation' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\dashboard.py
+📦 Módulo: fastapi.APIRouter
+💥 Error: No module named 'fastapi.APIRouter'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\dashboard.py
+📦 Módulo: fastapi.Depends
+💥 Error: No module named 'fastapi.Depends'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\dashboard.py
+📦 Módulo: fastapi.Query
+💥 Error: No module named 'fastapi.Query'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\dashboard.py
+📦 Módulo: fastapi.status
+💥 Error: No module named 'fastapi.status'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\dashboard.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\dashboard.py
+📦 Módulo: models.notification_log.NotificationLog
+💥 Error: No module named 'models.notification_log.NotificationLog'; 'models.notification_log' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\dashboard.py
+📦 Módulo: models.task.Task
+💥 Error: No module named 'models.task.Task'; 'models.task' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\dashboard.py
+📦 Módulo: models.user.User
+💥 Error: No module named 'models.user.User'; 'models.user' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\dashboard.py
+📦 Módulo: utils.advanced_notifications.notification_service
+💥 Error: No module named 'utils.advanced_notifications.notification_service'; 'utils.advanced_notifications' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\dashboard.py
+📦 Módulo: core.advanced_sync.sync_service
+💥 Error: No module named 'core.advanced_sync.sync_service'; 'core.advanced_sync' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\dashboard.py
+📦 Módulo: core.database.init_db
+💥 Error: No module named 'core.database.init_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\integrations.py
+📦 Módulo: fastapi.APIRouter
+💥 Error: No module named 'fastapi.APIRouter'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\integrations.py
+📦 Módulo: fastapi.Depends
+💥 Error: No module named 'fastapi.Depends'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\integrations.py
+📦 Módulo: fastapi.HTTPException
+💥 Error: No module named 'fastapi.HTTPException'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\integrations.py
+📦 Módulo: fastapi.Query
+💥 Error: No module named 'fastapi.Query'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\integrations.py
+📦 Módulo: fastapi.status
+💥 Error: No module named 'fastapi.status'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\integrations.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\integrations.py
+📦 Módulo: models.integration.Integration
+💥 Error: No module named 'models.integration.Integration'; 'models.integration' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\integrations.py
+📦 Módulo: api.schemas.integration.IntegrationCreate
+💥 Error: No module named 'api.schemas.integration.IntegrationCreate'; 'api.schemas.integration' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\integrations.py
+📦 Módulo: api.schemas.integration.IntegrationUpdate
+💥 Error: No module named 'api.schemas.integration.IntegrationUpdate'; 'api.schemas.integration' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\integrations.py
+📦 Módulo: api.schemas.integration.IntegrationResponse
+💥 Error: No module named 'api.schemas.integration.IntegrationResponse'; 'api.schemas.integration' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\integrations.py
+📦 Módulo: api.schemas.integration.IntegrationList
+💥 Error: No module named 'api.schemas.integration.IntegrationList'; 'api.schemas.integration' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\integrations.py
+📦 Módulo: api.schemas.integration.IntegrationTest
+💥 Error: No module named 'api.schemas.integration.IntegrationTest'; 'api.schemas.integration' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\lists.py
+📦 Módulo: fastapi.APIRouter
+💥 Error: No module named 'fastapi.APIRouter'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\lists.py
+📦 Módulo: fastapi.Depends
+💥 Error: No module named 'fastapi.Depends'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\lists.py
+📦 Módulo: fastapi.HTTPException
+💥 Error: No module named 'fastapi.HTTPException'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\lists.py
+📦 Módulo: fastapi.Query
+💥 Error: No module named 'fastapi.Query'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\lists.py
+📦 Módulo: fastapi.status
+💥 Error: No module named 'fastapi.status'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\lists.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\lists.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\railway_monitor.py
+📦 Módulo: fastapi.APIRouter
+💥 Error: No module named 'fastapi.APIRouter'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\railway_monitor.py
+📦 Módulo: fastapi.HTTPException
+💥 Error: No module named 'fastapi.HTTPException'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\railway_monitor.py
+📦 Módulo: fastapi.BackgroundTasks
+💥 Error: No module named 'fastapi.BackgroundTasks'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\railway_monitor.py
+📦 Módulo: fastapi.Depends
+💥 Error: No module named 'fastapi.Depends'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\railway_monitor.py
+📦 Módulo: fastapi.Query
+💥 Error: No module named 'fastapi.Query'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\railway_monitor.py
+📦 Módulo: fastapi.responses.JSONResponse
+💥 Error: No module named 'fastapi.responses.JSONResponse'; 'fastapi.responses' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\railway_monitor.py
+📦 Módulo: fastapi.responses.FileResponse
+💥 Error: No module named 'fastapi.responses.FileResponse'; 'fastapi.responses' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\railway_monitor.py
+📦 Módulo: core.railway_log_monitor.RailwayLogMonitor
+💥 Error: No module named 'psutil'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\railway_monitor.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\reports.py
+📦 Módulo: fastapi.APIRouter
+💥 Error: No module named 'fastapi.APIRouter'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\reports.py
+📦 Módulo: fastapi.Depends
+💥 Error: No module named 'fastapi.Depends'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\reports.py
+📦 Módulo: fastapi.HTTPException
+💥 Error: No module named 'fastapi.HTTPException'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\reports.py
+📦 Módulo: fastapi.Query
+💥 Error: No module named 'fastapi.Query'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\reports.py
+📦 Módulo: fastapi.status
+💥 Error: No module named 'fastapi.status'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\reports.py
+📦 Módulo: fastapi.Response
+💥 Error: No module named 'fastapi.Response'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\reports.py
+📦 Módulo: fastapi.responses.FileResponse
+💥 Error: No module named 'fastapi.responses.FileResponse'; 'fastapi.responses' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\reports.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\reports.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\reports.py
+📦 Módulo: models.report.Report
+💥 Error: No module named 'models.report.Report'; 'models.report' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\reports.py
+📦 Módulo: models.task.Task
+💥 Error: No module named 'models.task.Task'; 'models.task' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\reports.py
+📦 Módulo: models.user.User
+💥 Error: No module named 'models.user.User'; 'models.user' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\reports.py
+📦 Módulo: api.schemas.report.ReportCreate
+💥 Error: No module named 'api.schemas.report.ReportCreate'; 'api.schemas.report' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\reports.py
+📦 Módulo: api.schemas.report.ReportResponse
+💥 Error: No module named 'api.schemas.report.ReportResponse'; 'api.schemas.report' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\reports.py
+📦 Módulo: api.schemas.report.ReportList
+💥 Error: No module named 'api.schemas.report.ReportList'; 'api.schemas.report' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\reports.py
+📦 Módulo: api.schemas.report.ReportFilter
+💥 Error: No module named 'api.schemas.report.ReportFilter'; 'api.schemas.report' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\search.py
+📦 Módulo: fastapi.APIRouter
+💥 Error: No module named 'fastapi.APIRouter'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\search.py
+📦 Módulo: fastapi.Depends
+💥 Error: No module named 'fastapi.Depends'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\search.py
+📦 Módulo: fastapi.HTTPException
+💥 Error: No module named 'fastapi.HTTPException'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\search.py
+📦 Módulo: fastapi.Query
+💥 Error: No module named 'fastapi.Query'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\search.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\search.py
+📦 Módulo: langgraph_tools.rag_search_workflow.run_rag_search_workflow
+💥 Error: No module named 'langgraph_tools.rag_search_workflow.run_rag_search_workflow'; 'langgraph_tools.rag_search_workflow' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\search.py
+📦 Módulo: langgraph_tools.rag_search_workflow.rebuild_search_index
+💥 Error: No module named 'langgraph_tools.rag_search_workflow.rebuild_search_index'; 'langgraph_tools.rag_search_workflow' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\search.py
+📦 Módulo: langgraph_tools.rag_search_workflow.get_search_stats
+💥 Error: No module named 'langgraph_tools.rag_search_workflow.get_search_stats'; 'langgraph_tools.rag_search_workflow' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\spaces.py
+📦 Módulo: fastapi.APIRouter
+💥 Error: No module named 'fastapi.APIRouter'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\spaces.py
+📦 Módulo: fastapi.Depends
+💥 Error: No module named 'fastapi.Depends'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\spaces.py
+📦 Módulo: fastapi.HTTPException
+💥 Error: No module named 'fastapi.HTTPException'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\spaces.py
+📦 Módulo: fastapi.status
+💥 Error: No module named 'fastapi.status'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\spaces.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\spaces.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: fastapi.APIRouter
+💥 Error: No module named 'fastapi.APIRouter'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: fastapi.Depends
+💥 Error: No module named 'fastapi.Depends'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: fastapi.HTTPException
+💥 Error: No module named 'fastapi.HTTPException'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: fastapi.Query
+💥 Error: No module named 'fastapi.Query'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: fastapi.status
+💥 Error: No module named 'fastapi.status'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: core.clickup_client.get_clickup_client
+💥 Error: No module named 'core.clickup_client.get_clickup_client'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: models.task.Task
+💥 Error: No module named 'models.task.Task'; 'models.task' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: langgraph_tools.sync_workflow.run_sync_workflow
+💥 Error: No module named 'langgraph_tools.sync_workflow.run_sync_workflow'; 'langgraph_tools.sync_workflow' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: api.schemas.task.TaskUpdate
+💥 Error: No module named 'api.schemas.task.TaskUpdate'; 'api.schemas.task' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: api.schemas.task.TaskResponse
+💥 Error: No module named 'api.schemas.task.TaskResponse'; 'api.schemas.task' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: langgraph_tools.simple_error_logging.log_error_with_graph
+💥 Error: No module named 'langgraph_tools.simple_error_logging.log_error_with_graph'; 'langgraph_tools.simple_error_logging' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: api.schemas.task.TaskResponse
+💥 Error: No module named 'api.schemas.task.TaskResponse'; 'api.schemas.task' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: core.phone_extractor.extract_whatsapp_numbers_from_task_with_custom_fields
+💥 Error: No module named 'core.phone_extractor.extract_whatsapp_numbers_from_task_with_custom_fields'; 'core.phone_extractor' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: core.phone_extractor.extract_whatsapp_numbers_from_task_with_custom_fields
+💥 Error: No module named 'core.phone_extractor.extract_whatsapp_numbers_from_task_with_custom_fields'; 'core.phone_extractor' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: core.simple_sync.simple_sync_service
+💥 Error: No module named 'core.simple_sync.simple_sync_service'; 'core.simple_sync' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: core.simple_sync.simple_sync_service
+💥 Error: No module named 'core.simple_sync.simple_sync_service'; 'core.simple_sync' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\users.py
+📦 Módulo: fastapi.APIRouter
+💥 Error: No module named 'fastapi.APIRouter'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\users.py
+📦 Módulo: fastapi.Depends
+💥 Error: No module named 'fastapi.Depends'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\users.py
+📦 Módulo: fastapi.HTTPException
+💥 Error: No module named 'fastapi.HTTPException'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\users.py
+📦 Módulo: fastapi.Query
+💥 Error: No module named 'fastapi.Query'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\users.py
+📦 Módulo: fastapi.status
+💥 Error: No module named 'fastapi.status'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\users.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\users.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\users.py
+📦 Módulo: models.user.User
+💥 Error: No module named 'models.user.User'; 'models.user' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\users.py
+📦 Módulo: api.schemas.user.UserResponse
+💥 Error: No module named 'api.schemas.user.UserResponse'; 'api.schemas.user' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\users.py
+📦 Módulo: api.schemas.user.UserList
+💥 Error: No module named 'api.schemas.user.UserList'; 'api.schemas.user' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\webhooks.py
+📦 Módulo: fastapi.APIRouter
+💥 Error: No module named 'fastapi.APIRouter'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\webhooks.py
+📦 Módulo: fastapi.Request
+💥 Error: No module named 'fastapi.Request'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\webhooks.py
+📦 Módulo: fastapi.HTTPException
+💥 Error: No module named 'fastapi.HTTPException'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\webhooks.py
+📦 Módulo: fastapi.BackgroundTasks
+💥 Error: No module named 'fastapi.BackgroundTasks'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\webhooks.py
+📦 Módulo: fastapi.Depends
+💥 Error: No module named 'fastapi.Depends'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\webhooks.py
+📦 Módulo: fastapi.status
+💥 Error: No module named 'fastapi.status'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\webhooks.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\webhooks.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\webhooks.py
+📦 Módulo: models.task.Task
+💥 Error: No module named 'models.task.Task'; 'models.task' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\webhooks.py
+📦 Módulo: utils.advanced_notifications.notification_service
+💥 Error: No module named 'utils.advanced_notifications.notification_service'; 'utils.advanced_notifications' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\webhooks.py
+📦 Módulo: utils.notifications.extract_contacts_from_custom_fields
+💥 Error: No module named 'utils.notifications.extract_contacts_from_custom_fields'; 'utils.notifications' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\webhooks.py
+📦 Módulo: api.routes.tasks._priority_to_int
+💥 Error: No module named 'api.routes.tasks._priority_to_int'; 'api.routes.tasks' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\webhooks.py
+📦 Módulo: api.routes.tasks._priority_to_int
+💥 Error: No module named 'api.routes.tasks._priority_to_int'; 'api.routes.tasks' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\webhooks.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\webhooks.py
+📦 Módulo: models.user.User
+💥 Error: No module named 'models.user.User'; 'models.user' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\whatsapp.py
+📦 Módulo: fastapi.APIRouter
+💥 Error: No module named 'fastapi.APIRouter'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\whatsapp.py
+📦 Módulo: fastapi.Depends
+💥 Error: No module named 'fastapi.Depends'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\whatsapp.py
+📦 Módulo: fastapi.HTTPException
+💥 Error: No module named 'fastapi.HTTPException'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\whatsapp.py
+📦 Módulo: fastapi.BackgroundTasks
+💥 Error: No module named 'fastapi.BackgroundTasks'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\whatsapp.py
+📦 Módulo: fastapi.Request
+💥 Error: No module named 'fastapi.Request'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\whatsapp.py
+📦 Módulo: fastapi.responses.JSONResponse
+💥 Error: No module named 'fastapi.responses.JSONResponse'; 'fastapi.responses' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\whatsapp.py
+📦 Módulo: core.phone_extractor.extract_whatsapp_numbers_from_task
+💥 Error: No module named 'core.phone_extractor.extract_whatsapp_numbers_from_task'; 'core.phone_extractor' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\whatsapp.py
+📦 Módulo: core.phone_extractor.get_primary_whatsapp_number
+💥 Error: No module named 'core.phone_extractor.get_primary_whatsapp_number'; 'core.phone_extractor' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\whatsapp.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\whatsapp_diagnostics.py
+📦 Módulo: fastapi.APIRouter
+💥 Error: No module named 'fastapi.APIRouter'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\whatsapp_diagnostics.py
+📦 Módulo: fastapi.Depends
+💥 Error: No module named 'fastapi.Depends'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\whatsapp_diagnostics.py
+📦 Módulo: fastapi.HTTPException
+💥 Error: No module named 'fastapi.HTTPException'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\whatsapp_diagnostics.py
+📦 Módulo: fastapi.BackgroundTasks
+💥 Error: No module named 'fastapi.BackgroundTasks'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\whatsapp_diagnostics.py
+📦 Módulo: fastapi.responses.JSONResponse
+💥 Error: No module named 'fastapi.responses.JSONResponse'; 'fastapi.responses' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\whatsapp_diagnostics.py
+📦 Módulo: core.evolution_api_config.get_evolution_config
+💥 Error: No module named 'core.evolution_api_config.get_evolution_config'; 'core.evolution_api_config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\whatsapp_diagnostics.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\workspaces.py
+📦 Módulo: fastapi.APIRouter
+💥 Error: No module named 'fastapi.APIRouter'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\workspaces.py
+📦 Módulo: fastapi.Depends
+💥 Error: No module named 'fastapi.Depends'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\workspaces.py
+📦 Módulo: fastapi.HTTPException
+💥 Error: No module named 'fastapi.HTTPException'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\workspaces.py
+📦 Módulo: fastapi.Query
+💥 Error: No module named 'fastapi.Query'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\workspaces.py
+📦 Módulo: fastapi.status
+💥 Error: No module named 'fastapi.status'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\workspaces.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\workspaces.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\workspaces.py
+📦 Módulo: models.workspace.Workspace
+💥 Error: No module named 'models.workspace.Workspace'; 'models.workspace' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\workspaces.py
+📦 Módulo: api.schemas.workspace.WorkspaceResponse
+💥 Error: No module named 'api.schemas.workspace.WorkspaceResponse'; 'api.schemas.workspace' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\workspaces.py
+📦 Módulo: api.schemas.workspace.WorkspaceList
+💥 Error: No module named 'api.schemas.workspace.WorkspaceList'; 'api.schemas.workspace' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\advanced_sync.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\advanced_sync.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\advanced_sync.py
+📦 Módulo: models.task.Task
+💥 Error: No module named 'models.task.Task'; 'models.task' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\advanced_sync.py
+📦 Módulo: models.workspace.Workspace
+💥 Error: No module named 'models.workspace.Workspace'; 'models.workspace' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\advanced_sync.py
+📦 Módulo: api.routes.tasks._priority_to_int
+💥 Error: No module named 'api.routes.tasks._priority_to_int'; 'api.routes.tasks' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\auth.py
+📦 Módulo: fastapi.HTTPException
+💥 Error: No module named 'fastapi.HTTPException'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\auth.py
+📦 Módulo: fastapi.Depends
+💥 Error: No module named 'fastapi.Depends'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\auth.py
+📦 Módulo: fastapi.status
+💥 Error: No module named 'fastapi.status'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\auth.py
+📦 Módulo: fastapi.security.HTTPBearer
+💥 Error: No module named 'fastapi.security.HTTPBearer'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\auth.py
+📦 Módulo: fastapi.security.HTTPAuthorizationCredentials
+💥 Error: No module named 'fastapi.security.HTTPAuthorizationCredentials'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\auth.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\auth.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\auth.py
+📦 Módulo: models.user.User
+💥 Error: No module named 'models.user.User'; 'models.user' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\clickup_client.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\database.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\database.py
+📦 Módulo: models.Task
+💥 Error: No module named 'models.Task'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\database.py
+📦 Módulo: models.Workspace
+💥 Error: No module named 'models.Workspace'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\database.py
+📦 Módulo: models.User
+💥 Error: No module named 'models.User'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\database.py
+📦 Módulo: models.Automation
+💥 Error: No module named 'models.Automation'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\database.py
+📦 Módulo: models.Report
+💥 Error: No module named 'models.Report'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\database.py
+📦 Módulo: models.Integration
+💥 Error: No module named 'models.Integration'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\database.py
+📦 Módulo: models.NotificationLog
+💥 Error: No module named 'models.NotificationLog'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\railway_alerts.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\railway_alerts.py
+📦 Módulo: utils.notifications.send_email_async
+💥 Error: No module named 'utils.notifications.send_email_async'; 'utils.notifications' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\railway_alerts.py
+📦 Módulo: langgraph_tools.simple_error_logging.log_error_with_graph
+💥 Error: No module named 'langgraph_tools.simple_error_logging.log_error_with_graph'; 'langgraph_tools.simple_error_logging' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\railway_log_monitor.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\railway_log_monitor.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\railway_log_monitor.py
+📦 Módulo: utils.deployment_logger.log_error_sync
+💥 Error: No module named 'utils.deployment_logger.log_error_sync'; 'utils.deployment_logger' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\railway_log_monitor.py
+📦 Módulo: langgraph_tools.simple_error_logging.log_error_with_graph
+💥 Error: No module named 'langgraph_tools.simple_error_logging.log_error_with_graph'; 'langgraph_tools.simple_error_logging' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\simple_sync.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\simple_sync.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\simple_sync.py
+📦 Módulo: models.task.Task
+💥 Error: No module named 'models.task.Task'; 'models.task' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\simple_sync.py
+📦 Módulo: models.workspace.Workspace
+💥 Error: No module named 'models.workspace.Workspace'; 'models.workspace' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\langgraph_tools\advanced_error_workflow.py
+📦 Módulo: utils.deployment_logger.log_error_sync
+💥 Error: No module named 'utils.deployment_logger.log_error_sync'; 'utils.deployment_logger' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\langgraph_tools\error_logging_workflow.py
+📦 Módulo: utils.deployment_logger.log_error_sync
+💥 Error: No module named 'utils.deployment_logger.log_error_sync'; 'utils.deployment_logger' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\langgraph_tools\rag_search_workflow.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\langgraph_tools\rag_search_workflow.py
+📦 Módulo: models.task.Task
+💥 Error: No module named 'models.task.Task'; 'models.task' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\langgraph_tools\rag_search_workflow.py
+📦 Módulo: utils.deployment_logger.log_error_sync
+💥 Error: No module named 'utils.deployment_logger.log_error_sync'; 'utils.deployment_logger' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\langgraph_tools\simple_error_logging.py
+📦 Módulo: utils.deployment_logger.log_error_sync
+💥 Error: No module named 'utils.deployment_logger.log_error_sync'; 'utils.deployment_logger' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\langgraph_tools\sync_workflow.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\langgraph_tools\sync_workflow.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\langgraph_tools\sync_workflow.py
+📦 Módulo: models.task.Task
+💥 Error: No module named 'models.task.Task'; 'models.task' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\langgraph_tools\sync_workflow.py
+📦 Módulo: utils.deployment_logger.log_error_sync
+💥 Error: No module named 'utils.deployment_logger.log_error_sync'; 'utils.deployment_logger' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\models\automation.py
+📦 Módulo: core.database.Base
+💥 Error: No module named 'core.database.Base'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\models\integration.py
+📦 Módulo: core.database.Base
+💥 Error: No module named 'core.database.Base'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\models\notification_log.py
+📦 Módulo: core.database.Base
+💥 Error: No module named 'core.database.Base'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\models\report.py
+📦 Módulo: core.database.Base
+💥 Error: No module named 'core.database.Base'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\models\task.py
+📦 Módulo: core.database.Base
+💥 Error: No module named 'core.database.Base'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\models\user.py
+📦 Módulo: core.database.Base
+💥 Error: No module named 'core.database.Base'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\models\workspace.py
+📦 Módulo: core.database.Base
+💥 Error: No module named 'core.database.Base'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\check_evolution_status.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\clean_database_emergency.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\clean_database_emergency.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\clean_database_emergency.py
+📦 Módulo: models.task.Task
+💥 Error: No module named 'models.task.Task'; 'models.task' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\debug_auto_update.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\debug_custom_fields_interface.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\debug_custom_fields_interface.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\debug_list_response.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\diagnose_evolution_api.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\diagnose_evolution_api.py
+📦 Módulo: core.evolution_api_config.get_evolution_config
+💥 Error: No module named 'core.evolution_api_config.get_evolution_config'; 'core.evolution_api_config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\diagnose_evolution_api.py
+📦 Módulo: core.evolution_api_config.is_production_ready
+💥 Error: No module named 'core.evolution_api_config.is_production_ready'; 'core.evolution_api_config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\diagnose_railway_db.py
+📦 Módulo: core.database.engine
+💥 Error: No module named 'core.database.engine'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\diagnose_railway_db.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\diagnose_railway_db.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\emergency_sync.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\emergency_sync.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\emergency_sync.py
+📦 Módulo: models.task.Task
+💥 Error: No module named 'models.task.Task'; 'models.task' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\emergency_sync.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\emergency_sync.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\fix_reports_table.py
+📦 Módulo: core.database.engine
+💥 Error: No module named 'core.database.engine'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\fix_reports_table.py
+📦 Módulo: core.database.Base
+💥 Error: No module named 'core.database.Base'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\fix_reports_table.py
+📦 Módulo: models.report.Report
+💥 Error: No module named 'models.report.Report'; 'models.report' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\force_update_direct.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\get_clickup_custom_field_ids.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\get_clickup_custom_field_ids.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\get_clickup_statuses.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\init_db.py
+📦 Módulo: core.database.init_db
+💥 Error: No module named 'core.database.init_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\init_db.py
+📦 Módulo: core.database.engine
+💥 Error: No module named 'core.database.engine'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\log_clickup_error.py
+📦 Módulo: langgraph_tools.simple_error_logging.log_error_with_graph
+💥 Error: No module named 'langgraph_tools.simple_error_logging.log_error_with_graph'; 'langgraph_tools.simple_error_logging' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\refresh_custom_field_ids.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\refresh_custom_field_ids.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\setup_whatsapp_instance.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\start_railway_monitoring.py
+📦 Módulo: core.railway_log_monitor.RailwayLogMonitor
+💥 Error: No module named 'psutil'
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\start_railway_monitoring.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_clickup_langgraph.py
+📦 Módulo: langgraph_tools.clickup.ClickUpTools
+💥 Error: No module named 'langgraph_tools.clickup.ClickUpTools'; 'langgraph_tools.clickup' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_config_functions.py
+📦 Módulo: api.routes.tasks.get_custom_field_id
+💥 Error: No module named 'api.routes.tasks.get_custom_field_id'; 'api.routes.tasks' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_config_functions.py
+📦 Módulo: api.routes.tasks.has_custom_fields
+💥 Error: No module named 'api.routes.tasks.has_custom_fields'; 'api.routes.tasks' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_config_functions.py
+📦 Módulo: api.routes.tasks.CUSTOM_FIELD_IDS
+💥 Error: No module named 'api.routes.tasks.CUSTOM_FIELD_IDS'; 'api.routes.tasks' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_custom_field_update.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_different_statuses.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_langgraph_logging.py
+📦 Módulo: langgraph_tools.simple_error_logging.log_error_with_graph
+💥 Error: No module named 'langgraph_tools.simple_error_logging.log_error_with_graph'; 'langgraph_tools.simple_error_logging' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_langgraph_logging.py
+📦 Módulo: langgraph_tools.advanced_error_workflow.run_error_workflow
+💥 Error: No module named 'langgraph_tools.advanced_error_workflow.run_error_workflow'; 'langgraph_tools.advanced_error_workflow' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_langgraph_logging.py
+📦 Módulo: langgraph_tools.error_logging_workflow.log_error_with_workflow
+💥 Error: No module named 'langgraph_tools.error_logging_workflow.log_error_with_workflow'; 'langgraph_tools.error_logging_workflow' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_langgraph_logging.py
+📦 Módulo: utils.deployment_logger.log_error_sync
+💥 Error: No module named 'utils.deployment_logger.log_error_sync'; 'utils.deployment_logger' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_manual_update_direct.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_manual_update_direct.py
+📦 Módulo: api.routes.tasks.get_custom_field_id
+💥 Error: No module named 'api.routes.tasks.get_custom_field_id'; 'api.routes.tasks' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_manual_update_direct.py
+📦 Módulo: api.routes.tasks.has_custom_fields
+💥 Error: No module named 'api.routes.tasks.has_custom_fields'; 'api.routes.tasks' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_update_function_local.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_update_function_local.py
+📦 Módulo: api.routes.tasks.get_custom_field_id
+💥 Error: No module named 'api.routes.tasks.get_custom_field_id'; 'api.routes.tasks' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_update_function_local.py
+📦 Módulo: api.routes.tasks.has_custom_fields
+💥 Error: No module named 'api.routes.tasks.has_custom_fields'; 'api.routes.tasks' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_update_function_local.py
+📦 Módulo: api.routes.tasks.update_custom_fields_direct
+💥 Error: No module named 'api.routes.tasks.update_custom_fields_direct'; 'api.routes.tasks' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_update_task_method.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\verify_clickup_task.py
+📦 Módulo: core.clickup_client.ClickUpClient
+💥 Error: No module named 'core.clickup_client.ClickUpClient'; 'core.clickup_client' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\utils\advanced_notifications.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\utils\advanced_notifications.py
+📦 Módulo: utils.email_templates.get_email_template
+💥 Error: No module named 'utils.email_templates.get_email_template'; 'utils.email_templates' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\utils\advanced_notifications.py
+📦 Módulo: utils.email_templates.get_summary_email_template
+💥 Error: No module named 'utils.email_templates.get_summary_email_template'; 'utils.email_templates' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\utils\notifications.py
+📦 Módulo: core.config.settings
+💥 Error: No module named 'core.config.settings'; 'core.config' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\utils\notifications.py
+📦 Módulo: core.database.get_db
+💥 Error: No module named 'core.database.get_db'; 'core.database' is not a package
+
+📄 Archivo: C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\utils\notifications.py
+📦 Módulo: models.notification_log.NotificationLog
+💥 Error: No module named 'models.notification_log.NotificationLog'; 'models.notification_log' is not a package
+
+🔧 SYS.PATH.APPEND() ENCONTRADOS:
+----------------------------------------
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\check_correct_lists.py:
+   Línea 11: sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\check_local_tasks.py:
+   Línea 10: sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\check_post_deploy.py:
+   Línea 10: sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\check_task_34.py:
+   Línea 10: sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\diagnose_whatsapp_complete.py:
+   Línea 13: sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\diagnose_whatsapp_notifications.py:
+   Línea 12: sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\main.py:
+   Línea 510: sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+   Línea 539: sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+   Línea 616: sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\migration_plan_safe.py:
+   Línea 253: # Actualizar sys.path.append si es necesario
+   Línea 254: if "sys.path.append" in content:
+   Línea 257: "sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))",
+   Línea 258: "sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))"
+   Línea 261: "sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))",
+   Línea 262: "sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))"
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\setup_evolution_api.py:
+   Línea 15: sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\sync_local_with_railway.py:
+   Línea 12: sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\test_update_sync.py:
+   Línea 11: sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\test_whatsapp_real_final.py:
+   Línea 11: sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\test_whatsapp_simple.py:
+   Línea 11: sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\verify_imports_safe.py:
+   Línea 65: """Encuentra todas las llamadas a sys.path.append()"""
+   Línea 72: if 'sys.path.append' in line:
+   Línea 152: # Extraer sys.path.append
+   Línea 186: report.append(f"🔧 sys.path.append() encontrados: {analysis['sys_path_appends']}")
+   Línea 316: print(f"🔧 sys.path.append() encontrados: {analysis['sys_path_appends']}")
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\railway_monitor.py:
+   Línea 18: sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\api\routes\tasks.py:
+   Línea 26: sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\railway_alerts.py:
+   Línea 18: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\core\railway_log_monitor.py:
+   Línea 21: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\langgraph_tools\advanced_error_workflow.py:
+   Línea 13: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\langgraph_tools\error_logging_workflow.py:
+   Línea 14: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\langgraph_tools\rag_search_workflow.py:
+   Línea 16: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\langgraph_tools\simple_error_logging.py:
+   Línea 13: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\langgraph_tools\sync_workflow.py:
+   Línea 15: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\check_evolution_status.py:
+   Línea 14: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\debug_auto_update.py:
+   Línea 66: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\debug_list_response.py:
+   Línea 13: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\diagnose_evolution_api.py:
+   Línea 16: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\diagnose_railway_db.py:
+   Línea 160: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\emergency_sync.py:
+   Línea 13: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\force_update_direct.py:
+   Línea 12: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\get_clickup_custom_field_ids.py:
+   Línea 12: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\get_clickup_statuses.py:
+   Línea 12: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\log_clickup_error.py:
+   Línea 11: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\setup_whatsapp_instance.py:
+   Línea 13: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\start_railway_monitoring.py:
+   Línea 14: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_config_functions.py:
+   Línea 8: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_custom_field_update.py:
+   Línea 12: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_langgraph_logging.py:
+   Línea 12: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_manual_update_direct.py:
+   Línea 12: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_update_function_local.py:
+   Línea 12: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\test_update_task_method.py:
+   Línea 12: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+📄 C:\Users\karla\OneDrive\Documentos\ClickUp_Project_Manager\scripts\verify_clickup_task.py:
+   Línea 12: sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

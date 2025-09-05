@@ -15,8 +15,8 @@ from core.database import get_db
 from models.notification_log import NotificationLog
 from models.task import Task
 from models.user import User
-from utils.advanced_notifications import notification_service
-from core.advanced_sync import sync_service
+from notifications.advanced_manager import notification_service
+from integrations.clickup.sync import sync_service
 
 dashboard_logger = logging.getLogger("dashboard")
 

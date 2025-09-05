@@ -1,0 +1,1737 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>📊 Dashboard Principal - ClickUp Manager</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="mobile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/dashboard-config.js"></script>
+    <style>
+        .dashboard-container {
+            max-width: 95%;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            min-width: auto;
+        }
+        
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            position: relative;
+        }
+        
+        .header-content {
+            position: relative;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-menu-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .nav-buttons {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-btn.primary {
+            background: #6f42c1;
+            color: white;
+        }
+        
+        .nav-btn.secondary {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        /* Indicador de estado móvil */
+        .mobile-status-indicator {
+            display: none;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            color: white;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #28a745;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .status-text {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            color: #667eea;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+        }
+        
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #2c3e50;
+        }
+        
+        .chart-canvas {
+            max-height: 250px;
+        }
+        
+        .notifications-table {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            overflow: hidden;
+            border: 1px solid #e9ecef;
+        }
+        
+        .table-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .table-title {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+        
+        .controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .filters-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            font-size: 0.9rem;
+        }
+        
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+        }
+        
+        .refresh-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .sync-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .sync-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .sync-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .sync-btn:hover {
+            background: #218838;
+        }
+        
+        .sync-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .sync-status {
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .sync-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .sync-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .sync-status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .period-selector {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .period-btn {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .period-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .period-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .period-btn.active:hover {
+            background: #5a6fd8;
+        }
+        
+        /* Estilos para los botones de navegación */
+        .dashboard-header button {
+            transition: all 0.3s ease;
+        }
+        
+        .dashboard-header button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .dashboard-header button:first-child:hover {
+            background: #5a3d8f !important;
+        }
+        
+        .dashboard-header button:last-child:hover {
+            background: #138496 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="header-content">
+                <h1><i class="fas fa-tachometer-alt"></i> Dashboard Principal</h1>
+                <p>Visión general del sistema y estadísticas en tiempo real</p>
+                
+                <!-- Indicador de estado móvil -->
+                <div class="mobile-status-indicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Conectado</span>
+                </div>
+                
+                <!-- Botón de menú móvil -->
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menú móvil">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <!-- Navegación principal -->
+                <div class="nav-buttons">
+                    <button onclick="window.location.href='/users-tasks'" class="nav-btn primary">
+                        <i class="fas fa-tasks"></i> <span class="btn-text">Ver Lista de Tareas</span>
+                    </button>
+                    <button onclick="showCreateTaskModal()" class="nav-btn secondary">
+                        <i class="fas fa-plus"></i> <span class="btn-text">Crear Nueva Tarea</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Contadores de Tareas -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="stat-number" id="total-tasks">-</div>
+                <div class="stat-label">Tareas Totales</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-number" id="pending-tasks">-</div>
+                <div class="stat-label">Pendientes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-number" id="completed-tasks">-</div>
+                <div class="stat-label">Completadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-number" id="overdue-tasks">-</div>
+                <div class="stat-label">Vencidas</div>
+            </div>
+        </div>
+
+        <!-- Controles de Sincronización -->
+        <div class="sync-section">
+            <h3 style="text-align: center; margin-bottom: 20px; color: #2c3e50;">
+                <i class="fas fa-sync-alt"></i> Control de Sincronización
+            </h3>
+            <div class="sync-controls">
+                <button class="sync-btn" onclick="manualSync()" id="sync-btn">
+                    <i class="fas fa-sync-alt"></i> Sincronizar Ahora
+                </button>
+                <button class="sync-btn" onclick="showCreateTaskModal()" style="background: #17a2b8;">
+                    <i class="fas fa-plus"></i> Crear Tarea
+                </button>
+            </div>
+            <div id="sync-status" class="sync-status" style="display: none;"></div>
+        </div>
+
+        <!-- Selector de Período -->
+        <div class="period-selector">
+            <button class="period-btn active" data-period="1h">1 Hora</button>
+            <button class="period-btn" data-period="24h">24 Horas</button>
+            <button class="period-btn" data-period="7d">7 Días</button>
+            <button class="period-btn" data-period="30d">30 Días</button>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-title">Estado de Tareas</div>
+                <canvas id="tasks-status-chart" class="chart-canvas"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Prioridades</div>
+                <canvas id="tasks-priority-chart" class="chart-canvas"></canvas>
+            </div>
+            </div>
+            
+
+    </div>
+
+    <!-- Modal para crear tarea -->
+    <!-- Última actualización: Campo de usuario asignado implementado -->
+    <div id="create-task-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('create-task-modal')">&times;</span>
+            <h2><i class="fas fa-plus-circle"></i> Crear Nueva Tarea</h2>
+            
+            <form id="create-task-form">
+                <div class="form-group">
+                    <label for="task-name">Nombre de la Tarea *</label>
+                    <input type="text" id="task-name" name="name" required placeholder="Ingresa el nombre de la tarea">
+                </div>
+                
+                                <div class="form-group">
+                    <label for="task-description">
+                        Descripción
+                        <span id="description-preview-indicator" class="preview-indicator" style="display: none;">
+                            <i class="fas fa-eye"></i> Vista previa disponible
+                        </span>
+                    </label>
+                    <textarea id="task-description" name="description" rows="3" placeholder="Describe la tarea (opcional)"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="task-phone">
+                        📱 Número de Celular <span class="optional-badge">(Opcional)</span>
+                        <i class="fas fa-info-circle info-icon" onclick="showPhoneHelp()" title="Click para más información"></i>
+                    </label>
+                    <input type="tel" id="task-phone" name="phone" placeholder="+57 300 123 4567" pattern="[+]?[0-9\s\-\(\)]+" maxlength="20">
+                    <small class="form-help">
+                        Este número se incluirá en la descripción de la tarea para notificaciones por WhatsApp
+                        <span id="phone-char-count" class="char-count">0/20</span>
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="task-assignee">Usuario Asignado *</label>
+                    <select id="task-assignee" name="assignee_id" required>
+                        <option value="">Seleccionar usuario...</option>
+                    </select>
+                    <small class="form-help">Se enviará una notificación automáticamente al usuario asignado</small>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="task-status">Estado</label>
+                        <select id="task-status" name="status">
+                            <option value="to do">Pendiente</option>
+                            <option value="in progress">En Progreso</option>
+                            <option value="complete">Completada</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="task-priority">Prioridad</label>
+                        <select id="task-priority" name="priority">
+                            <option value="1">Urgente</option>
+                            <option value="2">Alta</option>
+                            <option value="3" selected>Normal</option>
+                            <option value="4">Baja</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="task-due-date">Fecha Límite</label>
+                    <input type="date" id="task-due-date" name="due_date">
+                </div>
+                
+                <div class="form-group">
+                    <label for="task-list">Lista de ClickUp</label>
+                    <select id="task-list" name="list_id" required>
+                        <option value="">Selecciona una lista</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="task-workspace">Workspace de ClickUp</label>
+                    <select id="task-workspace" name="workspace_id" required>
+                        <option value="">Selecciona un workspace</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Crear Tarea
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('create-task-modal')">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        /* Estilos para el modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+            position: relative;
+        }
+        
+        .form-group textarea[data-preview] {
+            border-color: #28a745;
+            background-color: #f8fff9;
+        }
+        
+        .form-group input[type="tel"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input[type="tel"]:focus {
+            border-color: #6f42c1;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+            background-color: #f8f9fa;
+        }
+        
+        .form-group input[type="tel"]:not(:placeholder-shown) {
+            border-color: #28a745;
+            background-color: #f8fff9;
+        }
+        
+        .char-count {
+            float: right;
+            color: #6c757d;
+            font-weight: 600;
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+        
+        .form-group input[type="tel"]::placeholder {
+            color: #6c757d;
+            opacity: 0.7;
+        }
+        
+        .optional-badge {
+            background: #17a2b8;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: normal;
+            margin-left: 8px;
+        }
+        
+        .info-icon {
+            color: #17a2b8;
+            margin-left: 8px;
+            cursor: help;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+        
+        .info-icon:hover {
+            color: #138496;
+        }
+        
+        .preview-indicator {
+            background: #28a745;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: normal;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .form-help {
+            display: block;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+    </style>
+
+    <script>
+        let charts = {};
+        let currentPeriod = '1h';
+
+        // Inicializar dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+            setupEventListeners();
+            adjustDashboardForDevice();
+            
+            // Ajustar dashboard cuando cambie el tamaño de la ventana
+            window.addEventListener('resize', adjustDashboardForDevice);
+            
+            // ELIMINADO: setInterval(loadDashboard, 30000);
+        });
+
+        // Forzar recarga cuando se regrese a la pestaña
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                console.log('🔄 Pestaña visible - Recargando dashboard...');
+                loadDashboard();
+            }
+        });
+
+        // Forzar recarga cuando se regrese a la ventana
+        window.addEventListener('focus', function() {
+            console.log('🔄 Ventana enfocada - Recargando dashboard...');
+            loadDashboard();
+        });
+
+        function setupEventListeners() {
+            // Cambio de período
+            document.querySelectorAll('.period-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentPeriod = this.dataset.period;
+                loadDashboard();
+            });
+            });
+
+            // Filtros de notificaciones
+            document.getElementById('status-filter').addEventListener('change', loadNotifications);
+            document.getElementById('type-filter').addEventListener('change', loadNotifications);
+        }
+
+        async function loadDashboard() {
+            try {
+                // Agregar timestamp para evitar caché
+                const timestamp = Date.now();
+                console.log(`🔄 Cargando dashboard - Timestamp: ${timestamp}`);
+                
+                // Cargar en paralelo
+                await Promise.all([
+                    loadTaskStats(timestamp),
+                    loadCharts(timestamp),
+                    loadNotifications(timestamp),
+                    loadHealth(timestamp)
+                ]);
+
+                // Cargar tabla de tareas
+                refreshTaskTable();
+            } catch (error) {
+                console.error('Error cargando dashboard:', error);
+                showError('Error cargando el dashboard');
+            }
+        }
+
+        async function loadTaskStats(timestamp) {
+            try {
+                const response = await fetch(`/api/v1/dashboard/stats?period=${currentPeriod}&_t=${timestamp}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Actualizar contadores de tareas
+                if (data.tasks) {
+                    document.getElementById('total-tasks').textContent = data.tasks.total || 0;
+                    
+                    const byStatus = data.tasks.by_status || {};
+                    document.getElementById('pending-tasks').textContent = 
+                        (byStatus['in progress'] || 0) + (byStatus['to do'] || 0) + (byStatus['open'] || 0);
+                    document.getElementById('completed-tasks').textContent = 
+                        byStatus['complete'] || byStatus['done'] || 0;
+                    document.getElementById('overdue-tasks').textContent = 
+                        data.tasks.overdue || 0;
+                }
+
+                renderStats(data);
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+            }
+        }
+
+        async function loadCharts(timestamp) {
+            try {
+                const response = await fetch(`/api/v1/dashboard/stats?period=${currentPeriod}&_t=${timestamp}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                renderCharts(data);
+            } catch (error) {
+                console.error('Error cargando gráficos:', error);
+            }
+        }
+
+        async function loadNotifications(timestamp) {
+            try {
+                const statusFilter = document.getElementById('status-filter').value;
+                const typeFilter = document.getElementById('type-filter').value;
+                
+                const params = new URLSearchParams({
+                    limit: '50',
+                    offset: '0',
+                    _t: timestamp
+                });
+                
+                if (statusFilter) params.append('status', statusFilter);
+                if (typeFilter) params.append('notification_type', typeFilter);
+
+                const response = await fetch(`/api/v1/dashboard/notifications?${params}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                renderNotifications(data.notifications);
+            } catch (error) {
+                console.error('Error cargando notificaciones:', error);
+            }
+        }
+
+        async function loadHealth(timestamp) {
+            try {
+                const response = await fetch(`/api/v1/dashboard/health?_t=${timestamp}`);
+                const data = await response.json();
+
+                // Aquí podrías mostrar el estado de salud del sistema
+                console.log('Estado de salud del sistema:', data);
+            } catch (error) {
+                console.error('Error cargando estado de salud:', error);
+            }
+        }
+
+        function renderStats(data) {
+            // Esta función se mantiene para compatibilidad
+            console.log('Estadísticas cargadas:', data);
+        }
+
+        function renderCharts(data) {
+            if (!data.tasks) return;
+
+            // Gráfico de estado de tareas
+            renderTasksStatusChart(data.tasks.by_status || {});
+            
+            // Gráfico de prioridades
+            renderTasksPriorityChart(data.tasks.by_priority || {});
+        }
+
+        function renderTasksStatusChart(statusData) {
+            const ctx = document.getElementById('tasks-status-chart');
+            if (!ctx) return;
+
+            // Destruir gráfico existente si existe
+            if (charts.tasksStatus) {
+                charts.tasksStatus.destroy();
+            }
+
+            const labels = Object.keys(statusData);
+            const values = Object.values(statusData);
+
+            charts.tasksStatus = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: [
+                            '#28a745', // Verde para completadas
+                            '#ffc107', // Amarillo para en progreso
+                            '#17a2b8', // Azul para pendientes
+                            '#dc3545'  // Rojo para otras
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderTasksPriorityChart(priorityData) {
+            const ctx = document.getElementById('tasks-priority-chart');
+            if (!ctx) return;
+
+            // Destruir gráfico existente si existe
+            if (charts.tasksPriority) {
+                charts.tasksPriority.destroy();
+            }
+
+            const labels = Object.keys(priorityData);
+            const values = Object.values(priorityData);
+
+            charts.tasksPriority = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Cantidad de Tareas',
+                        data: values,
+                        backgroundColor: '#667eea',
+                        borderColor: '#5a6fd8',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderNotifications(notifications) {
+            const container = document.getElementById('notifications-container');
+            if (!container) return;
+
+            if (!notifications || notifications.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #6c757d;">
+                        <i class="fas fa-inbox" style="font-size: 2rem;"></i>
+                        <p>No hay notificaciones para mostrar</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const table = `
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f8f9fa;">
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Tipo</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Acción</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Tarea</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Destinatario</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Estado</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${notifications.map(notif => `
+                            <tr style="border-bottom: 1px solid #f1f3f4;">
+                                <td style="padding: 12px;">
+                                    <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; background: #e9ecef;">
+                                        ${notif.type}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px;">${notif.action || '-'}</td>
+                                <td style="padding: 12px;">${notif.task_name || '-'}</td>
+                                <td style="padding: 12px;">${notif.recipient || '-'}</td>
+                                <td style="padding: 12px;">
+                                    <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; 
+                                        background: ${notif.status === 'sent' ? '#d4edda' : 
+                                                   notif.status === 'failed' ? '#f8d7da' : '#fff3cd'};
+                                        color: ${notif.status === 'sent' ? '#155724' : 
+                                               notif.status === 'failed' ? '#721c24' : '#856404'};">
+                                        ${notif.status}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px; font-size: 0.9rem; color: #6c757d;">
+                                    ${new Date(notif.created_at).toLocaleString('es-ES')}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = table;
+        }
+
+        // Funciones de sincronización manual
+        async function manualSync() {
+            const syncBtn = document.getElementById('sync-btn');
+            const syncStatus = document.getElementById('sync-status');
+            
+            syncBtn.disabled = true;
+            syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
+            syncStatus.style.display = 'block';
+            syncStatus.className = 'sync-status info';
+            syncStatus.textContent = 'Iniciando sincronización...';
+
+            try {
+                const response = await fetch('/api/v1/tasks/sync', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    syncStatus.className = 'sync-status success';
+                    syncStatus.textContent = `Sincronización exitosa: ${data.message}`;
+                    
+                    // Recargar dashboard después de sincronizar
+                    setTimeout(() => {
+                        loadDashboard();
+                    }, 1000);
+                } else {
+                    throw new Error(data.error || 'Error en la sincronización');
+                }
+            } catch (error) {
+                console.error('Error en sincronización:', error);
+                syncStatus.className = 'sync-status error';
+                syncStatus.textContent = `Error: ${error.message}`;
+            } finally {
+                syncBtn.disabled = false;
+                syncBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Sincronizar Ahora';
+                
+                // Ocultar mensaje después de 5 segundos
+                setTimeout(() => {
+                    syncStatus.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function createTask() {
+            // Mostrar el modal de creación de tareas
+            document.getElementById('create-task-modal').style.display = 'block';
+            
+            // Cargar las listas de ClickUp
+            loadClickUpLists();
+        }
+
+        function closeCreateTaskModal() {
+            document.getElementById('create-task-modal').style.display = 'none';
+            // Limpiar el formulario
+            document.getElementById('create-task-form').reset();
+        }
+
+        async function loadClickUpLists() {
+            try {
+                // Cargar workspaces primero
+                const workspaceResponse = await fetch('/api/v1/workspaces/');
+                const workspaceData = await workspaceResponse.json();
+                
+                const workspaceSelect = document.getElementById('task-workspace');
+                workspaceSelect.innerHTML = '<option value="">Selecciona un workspace</option>';
+                
+                let selectedWorkspaceId = null;
+                
+                if (workspaceData.workspaces && workspaceData.workspaces.length > 0) {
+                    workspaceData.workspaces.forEach(workspace => {
+                        const option = document.createElement('option');
+                        option.value = workspace.id;
+                        option.textContent = workspace.name;
+                        workspaceSelect.appendChild(option);
+                    });
+                    
+                    // Seleccionar el primer workspace por defecto
+                    if (workspaceData.workspaces.length > 0) {
+                        selectedWorkspaceId = workspaceData.workspaces[0].id;
+                        workspaceSelect.value = selectedWorkspaceId;
+                    }
+                } else {
+                    // Si no hay workspaces, mostrar opción por defecto
+                    const option = document.createElement('option');
+                    option.value = 'default';
+                    option.textContent = 'Workspace por defecto';
+                    workspaceSelect.appendChild(option);
+                }
+                
+                // Cargar listas del workspace seleccionado
+                if (selectedWorkspaceId) {
+                    const response = await fetch(`/api/v1/lists/?workspace_id=${selectedWorkspaceId}`);
+                    const data = await response.json();
+                    
+                    const listSelect = document.getElementById('task-list');
+                    listSelect.innerHTML = '<option value="">Selecciona una lista</option>';
+                    
+                    if (data.lists && data.lists.length > 0) {
+                        data.lists.forEach(list => {
+                            const option = document.createElement('option');
+                            option.value = list.id;
+                            option.textContent = list.name;
+                            listSelect.appendChild(option);
+                        });
+                    } else {
+                        // Si no hay listas, mostrar opción por defecto
+                        const option = document.createElement('option');
+                        option.value = 'default';
+                        option.textContent = 'Lista por defecto';
+                        listSelect.appendChild(option);
+                    }
+                }
+                
+                // Cargar usuarios del workspace
+                if (selectedWorkspaceId) {
+                    await loadClickUpUsers(selectedWorkspaceId);
+                }
+                
+                // Agregar event listener para cambiar workspace
+                workspaceSelect.addEventListener('change', async function() {
+                    const workspaceId = this.value;
+                    if (workspaceId && workspaceId !== 'default') {
+                        // Recargar listas cuando cambie el workspace
+                        const response = await fetch(`/api/v1/lists/?workspace_id=${workspaceId}`);
+                        const data = await response.json();
+                        
+                        const listSelect = document.getElementById('task-list');
+                        listSelect.innerHTML = '<option value="">Selecciona una lista</option>';
+                        
+                        if (data.lists && data.lists.length > 0) {
+                            data.lists.forEach(list => {
+                                const option = document.createElement('option');
+                                option.value = list.id;
+                                option.textContent = list.name;
+                                listSelect.appendChild(option);
+                            });
+                        }
+                        
+                        // Recargar usuarios cuando cambie el workspace
+                        await loadClickUpUsers(workspaceId);
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error cargando datos de ClickUp:', error);
+                // Mostrar opciones por defecto en caso de error
+                const workspaceSelect = document.getElementById('task-workspace');
+                const listSelect = document.getElementById('task-list');
+                const assigneeSelect = document.getElementById('task-assignee');
+                
+                workspaceSelect.innerHTML = '<option value="">Error cargando workspaces</option>';
+                listSelect.innerHTML = '<option value="">Error cargando listas</option>';
+                assigneeSelect.innerHTML = '<option value="">Error cargando usuarios</option>';
+            }
+        }
+
+        async function loadClickUpUsers(workspaceId) {
+            try {
+                const response = await fetch(`/api/v1/users/?workspace_id=${workspaceId}`);
+                const data = await response.json();
+                
+                const assigneeSelect = document.getElementById('task-assignee');
+                assigneeSelect.innerHTML = '<option value="">Sin asignar</option>';
+                
+                if (data.users && data.users.length > 0) {
+                    data.users.forEach(user => {
+                        const option = document.createElement('option');
+                        option.value = user.id;
+                        option.textContent = user.name || user.username || user.email;
+                        assigneeSelect.appendChild(option);
+                    });
+                } else {
+                    // Si no hay usuarios, mostrar opción por defecto
+                    const option = document.createElement('option');
+                    option.value = 'default';
+                    option.textContent = 'Usuario por defecto';
+                    assigneeSelect.appendChild(option);
+                }
+            } catch (error) {
+                console.error('Error cargando usuarios:', error);
+                const assigneeSelect = document.getElementById('task-assignee');
+                assigneeSelect.innerHTML = '<option value="">Error cargando usuarios</option>';
+            }
+        }
+
+        // Configurar el formulario para crear tareas
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('create-task-form');
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    await submitCreateTask();
+                });
+                
+                // Agregar event listeners para preview de descripción
+                const descriptionField = document.getElementById('task-description');
+                const phoneField = document.getElementById('task-phone');
+                const previewIndicator = document.getElementById('description-preview-indicator');
+                const phoneCharCount = document.getElementById('phone-char-count');
+                
+                if (descriptionField && phoneField && previewIndicator && phoneCharCount) {
+                    const updatePreview = () => {
+                        const description = descriptionField.value || '';
+                        const phone = phoneField.value || '';
+                        
+                        // Actualizar contador de caracteres
+                        phoneCharCount.textContent = `${phone.length}/20`;
+                        
+                        if (phone.trim()) {
+                            const phoneText = `\n\n📱 **Número de Celular para WhatsApp:** ${phone.trim()}`;
+                            const preview = description + phoneText;
+                            
+                            // Mostrar preview en el campo de descripción (solo visual)
+                            descriptionField.setAttribute('data-preview', preview);
+                            descriptionField.title = `Vista previa de la descripción final:\n\n${preview}`;
+                            
+                            // Mostrar indicador de preview
+                            previewIndicator.style.display = 'inline-block';
+                        } else {
+                            descriptionField.removeAttribute('data-preview');
+                            descriptionField.title = '';
+                            
+                            // Ocultar indicador de preview
+                            previewIndicator.style.display = 'none';
+                        }
+                    };
+                    
+                    descriptionField.addEventListener('input', updatePreview);
+                    phoneField.addEventListener('input', updatePreview);
+                }
+            }
+        });
+
+        async function submitCreateTask() {
+            try {
+                const form = document.getElementById('create-task-form');
+                const formData = new FormData(form);
+                
+                // Obtener el número de celular
+                const phoneNumber = formData.get('phone');
+                let description = formData.get('description') || '';
+                
+                // Si hay número de celular, agregarlo al final de la descripción
+                if (phoneNumber && phoneNumber.trim()) {
+                    const phoneText = `\n\n📱 **Número de Celular para WhatsApp:** ${phoneNumber.trim()}`;
+                    description += phoneText;
+                    console.log('📱 Número de celular agregado a la descripción:', phoneNumber.trim());
+                }
+                
+                // Convertir FormData a objeto
+                const taskData = {
+                    name: formData.get('name'),
+                    description: description,
+                    status: formData.get('status'),
+                    priority: parseInt(formData.get('priority')),
+                    due_date: formData.get('due_date'),
+                    list_id: formData.get('list_id'),
+                    workspace_id: formData.get('workspace_id'),
+                    assignee_id: formData.get('assignee_id') || null
+                };
+                
+                console.log('🔄 Creando tarea:', taskData);
+                console.log('📋 Datos del formulario:', {
+                    name: formData.get('name'),
+                    description: formData.get('description'),
+                    status: formData.get('status'),
+                    priority: formData.get('priority'),
+                    due_date: formData.get('due_date'),
+                    list_id: formData.get('list_id'),
+                    workspace_id: formData.get('workspace_id'),
+                    assignee_id: formData.get('assignee_id'),
+                    phone: phoneNumber
+                });
+                
+                if (phoneNumber && phoneNumber.trim()) {
+                    console.log('📱 Configuración de WhatsApp:');
+                    console.log('  • Número detectado:', phoneNumber.trim());
+                    console.log('  • Descripción final:', description);
+                    console.log('  • Notificaciones habilitadas: ✅');
+                } else {
+                    console.log('📱 Configuración de WhatsApp:');
+                    console.log('  • No se proporcionó número de teléfono');
+                    console.log('  • Notificaciones por WhatsApp: ❌');
+                }
+                
+                // Validar datos requeridos
+                if (!taskData.name || !taskData.list_id || !taskData.workspace_id) {
+                    throw new Error('Nombre de tarea, lista y workspace son obligatorios');
+                }
+                
+                // Validar formato del número de teléfono si se proporciona
+                if (phoneNumber && phoneNumber.trim()) {
+                    const phoneRegex = /^[+]?[0-9\s\-\(\)]{7,20}$/;
+                    if (!phoneRegex.test(phoneNumber.trim())) {
+                        throw new Error('El número de teléfono debe tener entre 7 y 20 dígitos y puede incluir +, espacios, guiones y paréntesis');
+                    }
+                }
+                
+                // Mapear estado para ClickUp (corregir el problema de "COMPLETADA")
+                const statusMapping = {
+                    'to do': 'to do',
+                    'in progress': 'in progress', 
+                    'complete': 'complete'  // Enviar exactamente como "complete"
+                };
+                
+                // Aplicar mapeo de estado
+                if (taskData.status && statusMapping[taskData.status]) {
+                    taskData.status = statusMapping[taskData.status];
+                    console.log(`🔄 Estado mapeado: ${formData.get('status')} -> ${taskData.status}`);
+                }
+                
+                // Mostrar estado de carga
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
+                submitBtn.disabled = true;
+                
+                // Crear tarea en ClickUp
+                const response = await fetch('/api/v1/tasks/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(taskData)
+                });
+                
+                if (!response.ok) {
+                    // Obtener detalles del error
+                    let errorDetail = '';
+                    try {
+                        const errorData = await response.json();
+                        errorDetail = errorData.detail || errorData.message || 'Error desconocido';
+                    } catch (e) {
+                        errorDetail = `HTTP ${response.status}: ${response.statusText}`;
+                    }
+                    
+                    throw new Error(`Error del servidor: ${errorDetail}`);
+                }
+                
+                const result = await response.json();
+                console.log('✅ Tarea creada exitosamente:', result);
+                
+                // Log adicional para confirmar la configuración de WhatsApp
+                if (phoneNumber && phoneNumber.trim()) {
+                    console.log('📱 WhatsApp configurado correctamente:');
+                    console.log('  • Número:', phoneNumber.trim());
+                    console.log('  • ClickUp ID:', result.clickup_id);
+                    console.log('  • Descripción con teléfono enviada a ClickUp');
+                    console.log('  • Sistema de notificaciones activado');
+                }
+                
+                // Verificar si se sincronizó con ClickUp
+                if (result.clickup_id) {
+                    let successMessage = '🎉 ¡Tarea creada exitosamente en ClickUp!';
+                    if (phoneNumber && phoneNumber.trim()) {
+                        successMessage += `\n\n📱 **Notificaciones por WhatsApp habilitadas:**`;
+                        successMessage += `\n• Número: ${phoneNumber.trim()}`;
+                        successMessage += `\n• Se incluyó en la descripción de la tarea`;
+                        successMessage += `\n• Las notificaciones se enviarán automáticamente`;
+                        successMessage += `\n\n💡 **Próximos pasos:**`;
+                        successMessage += `\n• El sistema detectará automáticamente el número`;
+                        successMessage += `\n• Se enviarán notificaciones por WhatsApp cuando:`;
+                        successMessage += `\n  - Se cree la tarea`;
+                        successMessage += `\n  - Se actualice el estado`;
+                        successMessage += `\n  - Se acerque la fecha límite`;
+                    }
+                    alert(successMessage);
+                    console.log(`✅ Sincronización exitosa - ClickUp ID: ${result.clickup_id}`);
+                } else {
+                    alert('⚠️ Tarea creada localmente, pero no se sincronizó con ClickUp');
+                    console.log('⚠️ No se recibió ClickUp ID - Verificar configuración');
+                }
+                
+                // Cerrar modal y limpiar formulario
+                closeCreateTaskModal();
+                
+                // Mostrar mensaje de confirmación adicional en consola
+                if (phoneNumber && phoneNumber.trim()) {
+                    console.log('🎯 Próximos pasos para WhatsApp:');
+                    console.log('  1. La tarea se creó en ClickUp con el teléfono en la descripción');
+                    console.log('  2. El sistema de notificaciones detectará automáticamente el número');
+                    console.log('  3. Se enviarán notificaciones por WhatsApp cuando:');
+                    console.log('     • Se cree la tarea (inmediato)');
+                    console.log('     • Se actualice el estado');
+                    console.log('     • Se acerque la fecha límite');
+                    console.log('     • Se complete la tarea');
+                    console.log('  4. El usuario recibirá las notificaciones en su WhatsApp');
+                }
+                
+                // Recargar dashboard para mostrar la nueva tarea
+                loadDashboard();
+                
+            } catch (error) {
+                console.error('❌ Error creando tarea:', error);
+                alert('❌ Error creando tarea: ' + error.message);
+                
+                // Restaurar botón solo si form existe
+                try {
+                    const form = document.getElementById('create-task-form');
+                    if (form) {
+                        const submitBtn = form.querySelector('button[type="submit"]');
+                        if (submitBtn) {
+                            submitBtn.innerHTML = '<i class="fas fa-plus"></i> Crear Tarea';
+                            submitBtn.disabled = false;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error restaurando botón:', e);
+                }
+            }
+        }
+
+        function deleteTask() {
+            // Redirigir a la página de tareas para eliminar
+            window.location.href = '/index#tasks';
+        }
+
+        function goToTasks() {
+            // Confirmar navegación a tareas
+            if (confirm('¿Ir a la lista de tareas? El dashboard se mantendrá disponible en la ruta principal.')) {
+                window.location.href = '/index#tasks';
+            }
+        }
+
+        function showError(message) {
+            console.error(message);
+            // Aquí podrías mostrar un toast o notificación de error
+        }
+
+        // Función para forzar recarga completa
+        function forceReload() {
+            console.log('🔄 Forzando recarga completa del dashboard...');
+            const timestamp = Date.now();
+            
+            // Limpiar contadores
+            document.getElementById('total-tasks').textContent = '-';
+            document.getElementById('pending-tasks').textContent = '-';
+            document.getElementById('completed-tasks').textContent = '-';
+            document.getElementById('overdue-tasks').textContent = '-';
+            
+            // Recargar dashboard con timestamp único
+            loadDashboard();
+            
+            // Mostrar mensaje de recarga
+            const refreshBtn = document.querySelector('.refresh-btn');
+            const originalText = refreshBtn.innerHTML;
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Recargando...';
+            refreshBtn.disabled = true;
+            
+            setTimeout(() => {
+                refreshBtn.innerHTML = originalText;
+                refreshBtn.disabled = false;
+            }, 2000);
+        }
+
+        // Función para alternar el menú móvil
+        function toggleMobileMenu() {
+            const navButtons = document.querySelector('.nav-buttons');
+            const menuBtn = document.querySelector('.mobile-menu-btn i');
+            
+            if (navButtons.classList.contains('mobile-open')) {
+                navButtons.classList.remove('mobile-open');
+                menuBtn.className = 'fas fa-bars';
+            } else {
+                navButtons.classList.add('mobile-open');
+                menuBtn.className = 'fas fa-times';
+            }
+        }
+        
+        // Función para detectar si es un dispositivo móvil
+        function isMobileDevice() {
+            return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        
+        // Función para ajustar el dashboard según el dispositivo
+        function adjustDashboardForDevice() {
+            if (isMobileDevice()) {
+                document.body.classList.add('mobile-device');
+                
+                // Mostrar indicador de estado móvil
+                const statusIndicator = document.querySelector('.mobile-status-indicator');
+                if (statusIndicator) {
+                    statusIndicator.style.display = 'flex';
+                }
+                
+                // Ajustar altura de gráficos en móviles
+                const chartCanvases = document.querySelectorAll('.chart-canvas');
+                chartCanvases.forEach(canvas => {
+                    canvas.style.maxHeight = '200px';
+                });
+                
+                // Ajustar botones para dispositivos táctiles
+                const buttons = document.querySelectorAll('button');
+                buttons.forEach(btn => {
+                    btn.style.minHeight = '44px';
+                    btn.style.minWidth = '44px';
+                });
+                
+                // Ajustar grid de estadísticas para móviles
+                const statsGrid = document.querySelector('.stats-grid');
+                if (statsGrid && window.innerWidth <= 480) {
+                    statsGrid.style.gridTemplateColumns = '1fr';
+                }
+            } else {
+                document.body.classList.remove('mobile-device');
+                
+                // Ocultar indicador de estado móvil en desktop
+                const statusIndicator = document.querySelector('.mobile-status-indicator');
+                if (statusIndicator) {
+                    statusIndicator.style.display = 'none';
+                }
+            }
+        }
+        
+        // Función para actualizar la tabla de tareas
+        function refreshTaskTable() {
+            console.log('Actualizando tabla de tareas...');
+
+            // Mostrar estado de carga
+            const tableBody = document.getElementById('task-table-body');
+            if (tableBody) {
+                tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Cargando tareas...</td></tr>';
+            }
+
+            // Cargar tareas desde la API
+            fetch('/api/v1/tasks/?include_closed=true&page=0&limit=100')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.tasks && data.tasks.length > 0) {
+                        displayTaskTable(data.tasks);
+                    } else {
+                        if (tableBody) {
+                            tableBody.innerHTML = '<tr><td colspan="4" class="text-center">No se encontraron tareas</td></tr>';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar tareas:', error);
+                    if (tableBody) {
+                        tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error al cargar tareas</td></tr>';
+                    }
+                });
+        }
+
+        // Función para mostrar tareas en la tabla
+        function displayTaskTable(tasks) {
+            const tableBody = document.getElementById('task-table-body');
+            if (!tableBody) return;
+
+            tableBody.innerHTML = '';
+
+            tasks.forEach(task => {
+                const row = document.createElement('tr');
+
+                // Nombre de la tarea
+                const nameCell = document.createElement('td');
+                nameCell.textContent = task.name || 'Sin nombre';
+                nameCell.style.maxWidth = '200px';
+                nameCell.style.overflow = 'hidden';
+                nameCell.style.textOverflow = 'ellipsis';
+                nameCell.style.whiteSpace = 'nowrap';
+                row.appendChild(nameCell);
+
+                // Usuario asignado
+                const userCell = document.createElement('td');
+                userCell.textContent = task.assignee || 'Sin asignar';
+                row.appendChild(userCell);
+
+                // Prioridad
+                const priorityCell = document.createElement('td');
+                const priority = task.priority || 3;
+                const priorityText = getPriorityText(priority);
+                const priorityClass = getPriorityClass(priority);
+                priorityCell.innerHTML = `<span class="priority-badge ${priorityClass}">${priorityText}</span>`;
+                row.appendChild(priorityCell);
+
+                // Estado
+                const statusCell = document.createElement('td');
+                const status = task.status || 'to do';
+                const statusText = getStatusText(status);
+                const statusClass = getStatusClass(status);
+                statusCell.innerHTML = `<span class="status-badge ${statusClass}">${statusText}</span>`;
+                row.appendChild(statusCell);
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Función para obtener texto de prioridad
+        function getPriorityText(priority) {
+            const priorities = {
+                1: 'Urgente',
+                2: 'Alta',
+                3: 'Normal',
+                4: 'Baja'
+            };
+            return priorities[priority] || 'Normal';
+        }
+
+        // Función para obtener clase CSS de prioridad
+        function getPriorityClass(priority) {
+            const classes = {
+                1: 'priority-urgent',
+                2: 'priority-high',
+                3: 'priority-normal',
+                4: 'priority-low'
+            };
+            return classes[priority] || 'priority-normal';
+        }
+
+        // Función para obtener texto de estado
+        function getStatusText(status) {
+            const statuses = {
+                'to do': 'Pendiente',
+                'in progress': 'En Progreso',
+                'complete': 'Completada'
+            };
+            return statuses[status] || status;
+        }
+
+        // Función para obtener clase CSS de estado
+        function getStatusClass(status) {
+            const classes = {
+                'to do': 'status-pending',
+                'in progress': 'status-progress',
+                'complete': 'status-complete'
+            };
+            return classes[status] || 'status-pending';
+        }
+        
+        // Función para mostrar ayuda sobre el campo de teléfono
+        function showPhoneHelp() {
+            const helpMessage = `
+📱 **Campo de Número de Celular**
+
+**¿Qué hace este campo?**
+• Agrega automáticamente el número de celular a la descripción de la tarea
+• Permite que el sistema de notificaciones por WhatsApp identifique el destinatario
+• Las notificaciones se enviarán automáticamente cuando se creen o actualicen tareas
+
+**Formato recomendado:**
+• +57 300 123 4567 (con código de país)
+• 300 123 4567 (sin código de país)
+• (300) 123-4567 (con paréntesis y guiones)
+
+**¿Es obligatorio?**
+• No, es completamente opcional
+• Solo se incluye en la descripción si se proporciona un número
+
+**¿Cómo funciona?**
+1. Escribe tu descripción normal
+2. Agrega tu número de celular
+3. El sistema combina ambos en la descripción final
+4. Las notificaciones por WhatsApp se envían automáticamente
+            `;
+            
+            alert(helpMessage);
+        }
+    </script>
+    
+    <!-- Script principal del dashboard -->
+    <script src="script.js"></script>
+</body>
+</html>
