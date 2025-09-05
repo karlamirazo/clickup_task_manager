@@ -392,6 +392,25 @@ class WhatsAppNotificationService:
                 ))
         
         return results
+    
+    async def get_status(self) -> Dict[str, any]:
+        """Obtiene el estado del servicio de WhatsApp"""
+        try:
+            return {
+                "enabled": self.enabled,
+                "simulator_enabled": self.simulator is not None,
+                "client_configured": bool(self.client.api_key),
+                "base_url": self.client.base_url,
+                "instance_name": self.client.instance_name,
+                "timestamp": datetime.now().isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Error obteniendo estado del servicio: {e}")
+            return {
+                "enabled": False,
+                "error": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
 
 # Instancia global del servicio de notificaciones
 whatsapp_service = WhatsAppNotificationService()
