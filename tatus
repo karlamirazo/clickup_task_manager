@@ -1,10 +1,5 @@
-[33ma89ff958[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m  FIX: Corregir estructura try/except en main.py - WhatsApp diagnostics routes ahora dentro del bloque try - Resuelve error de sintaxis que impedía el deploy
-[33mcf7fb3b2[m  IMPLEMENTACIÓN 2: Sistema Robusto de WhatsApp con Evolution API - Servicio con reintentos automáticos y fallback al simulador - Endpoints de diagnóstico para WhatsApp - Integración con endpoint PUT de tareas - Rate limiting y backoff exponencial - Health checks y estadísticas detalladas
-[33mcd6b58d6[m  FIX: Agregar importación de TaskUpdate y TaskResponse - Corrige error de NameError en deploy de Railway
-[33me7ce483a[m  IMPLEMENTACIÓN 1: Endpoint PUT para actualización de tareas - Resuelve problema de edición desde interfaz - Sincronización bidireccional con ClickUp - Notificaciones WhatsApp automáticas - Logging automático con LangGraph
-[33m8dd3c683[m  Corregir endpoint PUT: Mejorar logs para diagnosticar problemas de sincronización
-[33mafb2d7cb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/main-new[m[33m, [m[1;32mmain-new[m[33m)[m FIX: Corregir error strftime en due_date para notificaciones WhatsApp - 2025-01-31
+[33m3f6eebdc[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m docs: Actualizar documentación con nueva estructura
+[33m069b9d96[m feat: Reorganizar proyecto por funcionalidad
+[33mafb2d7cb[m[33m ([m[1;31morigin/main-new[m[33m, [m[1;32mmain-new[m[33m)[m FIX: Corregir error strftime en due_date para notificaciones WhatsApp - 2025-01-31
 [33m9884cb03[m CLEANUP: Remover archivos de prueba y diagnóstico - 2025-01-31
 [33m7af02b1e[m FIX: Implementar extracción de números desde campo 'Número de Celular' en custom_fields - 2025-01-31
-[33medb10daf[m FIX: Extraer números de WhatsApp del campo 'Número de Celular' en custom_fields - 2025-01-31
-[33me75eb9ef[m 🔧 FORZAR DEPLOY: Asegurar que Railway use variables de entorno correctas
