@@ -44,10 +44,31 @@ Un módulo completo de gestión de tareas con la API de ClickUp que incluye auto
 
 ```
 ClickUp Project Manager/
-├── api/                    # API REST con FastAPI
-│   ├── routes/            # Endpoints de la API
-│   └── schemas/           # Esquemas Pydantic
-├── core/                  # Configuración y utilidades
+├── app/                   # Aplicación principal
+│   └── main.py           # Punto de entrada de la aplicación
+├── auth/                  # Sistema de autenticación
+│   └── auth.py           # Módulo de autenticación
+├── integrations/          # Integraciones externas
+│   ├── clickup/          # Integración con ClickUp API
+│   ├── whatsapp/         # Integración con WhatsApp Evolution API
+│   └── evolution_api/    # Configuración Evolution API
+├── monitoring/            # Monitoreo y alertas
+│   ├── railway/          # Monitoreo de Railway
+│   └── health/           # Health checks
+├── search/               # Motor de búsqueda
+│   └── engine.py         # Motor de búsqueda semántica
+├── notifications/        # Sistema de notificaciones
+│   ├── email/           # Plantillas de email
+│   └── whatsapp/        # Notificaciones WhatsApp
+├── scripts/             # Scripts organizados por categoría
+│   ├── clickup/         # Scripts ClickUp
+│   ├── whatsapp/        # Scripts WhatsApp
+│   ├── railway/         # Scripts Railway
+│   └── database/        # Scripts de base de datos
+├── api/                 # API REST con FastAPI
+│   ├── routes/          # Endpoints de la API
+│   └── schemas/         # Esquemas Pydantic
+├── core/                # Núcleo del sistema
 │   ├── config.py         # Configuración de la aplicación
 │   ├── database.py       # Configuración de base de datos
 │   └── clickup_client.py # Cliente de ClickUp API
@@ -110,7 +131,7 @@ python -c "from core.database import init_db; import asyncio; asyncio.run(init_d
 
 6. **Ejecutar la aplicación**
 ```bash
-python main.py
+uvicorn app.main:app --reload
 ```
 
 La aplicación estará disponible en `http://localhost:8000`
