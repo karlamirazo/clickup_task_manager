@@ -1,5 +1,0 @@
-[33m3f6eebdc[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m docs: Actualizar documentación con nueva estructura
-[33m069b9d96[m feat: Reorganizar proyecto por funcionalidad
-[33mafb2d7cb[m[33m ([m[1;31morigin/main-new[m[33m, [m[1;32mmain-new[m[33m)[m FIX: Corregir error strftime en due_date para notificaciones WhatsApp - 2025-01-31
-[33m9884cb03[m CLEANUP: Remover archivos de prueba y diagnóstico - 2025-01-31
-[33m7af02b1e[m FIX: Implementar extracción de números desde campo 'Número de Celular' en custom_fields - 2025-01-31
