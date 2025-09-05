@@ -115,7 +115,8 @@ class WebhookProcessor:
                         f"updated_{change_type}", local_task, task_data
                     )
                     
-                    webhook_logger.info(f"‚úÖ {change_type} actualizado para tarea {task_id}")
+                    # change_type está comentado, usar event_type directamente
+                    webhook_logger.info(f"✅ Evento {event_type} procesado para tarea {task_id}")
         
         except Exception as e:
             webhook_logger.error(f"‚ùå Error procesando evento {event_type} para tarea {task_id}: {e}")

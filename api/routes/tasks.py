@@ -515,6 +515,7 @@ async def create_task_FINAL_VERSION(
                 
                 if whatsapp_numbers:
                     print(f"📱 Números WhatsApp encontrados: {whatsapp_numbers}")
+                    print(f"🔍 ENVIANDO NOTIFICACIÓN DE CREACIÓN - Timestamp: {datetime.now().isoformat()}")
                     
                     # Enviar notificación a cada número usando servicio robusto
                     for phone_number in whatsapp_numbers:
@@ -757,6 +758,7 @@ async def update_task(
                 
                 if whatsapp_numbers:
                     print(f"📱 Números WhatsApp encontrados: {whatsapp_numbers}")
+                    print(f"🔍 ENVIANDO NOTIFICACIÓN DE ACTUALIZACIÓN - Timestamp: {datetime.now().isoformat()}")
                     
                     # Enviar notificación de actualización a cada número usando servicio robusto
                     for phone_number in whatsapp_numbers:
