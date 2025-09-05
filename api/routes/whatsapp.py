@@ -42,15 +42,15 @@ class WhatsAppWebhookRequest(BaseModel):
     data: Dict[str, Any] = Field(..., description="Datos del evento")
 
 # Dependencias
-async def get_clickup_client() -> WhatsAppClient:
-    """Obtiene el cliente de ClickUp"""
-    return WhatsAppClient()
+async def get_whatsapp_service() -> WhatsAppNotificationService:
+    """Obtiene el servicio de notificaciones de WhatsApp"""
+    return WhatsAppNotificationService()
 
 async def get_whatsapp_integrator(
-    clickup_client: WhatsAppClient = Depends(get_clickup_client)
+    whatsapp_service: WhatsAppNotificationService = Depends(get_whatsapp_service)
 ) -> WhatsAppClickUpIntegrator:
     """Obtiene el integrador de WhatsApp"""
-    return WhatsAppClickUpIntegrator(clickup_client)
+    return WhatsAppClickUpIntegrator(whatsapp_service)
 
 # Rutas de estado y configuración
 @router.get("/status")
