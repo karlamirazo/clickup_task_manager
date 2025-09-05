@@ -6,7 +6,7 @@ Configuración para producción con notificaciones reales
 import os
 from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
-from .config import settings
+from core.config import settings
 
 class EvolutionAPIConfig(BaseModel):
     """Configuración específica para Evolution API"""

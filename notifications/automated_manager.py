@@ -10,11 +10,11 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 import uuid
 
-from .production_whatsapp_service import ProductionWhatsAppService, ProductionNotification
-from .clickup_client import ClickUpClient
-from .phone_extractor import PhoneNumberExtractor
-from .evolution_api_config import get_evolution_config, is_production_ready
-from .config import settings
+from core.robust_whatsapp_service import RobustWhatsAppService
+from integrations.clickup.client import ClickUpClient
+from core.phone_extractor import extract_whatsapp_numbers_from_task, PhoneNumberExtractor
+from integrations.evolution_api.config import get_evolution_config, is_production_ready
+from core.config import settings
 
 logger = logging.getLogger(__name__)
 

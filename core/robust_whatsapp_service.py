@@ -11,10 +11,10 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass
 from enum import Enum
 
-from .whatsapp_client import WhatsAppNotificationService, WhatsAppResponse
-from .whatsapp_simulator import WhatsAppSimulator
-from .evolution_api_config import get_evolution_config, evolution_config
-from .config import settings
+from integrations.whatsapp.client import WhatsAppNotificationService, WhatsAppResponse
+from integrations.whatsapp.simulator import WhatsAppSimulator
+from integrations.evolution_api.config import get_evolution_config, evolution_config
+from core.config import settings
 
 # Configurar logging
 logger = logging.getLogger(__name__)
