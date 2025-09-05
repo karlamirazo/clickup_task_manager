@@ -29,8 +29,23 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"ERROR: Error initializing search engine: {e}")
     
+    # Initialize automation system for WhatsApp notifications
+    try:
+        from notifications.automated_manager import AutomatedNotificationManager
+        automation_manager = AutomatedNotificationManager()
+        await automation_manager.start_automation()
+        print("SUCCESS: WhatsApp automation system initialized")
+    except Exception as e:
+        print(f"ERROR: Error initializing automation system: {e}")
+    
     yield
     # Shutdown (if needed)
+    try:
+        if 'automation_manager' in locals():
+            await automation_manager.stop_automation()
+            print("SUCCESS: Automation system stopped")
+    except Exception as e:
+        print(f"ERROR: Error stopping automation system: {e}")
 
 app = FastAPI(
     title="ClickUp Project Manager",
