@@ -392,3 +392,31 @@ class WhatsAppClickUpIntegrator:
                 "message": str(e),
                 "data": None
             }
+    
+    async def get_whatsapp_status(self) -> Dict[str, Any]:
+        """Obtiene el estado del servicio de WhatsApp"""
+        try:
+            if not self.whatsapp_service:
+                return {
+                    "status": "inactive",
+                    "message": "Servicio de WhatsApp no inicializado",
+                    "timestamp": datetime.now().isoformat()
+                }
+            
+            # Verificar el estado del servicio
+            service_status = await self.whatsapp_service.get_status()
+            
+            return {
+                "status": "active",
+                "service_status": service_status,
+                "notifications_sent": self.notifications_sent,
+                "last_notification": self.last_notification.isoformat() if self.last_notification else None,
+                "timestamp": datetime.now().isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Error obteniendo estado de WhatsApp: {e}")
+            return {
+                "status": "error",
+                "message": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
