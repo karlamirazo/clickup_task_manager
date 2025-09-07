@@ -1,0 +1,7 @@
+api/routes/__pycache__/tasks.cpython-311.pyc
+api/routes/tasks.py
+core/__pycache__/robust_whatsapp_service.cpython-311.pyc
+static/dashboard.html
+static/kanban_board.html
+static/script.js
+static/tasks_dashboard.html
