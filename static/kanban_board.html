@@ -522,6 +522,10 @@
                     <i class="fas fa-bug"></i>
                     Debug
                 </button>
+                <button class="kanban-btn secondary" onclick="forceReloadCompletedTasks()" style="background: #28a745;">
+                    <i class="fas fa-check-circle"></i>
+                    Recargar Completadas
+                </button>
                 <button class="kanban-btn secondary" onclick="window.location.href='/dashboard'">
                     <i class="fas fa-tachometer-alt"></i>
                     Dashboard
@@ -864,11 +868,26 @@
                     };
                     
                     const mappedStatus = statusMapping[taskStatus] || taskStatus;
-                    console.log(`🔄 Mapeando: "${taskStatus}" -> "${mappedStatus}" para columna "${status}"`);
+                    
+                    // Logging especial para la columna "complete"
+                    if (status === 'complete') {
+                        console.log(`🎯 [COMPLETE] Mapeando: "${taskStatus}" -> "${mappedStatus}" para tarea "${task.name}"`);
+                    } else {
+                        console.log(`🔄 Mapeando: "${taskStatus}" -> "${mappedStatus}" para columna "${status}"`);
+                    }
+                    
                     return mappedStatus === status;
                 });
                 
                 console.log(`📊 Columna "${status}": ${tasksInStatus.length} tareas`);
+                
+                // Logging especial para la columna complete
+                if (status === 'complete' && tasksInStatus.length > 0) {
+                    console.log(`🎯 Tareas en columna COMPLETE:`);
+                    tasksInStatus.forEach((task, index) => {
+                        console.log(`  ${index + 1}. "${task.name}" - Estado original: "${task.status}"`);
+                    });
+                }
                 
                 // Actualizar contador
                 const countElement = document.getElementById(`${status.replace(' ', '-')}-count`);
@@ -1332,6 +1351,60 @@
             }, 3000);
         }
 
+        // Función para forzar la recarga de tareas completadas
+        async function forceReloadCompletedTasks() {
+            try {
+                console.log('🔄 Forzando recarga de tareas completadas...');
+                
+                // Mostrar indicador de carga
+                const btn = document.querySelector('[onclick="forceReloadCompletedTasks()"]');
+                const originalContent = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+                
+                // Hacer consulta específica para tareas completadas
+                const response = await fetch('/api/v1/tasks/?include_closed=true&page=0&limit=1000');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const tasks = await response.json();
+                console.log('✅ Tareas obtenidas para recarga:', tasks.length);
+                
+                // Filtrar solo tareas completadas
+                const completedTasks = tasks.filter(task => {
+                    const status = task.status?.toLowerCase() || '';
+                    return status.includes('complete') || status.includes('completad') || 
+                           status.includes('done') || status.includes('finalizad') || 
+                           status.includes('terminad') || status.includes('finished');
+                });
+                
+                console.log(`🎯 Tareas completadas encontradas: ${completedTasks.length}`);
+                completedTasks.forEach((task, index) => {
+                    console.log(`  ${index + 1}. "${task.name}" - Estado: "${task.status}"`);
+                });
+                
+                // Actualizar tareas locales
+                allTasks = tasks;
+                filteredTasks = [...allTasks];
+                
+                // Re-renderizar
+                renderKanbanBoard();
+                
+                showNotification(`Recargadas ${completedTasks.length} tareas completadas`, 'success');
+                
+            } catch (error) {
+                console.error('❌ Error recargando tareas completadas:', error);
+                showNotification('Error recargando tareas completadas: ' + error.message, 'error');
+            } finally {
+                // Restaurar botón
+                const btn = document.querySelector('[onclick="forceReloadCompletedTasks()"]');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Recargar Completadas';
+            }
+        }
+
         // Función de debug para mostrar información detallada
         function debugKanbanTasks() {
             console.log('🐛 === DEBUG KANBAN TASKS ===');
@@ -1388,6 +1461,30 @@
                     const mappedStatus = statusMapping[status] || status;
                     console.log(`  "${status}" -> "${mappedStatus}"`);
                 });
+                
+                // Debug específico para tareas completadas
+                console.log('🎯 === DEBUG TAREAS COMPLETADAS ===');
+                const completedTasks = allTasks.filter(task => {
+                    const status = task.status?.toLowerCase() || '';
+                    return status.includes('complete') || status.includes('completad') || 
+                           status.includes('done') || status.includes('finalizad') || 
+                           status.includes('terminad') || status.includes('finished');
+                });
+                
+                console.log(`📊 Tareas que deberían estar completadas: ${completedTasks.length}`);
+                completedTasks.forEach((task, index) => {
+                    console.log(`  ${index + 1}. "${task.name}" - Estado: "${task.status}"`);
+                });
+                
+                // Verificar qué pasa con el mapeo
+                console.log('🔄 Verificación de mapeo para tareas completadas:');
+                completedTasks.forEach(task => {
+                    const originalStatus = task.status?.toLowerCase() || '';
+                    const mappedStatus = statusMapping[originalStatus] || originalStatus;
+                    console.log(`  "${originalStatus}" -> "${mappedStatus}" (debería ser "complete")`);
+                });
+                
+                console.log('🎯 === FIN DEBUG TAREAS COMPLETADAS ===');
             } else {
                 console.log('⚠️ No hay tareas cargadas');
             }
