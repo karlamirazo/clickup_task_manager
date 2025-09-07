@@ -297,7 +297,7 @@ function updateDashboardStats(tasksArray) {
     const completedTasks = tasks.filter(t => {
         const status = (t.status || '').toLowerCase();
         console.log(`DEBUG: Tarea ${t.name} - Status: "${status}"`);
-        return status === 'complete' || status === 'completada' || status === 'done';
+        return status === 'complete' || status === 'completada' || status === 'done' || status === 'completado';
     }).length;
     const pendingTasks = totalTasks - completedTasks;
 
@@ -2271,7 +2271,8 @@ async function updateDashboardCounters() {
         const completedTasks = tasks.filter(t => 
             t.status === 'complete' || 
             t.status === 'completed' || 
-            t.status === 'done'
+            t.status === 'done' ||
+            t.status === 'completado'
         ).length;
         const inProgressTasks = tasks.filter(t => 
             t.status === 'in progress' || 

@@ -804,6 +804,10 @@
         }
 
         function renderKanbanBoard() {
+            console.log('🎯 Renderizando Kanban Board...');
+            console.log('📊 Total de tareas filtradas:', filteredTasks.length);
+            console.log('📋 Tareas disponibles:', filteredTasks.map(t => ({ name: t.name, status: t.status })));
+            
             const statuses = ['to do', 'in progress', 'complete'];
             
             statuses.forEach(status => {
@@ -824,13 +828,17 @@
                         'en curso': 'in progress',
                         'complete': 'complete',
                         'completada': 'complete',
+                        'completado': 'complete',
                         'to do': 'to do',
                         'in progress': 'in progress'
                     };
                     
                     const mappedStatus = statusMapping[taskStatus] || taskStatus;
+                    console.log(`🔄 Mapeando: "${taskStatus}" -> "${mappedStatus}" para columna "${status}"`);
                     return mappedStatus === status;
                 });
+                
+                console.log(`📊 Columna "${status}": ${tasksInStatus.length} tareas`);
                 
                 // Actualizar contador
                 const countElement = document.getElementById(`${status.replace(' ', '-')}-count`);
@@ -974,7 +982,7 @@
                 const statusMapping = {
                     'to do': 'pendiente',
                     'in progress': 'en curso',
-                    'complete': 'complete'
+                    'complete': 'completado'
                 };
                 
                 const mappedStatus = statusMapping[newStatus] || newStatus;

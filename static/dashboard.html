@@ -849,9 +849,9 @@
                     
                     const byStatus = data.tasks.by_status || {};
                     document.getElementById('pending-tasks').textContent = 
-                        (byStatus['in progress'] || 0) + (byStatus['to do'] || 0) + (byStatus['open'] || 0);
+                        (byStatus['pendiente'] || 0) + (byStatus['en curso'] || 0);
                     document.getElementById('completed-tasks').textContent = 
-                        byStatus['complete'] || byStatus['done'] || 0;
+                        byStatus['completado'] || 0;
                     document.getElementById('overdue-tasks').textContent = 
                         data.tasks.overdue || 0;
                 }

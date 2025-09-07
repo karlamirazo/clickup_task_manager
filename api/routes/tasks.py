@@ -1353,7 +1353,7 @@ async def sync_tasks_simple(
                     
                     try:
                         # Get tareas de esta lista
-                        tasks = await clickup_client.get_tasks(list_id)
+                        tasks = await clickup_client.get_tasks(list_id, include_closed=True)
                         print(f"      📊 Encontradas {len(tasks)} tareas en la lista {list_name}")
                         
                         for task_data in tasks:
@@ -1367,7 +1367,12 @@ async def sync_tasks_simple(
                                 existing_task.name = task_data.get("name", existing_task.name)
                                 existing_task.description = task_data.get("description", existing_task.description)
                                 existing_task.status = task_data.get("status", {}).get("status", existing_task.status)
-                                existing_task.priority = task_data.get("priority", existing_task.priority)
+                                # Manejar priority como diccionario o entero
+                                priority_data = task_data.get("priority", existing_task.priority)
+                                if isinstance(priority_data, dict):
+                                    existing_task.priority = int(priority_data.get("id", 3))
+                                else:
+                                    existing_task.priority = int(priority_data) if priority_data else 3
                                 existing_task.due_date = safe_timestamp_to_datetime(task_data.get("due_date"))
                                 existing_task.updated_at = datetime.now()
                                 existing_task.is_synced = True
@@ -1381,7 +1386,7 @@ async def sync_tasks_simple(
                                     name=task_data.get("name", "Sin nombre"),
                                     description=task_data.get("description", ""),
                                     status=task_data.get("status", {}).get("status", "to_do"),
-                                    priority=task_data.get("priority", 3),
+                                    priority=int(task_data.get("priority", {}).get("id", 3)) if isinstance(task_data.get("priority"), dict) else int(task_data.get("priority", 3)),
                                     due_date=safe_timestamp_to_datetime(task_data.get("due_date")),
                                     workspace_id=workspace_id,
                                     list_id=list_id,
@@ -1428,7 +1433,7 @@ async def sync_tasks_simple(
                 for list_info in lists:
                     list_id = list_info.get("id")
                     try:
-                        tasks = await clickup_client.get_tasks(list_id)
+                        tasks = await clickup_client.get_tasks(list_id, include_closed=True)
                         for task_data in tasks:
                             all_clickup_task_ids.add(task_data.get("id"))
                     except Exception as e:
