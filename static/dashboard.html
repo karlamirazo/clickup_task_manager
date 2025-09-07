@@ -496,10 +496,10 @@
                 
                 <div class="form-group">
                     <label for="task-phone">
-                        📱 Número de Celular <span class="optional-badge">(Opcional)</span>
+                        📱 Número de Celular <span class="required-badge">*</span>
                         <i class="fas fa-info-circle info-icon" onclick="showPhoneHelp()" title="Click para más información"></i>
                     </label>
-                    <input type="tel" id="task-phone" name="phone" placeholder="+57 300 123 4567" pattern="[+]?[0-9\s\-\(\)]+" maxlength="20">
+                    <input type="tel" id="task-phone" name="phone" required placeholder="+57 300 123 4567" pattern="[+]?[0-9\s\-\(\)]+" maxlength="20">
                     <small class="form-help">
                         Este número se incluirá en la descripción de la tarea para notificaciones por WhatsApp
                         <span id="phone-char-count" class="char-count">0/20</span>
@@ -1717,8 +1717,8 @@
 • (300) 123-4567 (con paréntesis y guiones)
 
 **¿Es obligatorio?**
-• No, es completamente opcional
-• Solo se incluye en la descripción si se proporciona un número
+• Sí, es obligatorio para enviar notificaciones por WhatsApp
+• Se incluye automáticamente en la descripción de la tarea
 
 **¿Cómo funciona?**
 1. Escribe tu descripción normal
