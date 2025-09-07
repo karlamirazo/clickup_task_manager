@@ -1153,6 +1153,8 @@ async def get_tasks(
 ):
     """Obtener lista de tareas con paginación"""
     try:
+        print(f"🔍 API GET /tasks - include_closed: {include_closed}, page: {page}, limit: {limit}")
+        
         # Calcular offset para paginación
         offset = page * limit
         
@@ -1161,10 +1163,33 @@ async def get_tasks(
         
         # Aplicar filtros
         if not include_closed:
-            query = query.filter(Task.status != "complete")
+            # Filtrar tareas que no estén completadas (múltiples variaciones de estado)
+            query = query.filter(
+                ~Task.status.in_([
+                    "complete", "completado", "completada", "done", 
+                    "finalizada", "terminada", "finished", "completed"
+                ])
+            )
+            print("🚫 Filtro aplicado: excluyendo tareas completadas")
+        else:
+            print("✅ Incluyendo todas las tareas (completadas y no completadas)")
         
         # Aplicar paginación
         tasks = query.offset(offset).limit(limit).all()
+        
+        print(f"📊 Tareas obtenidas de la DB: {len(tasks)}")
+        
+        # Debug: mostrar estados de las tareas
+        if tasks:
+            statuses = [task.status for task in tasks]
+            unique_statuses = list(set(statuses))
+            print(f"📋 Estados encontrados en la DB: {unique_statuses}")
+            
+            # Contar tareas por estado
+            status_counts = {}
+            for status in statuses:
+                status_counts[status] = status_counts.get(status, 0) + 1
+            print(f"📊 Conteo por estado: {status_counts}")
         
         # Convertir a TaskResponse
         task_responses = []
