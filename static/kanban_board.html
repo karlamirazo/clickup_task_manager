@@ -1073,10 +1073,24 @@
                 });
 
                 if (response.ok) {
-                    // Actualizar tarea local con el estado mapeado
-                    task.status = mappedStatus;
-                    await updateKanbanCounters();
-                    console.log(`✅ Tarea ${taskId} movida a ${mappedStatus}`);
+                    const updatedTask = await response.json();
+                    console.log('✅ Tarea actualizada en ClickUp:', updatedTask);
+                    
+                    // Actualizar tarea local con los datos actualizados de la API
+                    const taskIndex = allTasks.findIndex(t => t.id == taskId);
+                    if (taskIndex !== -1) {
+                        allTasks[taskIndex] = updatedTask;
+                        filteredTasks = [...allTasks];
+                    }
+                    
+                    // Re-renderizar el Kanban Board con los datos actualizados
+                    renderKanbanBoard();
+                    
+                    console.log(`✅ Tarea ${taskId} movida a ${mappedStatus} y contadores actualizados`);
+                    
+                    // Mostrar notificación de éxito
+                    showNotification(`Tarea "${task.name}" movida a ${newStatus}`, 'success');
+                    
                 } else {
                     const errorText = await response.text();
                     console.error(`❌ Error ${response.status}:`, errorText);
@@ -1085,6 +1099,9 @@
             } catch (error) {
                 console.error('Error actualizando estado de tarea:', error);
                 showError('Error actualizando la tarea: ' + error.message);
+                
+                // Re-renderizar para restaurar el estado anterior
+                renderKanbanBoard();
             }
         }
 
@@ -1247,6 +1264,72 @@
         function showError(message) {
             console.error(message);
             // Aquí podrías mostrar un toast o notificación de error
+        }
+
+        function showNotification(message, type = 'info') {
+            console.log(`📢 Notificación [${type}]: ${message}`);
+            
+            // Crear elemento de notificación
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                font-size: 14px;
+                font-weight: 500;
+                max-width: 300px;
+                animation: slideInRight 0.3s ease-out;
+            `;
+            
+            notification.textContent = message;
+            
+            // Agregar estilos de animación si no existen
+            if (!document.getElementById('notification-styles')) {
+                const style = document.createElement('style');
+                style.id = 'notification-styles';
+                style.textContent = `
+                    @keyframes slideInRight {
+                        from {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                    }
+                    @keyframes slideOutRight {
+                        from {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                        to {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            document.body.appendChild(notification);
+            
+            // Remover notificación después de 3 segundos
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease-out';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
         }
 
         // Función de debug para mostrar información detallada
