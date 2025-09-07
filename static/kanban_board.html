@@ -518,6 +518,10 @@
                     <i class="fas fa-cloud-download-alt"></i>
                     Sincronizar
                 </button>
+                <button class="kanban-btn secondary" onclick="debugKanbanTasks()" style="background: #6c757d;">
+                    <i class="fas fa-bug"></i>
+                    Debug
+                </button>
                 <button class="kanban-btn secondary" onclick="window.location.href='/dashboard'">
                     <i class="fas fa-tachometer-alt"></i>
                     Dashboard
@@ -730,7 +734,7 @@
 
         async function loadTasks() {
             try {
-                const response = await fetch('/api/v1/tasks/?include_closed=true&page=0&limit=100');
+                const response = await fetch('/api/v1/tasks/?include_closed=true&page=0&limit=1000');
                 const data = await response.json();
                 
                 // La API devuelve una lista directamente, no un objeto con 'tasks'
@@ -738,11 +742,13 @@
                     allTasks = data;
                     filteredTasks = [...allTasks];
                     console.log(`✅ Cargadas ${allTasks.length} tareas`);
-                    console.log('Estados encontrados:', [...new Set(allTasks.map(t => t.status))]);
+                    console.log('📋 Estados encontrados:', [...new Set(allTasks.map(t => t.status))]);
+                    console.log('📊 Ejemplo de tareas:', allTasks.slice(0, 3).map(t => ({ name: t.name, status: t.status })));
                 } else if (data.tasks) {
                     allTasks = data.tasks;
                     filteredTasks = [...allTasks];
                     console.log(`✅ Cargadas ${allTasks.length} tareas`);
+                    console.log('📋 Estados encontrados:', [...new Set(allTasks.map(t => t.status))]);
                 } else {
                     allTasks = [];
                     filteredTasks = [];
@@ -812,6 +818,14 @@
             console.log('📊 Total de tareas filtradas:', filteredTasks.length);
             console.log('📋 Tareas disponibles:', filteredTasks.map(t => ({ name: t.name, status: t.status })));
             
+            // Debug: Mostrar distribución de estados
+            const statusCounts = {};
+            filteredTasks.forEach(task => {
+                const status = task.status?.toLowerCase() || 'unknown';
+                statusCounts[status] = (statusCounts[status] || 0) + 1;
+            });
+            console.log('📊 Distribución de estados:', statusCounts);
+            
             const statuses = ['to do', 'in progress', 'complete'];
             
             statuses.forEach(status => {
@@ -826,15 +840,27 @@
                 const tasksInStatus = filteredTasks.filter(task => {
                     const taskStatus = task.status?.toLowerCase() || 'to do';
                     
-                    // Mapear estados en español a inglés
+                    // Mapear estados en español a inglés - mapeo más completo
                     const statusMapping = {
+                        // Estados en español
                         'pendiente': 'to do',
+                        'por hacer': 'to do',
+                        'todo': 'to do',
                         'en curso': 'in progress',
+                        'en progreso': 'in progress',
+                        'trabajando': 'in progress',
                         'complete': 'complete',
                         'completada': 'complete',
                         'completado': 'complete',
+                        'done': 'complete',
+                        'finalizada': 'complete',
+                        'terminada': 'complete',
+                        // Estados en inglés
                         'to do': 'to do',
-                        'in progress': 'in progress'
+                        'in progress': 'in progress',
+                        'working': 'in progress',
+                        'completed': 'complete',
+                        'finished': 'complete'
                     };
                     
                     const mappedStatus = statusMapping[taskStatus] || taskStatus;
@@ -878,6 +904,8 @@
                 
                 const tasks = await response.json();
                 console.log('✅ Tareas obtenidas para contadores Kanban:', tasks.length);
+                console.log('📋 Estados encontrados en las tareas:', [...new Set(tasks.map(t => t.status))]);
+                console.log('📊 Ejemplo de tareas:', tasks.slice(0, 3).map(t => ({ name: t.name, status: t.status })));
                 
                 // Actualizar las tareas locales
                 allTasks = tasks;
@@ -1219,6 +1247,69 @@
         function showError(message) {
             console.error(message);
             // Aquí podrías mostrar un toast o notificación de error
+        }
+
+        // Función de debug para mostrar información detallada
+        function debugKanbanTasks() {
+            console.log('🐛 === DEBUG KANBAN TASKS ===');
+            console.log('📊 Total de tareas cargadas:', allTasks.length);
+            console.log('📊 Total de tareas filtradas:', filteredTasks.length);
+            
+            if (allTasks.length > 0) {
+                console.log('📋 Todas las tareas:');
+                allTasks.forEach((task, index) => {
+                    console.log(`  ${index + 1}. "${task.name}" - Estado: "${task.status}" - ID: ${task.id}`);
+                });
+                
+                // Agrupar por estado
+                const statusGroups = {};
+                allTasks.forEach(task => {
+                    const status = task.status?.toLowerCase() || 'unknown';
+                    if (!statusGroups[status]) {
+                        statusGroups[status] = [];
+                    }
+                    statusGroups[status].push(task);
+                });
+                
+                console.log('📊 Agrupación por estado:');
+                Object.keys(statusGroups).forEach(status => {
+                    console.log(`  "${status}": ${statusGroups[status].length} tareas`);
+                    statusGroups[status].forEach(task => {
+                        console.log(`    - "${task.name}"`);
+                    });
+                });
+                
+                // Mostrar mapeo de estados
+                console.log('🔄 Mapeo de estados aplicado:');
+                const statusMapping = {
+                    'pendiente': 'to do',
+                    'por hacer': 'to do',
+                    'todo': 'to do',
+                    'en curso': 'in progress',
+                    'en progreso': 'in progress',
+                    'trabajando': 'in progress',
+                    'complete': 'complete',
+                    'completada': 'complete',
+                    'completado': 'complete',
+                    'done': 'complete',
+                    'finalizada': 'complete',
+                    'terminada': 'complete',
+                    'to do': 'to do',
+                    'in progress': 'in progress',
+                    'working': 'in progress',
+                    'completed': 'complete',
+                    'finished': 'complete'
+                };
+                
+                Object.keys(statusGroups).forEach(status => {
+                    const mappedStatus = statusMapping[status] || status;
+                    console.log(`  "${status}" -> "${mappedStatus}"`);
+                });
+            } else {
+                console.log('⚠️ No hay tareas cargadas');
+            }
+            
+            console.log('🐛 === FIN DEBUG ===');
         }
 
         // Función para sincronizar tareas desde ClickUp
