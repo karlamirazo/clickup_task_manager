@@ -514,6 +514,10 @@
                     <i class="fas fa-sync-alt"></i>
                     Actualizar
                 </button>
+                <button class="kanban-btn secondary" onclick="syncKanbanTasks()">
+                    <i class="fas fa-cloud-download-alt"></i>
+                    Sincronizar
+                </button>
                 <button class="kanban-btn secondary" onclick="window.location.href='/dashboard'">
                     <i class="fas fa-tachometer-alt"></i>
                     Dashboard
@@ -860,6 +864,35 @@
             });
         }
 
+        // Función específica para actualizar contadores del Kanban Board
+        async function updateKanbanCounters() {
+            console.log('🔄 Actualizando contadores del Kanban Board...');
+            
+            try {
+                // Obtener todas las tareas actualizadas
+                const response = await fetch('/api/v1/tasks/?include_closed=true&page=0&limit=1000');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const tasks = await response.json();
+                console.log('✅ Tareas obtenidas para contadores Kanban:', tasks.length);
+                
+                // Actualizar las tareas locales
+                allTasks = tasks;
+                filteredTasks = [...allTasks];
+                
+                // Re-renderizar el Kanban Board con los nuevos datos
+                renderKanbanBoard();
+                
+                console.log('✅ Contadores del Kanban Board actualizados correctamente');
+                
+            } catch (error) {
+                console.error('❌ Error actualizando contadores del Kanban Board:', error);
+            }
+        }
+
         function createTaskCard(task) {
             const priority = task.priority || 3;
             const priorityClass = getPriorityClass(priority);
@@ -1014,7 +1047,7 @@
                 if (response.ok) {
                     // Actualizar tarea local con el estado mapeado
                     task.status = mappedStatus;
-                    renderKanbanBoard();
+                    await updateKanbanCounters();
                     console.log(`✅ Tarea ${taskId} movida a ${mappedStatus}`);
                 } else {
                     const errorText = await response.text();
@@ -1156,7 +1189,7 @@
                 
                 // Cerrar modal y recargar
                 closeModal('create-task-modal');
-                await loadKanbanBoard();
+                await updateKanbanCounters();
                 
                 alert('🎉 ¡Tarea creada exitosamente!');
                 
@@ -1168,7 +1201,7 @@
 
         // Funciones auxiliares
         function refreshKanban() {
-            loadKanbanBoard();
+            updateKanbanCounters();
         }
 
         function editTask(taskId) {
@@ -1186,6 +1219,52 @@
         function showError(message) {
             console.error(message);
             // Aquí podrías mostrar un toast o notificación de error
+        }
+
+        // Función para sincronizar tareas desde ClickUp
+        async function syncKanbanTasks() {
+            try {
+                console.log('🔄 Sincronizando tareas del Kanban Board...');
+                
+                // Mostrar indicador de carga en el botón
+                const syncBtn = document.querySelector('[onclick="syncKanbanTasks()"]');
+                if (syncBtn) {
+                    const originalContent = syncBtn.innerHTML;
+                    syncBtn.disabled = true;
+                    syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
+                    
+                    try {
+                        // Llamar a la función de sincronización global si existe
+                        if (typeof syncAllTasks === 'function') {
+                            await syncAllTasks();
+                        } else {
+                            // Si no existe, hacer sincronización directa
+                            const response = await fetch('/api/v1/tasks/sync-simple', {
+                                method: 'POST'
+                            });
+                            
+                            if (response.ok) {
+                                const data = await response.json();
+                                console.log('✅ Sincronización completada:', data);
+                                
+                                // Actualizar contadores del Kanban Board
+                                await updateKanbanCounters();
+                                
+                                alert('🎉 ¡Sincronización completada exitosamente!');
+                            } else {
+                                throw new Error('Error en la sincronización');
+                            }
+                        }
+                    } finally {
+                        // Restaurar botón
+                        syncBtn.disabled = false;
+                        syncBtn.innerHTML = originalContent;
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Error sincronizando tareas:', error);
+                alert('❌ Error en la sincronización: ' + error.message);
+            }
         }
 
         // Cerrar modal al hacer clic fuera

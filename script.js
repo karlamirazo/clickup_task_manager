@@ -446,6 +446,11 @@ async function syncAllTasks() {
             // Actualizar contadores del dashboard
             await updateDashboardCounters();
             
+            // Actualizar contadores del Kanban Board si estamos en esa página
+            if (typeof updateKanbanCounters === 'function') {
+                await updateKanbanCounters();
+            }
+            
         } else {
             const errorData = await response.json();
             throw new Error(errorData.detail || 'Error en la sincronización');
