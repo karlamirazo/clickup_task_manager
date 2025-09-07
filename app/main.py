@@ -270,6 +270,20 @@ async def read_tasks_dashboard():
     with open("static/tasks_dashboard.html", "r", encoding="utf-8") as f:
         return HTMLResponse(content=f.read())
 
+@app.get("/kanban", response_class=HTMLResponse)
+async def read_kanban_board():
+    """Kanban Board interface"""
+    response = FileResponse("static/kanban_board.html")
+    
+    # AGGRESSIVE NO CACHE HEADERS
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    response.headers["Last-Modified"] = "Thu, 01 Jan 1970 00:00:00 GMT"
+    response.headers["ETag"] = f'"{hash("kanban_board.html")}"'
+    
+    return response
+
 @app.get("/api")
 async def api_root():
     """Root endpoint of the API with debug information"""

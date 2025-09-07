@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>📋 Kanban Board - ClickUp Manager</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="mobile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Estilos específicos para el Kanban Board */
+        .kanban-container {
+            max-width: 100%;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .kanban-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .kanban-header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .kanban-header p {
+            color: #6c757d;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        
+        .kanban-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .kanban-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .kanban-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .kanban-btn.secondary {
+            background: #17a2b8;
+        }
+        
+        .kanban-btn.secondary:hover {
+            background: #138496;
+        }
+        
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .kanban-column {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .column-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .column-count {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .column-count.todo {
+            background: #6c757d;
+        }
+        
+        .column-count.progress {
+            background: #17a2b8;
+        }
+        
+        .column-count.done {
+            background: #28a745;
+        }
+        
+        .tasks-container {
+            flex: 1;
+            min-height: 400px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border: 2px dashed #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .tasks-container.drag-over {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .task-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+            cursor: grab;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+        
+        .task-card.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+            cursor: grabbing;
+        }
+        
+        .task-card.priority-urgent {
+            border-left-color: #dc3545;
+        }
+        
+        .task-card.priority-high {
+            border-left-color: #fd7e14;
+        }
+        
+        .task-card.priority-normal {
+            border-left-color: #17a2b8;
+        }
+        
+        .task-card.priority-low {
+            border-left-color: #6c757d;
+        }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .task-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+            line-height: 1.3;
+        }
+        
+        .task-id {
+            background: #e9ecef;
+            color: #6c757d;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .task-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 12px;
+            max-height: 60px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .task-assignee {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        
+        .assignee-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .task-due-date {
+            font-size: 0.8rem;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .task-due-date.overdue {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        
+        .task-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .task-priority {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .priority-urgent {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .priority-high {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .priority-normal {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .priority-low {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .task-action-btn {
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .task-action-btn:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+        
+        .empty-column {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 40px 20px;
+            border: 2px dashed #e9ecef;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        
+        .empty-column i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .kanban-container {
+                padding: 10px;
+            }
+            
+            .kanban-header h1 {
+                font-size: 2rem;
+            }
+            
+            .kanban-board {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .kanban-column {
+                min-height: 400px;
+                padding: 15px;
+            }
+            
+            .kanban-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .kanban-btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .kanban-header h1 {
+                font-size: 1.5rem;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .kanban-header p {
+                font-size: 1rem;
+            }
+            
+            .task-card {
+                padding: 12px;
+            }
+            
+            .task-title {
+                font-size: 0.9rem;
+            }
+            
+            .task-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+        
+        /* Animaciones */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .task-card {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        /* Estados de carga */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        
+        .loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Filtros */
+        .kanban-filters {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .filters-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .filter-group label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            background: white;
+            min-width: 150px;
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .filters-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-group {
+                width: 100%;
+            }
+            
+            .filter-select {
+                width: 100%;
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="kanban-container">
+        <!-- Header -->
+        <div class="kanban-header">
+            <h1>
+                <i class="fas fa-columns"></i>
+                Kanban Board
+            </h1>
+            <p>Gestiona tus tareas de forma visual y eficiente</p>
+            
+            <!-- Controles principales -->
+            <div class="kanban-controls">
+                <button class="kanban-btn" onclick="showCreateTaskModal()">
+                    <i class="fas fa-plus"></i>
+                    Nueva Tarea
+                </button>
+                <button class="kanban-btn secondary" onclick="refreshKanban()">
+                    <i class="fas fa-sync-alt"></i>
+                    Actualizar
+                </button>
+                <button class="kanban-btn secondary" onclick="window.location.href='/dashboard'">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </button>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="kanban-filters">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label for="workspace-filter">Workspace</label>
+                    <select id="workspace-filter" class="filter-select" onchange="filterTasks()">
+                        <option value="">Todos los workspaces</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="assignee-filter">Asignado a</label>
+                    <select id="assignee-filter" class="filter-select" onchange="filterTasks()">
+                        <option value="">Todos los usuarios</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="priority-filter">Prioridad</label>
+                    <select id="priority-filter" class="filter-select" onchange="filterTasks()">
+                        <option value="">Todas las prioridades</option>
+                        <option value="1">Urgente</option>
+                        <option value="2">Alta</option>
+                        <option value="3">Normal</option>
+                        <option value="4">Baja</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kanban Board -->
+        <div class="kanban-board">
+            <!-- Columna: To Do -->
+            <div class="kanban-column" data-status="to do">
+                <div class="column-header">
+                    <div class="column-title">
+                        <i class="fas fa-clock"></i>
+                        To Do
+                    </div>
+                    <div class="column-count todo" id="todo-count">0</div>
+                </div>
+                <div class="tasks-container" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <div class="loading" id="todo-loading">
+                        <i class="fas fa-spinner"></i>
+                        <p>Cargando tareas...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna: In Progress -->
+            <div class="kanban-column" data-status="in progress">
+                <div class="column-header">
+                    <div class="column-title">
+                        <i class="fas fa-play"></i>
+                        In Progress
+                    </div>
+                    <div class="column-count progress" id="progress-count">0</div>
+                </div>
+                <div class="tasks-container" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <div class="loading" id="progress-loading">
+                        <i class="fas fa-spinner"></i>
+                        <p>Cargando tareas...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna: Done -->
+            <div class="kanban-column" data-status="complete">
+                <div class="column-header">
+                    <div class="column-title">
+                        <i class="fas fa-check-circle"></i>
+                        Done
+                    </div>
+                    <div class="column-count done" id="done-count">0</div>
+                </div>
+                <div class="tasks-container" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <div class="loading" id="done-loading">
+                        <i class="fas fa-spinner"></i>
+                        <p>Cargando tareas...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para crear tarea -->
+    <div id="create-task-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('create-task-modal')">&times;</span>
+            <h2><i class="fas fa-plus-circle"></i> Crear Nueva Tarea</h2>
+            
+            <form id="create-task-form">
+                <div class="form-group">
+                    <label for="task-name">Nombre de la Tarea *</label>
+                    <input type="text" id="task-name" name="name" required placeholder="Ingresa el nombre de la tarea">
+                </div>
+                
+                <div class="form-group">
+                    <label for="task-description">Descripción</label>
+                    <textarea id="task-description" name="description" rows="3" placeholder="Describe la tarea (opcional)"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="task-phone">📱 Número de Celular</label>
+                    <input type="tel" id="task-phone" name="phone" placeholder="+57 300 123 4567" pattern="[+]?[0-9\s\-\(\)]+" maxlength="20">
+                    <small class="form-help">Este número se incluirá en la descripción para notificaciones por WhatsApp</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="task-assignee">Usuario Asignado</label>
+                    <select id="task-assignee" name="assignee_id">
+                        <option value="">Sin asignar</option>
+                    </select>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="task-status">Estado</label>
+                        <select id="task-status" name="status">
+                            <option value="to do">Pendiente</option>
+                            <option value="in progress">En Progreso</option>
+                            <option value="complete">Completada</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="task-priority">Prioridad</label>
+                        <select id="task-priority" name="priority">
+                            <option value="1">Urgente</option>
+                            <option value="2">Alta</option>
+                            <option value="3" selected>Normal</option>
+                            <option value="4">Baja</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="task-due-date">Fecha Límite</label>
+                    <input type="date" id="task-due-date" name="due_date">
+                </div>
+                
+                <div class="form-group">
+                    <label for="task-list">Lista de ClickUp</label>
+                    <select id="task-list" name="list_id" required>
+                        <option value="">Selecciona una lista</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="task-workspace">Workspace de ClickUp</label>
+                    <select id="task-workspace" name="workspace_id" required>
+                        <option value="">Selecciona un workspace</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Crear Tarea
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('create-task-modal')">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let allTasks = [];
+        let filteredTasks = [];
+
+        // Inicializar Kanban Board
+        document.addEventListener('DOMContentLoaded', function() {
+            loadKanbanBoard();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Configurar formulario de creación de tareas
+            const form = document.getElementById('create-task-form');
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    await submitCreateTask();
+                });
+            }
+        }
+
+        async function loadKanbanBoard() {
+            try {
+                console.log('🔄 Cargando Kanban Board...');
+                
+                // Cargar tareas y filtros en paralelo
+                await Promise.all([
+                    loadTasks(),
+                    loadFilters()
+                ]);
+                
+                renderKanbanBoard();
+            } catch (error) {
+                console.error('Error cargando Kanban Board:', error);
+                showError('Error cargando el tablero Kanban');
+            }
+        }
+
+        async function loadTasks() {
+            try {
+                const response = await fetch('/api/v1/tasks/?include_closed=true&page=0&limit=100');
+                const data = await response.json();
+                
+                // La API devuelve una lista directamente, no un objeto con 'tasks'
+                if (Array.isArray(data)) {
+                    allTasks = data;
+                    filteredTasks = [...allTasks];
+                    console.log(`✅ Cargadas ${allTasks.length} tareas`);
+                    console.log('Estados encontrados:', [...new Set(allTasks.map(t => t.status))]);
+                } else if (data.tasks) {
+                    allTasks = data.tasks;
+                    filteredTasks = [...allTasks];
+                    console.log(`✅ Cargadas ${allTasks.length} tareas`);
+                } else {
+                    allTasks = [];
+                    filteredTasks = [];
+                    console.log('⚠️ No se encontraron tareas');
+                }
+            } catch (error) {
+                console.error('Error cargando tareas:', error);
+                allTasks = [];
+                filteredTasks = [];
+            }
+        }
+
+        async function loadFilters() {
+            try {
+                // Cargar workspaces
+                const workspaceResponse = await fetch('/api/v1/workspaces/');
+                const workspaceData = await workspaceResponse.json();
+                
+                const workspaceSelect = document.getElementById('workspace-filter');
+                if (workspaceData.workspaces && workspaceData.workspaces.length > 0) {
+                    workspaceData.workspaces.forEach(workspace => {
+                        const option = document.createElement('option');
+                        option.value = workspace.id;
+                        option.textContent = workspace.name;
+                        workspaceSelect.appendChild(option);
+                    });
+                }
+
+                // Cargar usuarios (usar el primer workspace disponible)
+                if (workspaceData.workspaces && workspaceData.workspaces.length > 0) {
+                    const firstWorkspaceId = workspaceData.workspaces[0].id;
+                    await loadUsers(firstWorkspaceId);
+                }
+            } catch (error) {
+                console.error('Error cargando filtros:', error);
+            }
+        }
+
+        async function loadUsers(workspaceId) {
+            try {
+                const response = await fetch(`/api/v1/users/?workspace_id=${workspaceId}`);
+                const data = await response.json();
+                
+                const assigneeSelect = document.getElementById('assignee-filter');
+                const taskAssigneeSelect = document.getElementById('task-assignee');
+                
+                if (data.users && data.users.length > 0) {
+                    data.users.forEach(user => {
+                        const option1 = document.createElement('option');
+                        option1.value = user.id;
+                        option1.textContent = user.name || user.username || user.email;
+                        assigneeSelect.appendChild(option1);
+                        
+                        const option2 = document.createElement('option');
+                        option2.value = user.id;
+                        option2.textContent = user.name || user.username || user.email;
+                        taskAssigneeSelect.appendChild(option2);
+                    });
+                }
+            } catch (error) {
+                console.error('Error cargando usuarios:', error);
+            }
+        }
+
+        function renderKanbanBoard() {
+            const statuses = ['to do', 'in progress', 'complete'];
+            
+            statuses.forEach(status => {
+                const container = document.querySelector(`[data-status="${status}"] .tasks-container`);
+                const loading = document.getElementById(`${status.replace(' ', '-')}-loading`);
+                
+                if (loading) {
+                    loading.style.display = 'none';
+                }
+                
+                // Filtrar tareas por estado (manejar tanto español como inglés)
+                const tasksInStatus = filteredTasks.filter(task => {
+                    const taskStatus = task.status?.toLowerCase() || 'to do';
+                    
+                    // Mapear estados en español a inglés
+                    const statusMapping = {
+                        'pendiente': 'to do',
+                        'en curso': 'in progress',
+                        'complete': 'complete',
+                        'completada': 'complete',
+                        'to do': 'to do',
+                        'in progress': 'in progress'
+                    };
+                    
+                    const mappedStatus = statusMapping[taskStatus] || taskStatus;
+                    return mappedStatus === status;
+                });
+                
+                // Actualizar contador
+                const countElement = document.getElementById(`${status.replace(' ', '-')}-count`);
+                if (countElement) {
+                    countElement.textContent = tasksInStatus.length;
+                }
+                
+                // Renderizar tareas
+                if (tasksInStatus.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-column">
+                            <i class="fas fa-inbox"></i>
+                            <p>No hay tareas en esta columna</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = tasksInStatus.map(task => createTaskCard(task)).join('');
+                }
+            });
+        }
+
+        function createTaskCard(task) {
+            const priority = task.priority || 3;
+            const priorityClass = getPriorityClass(priority);
+            const priorityText = getPriorityText(priority);
+            
+            const dueDate = task.due_date ? new Date(task.due_date) : null;
+            const isOverdue = dueDate && dueDate < new Date() && task.status !== 'complete';
+            
+            const assigneeName = task.assignee || 'Sin asignar';
+            const assigneeInitials = getInitials(assigneeName);
+            
+            return `
+                <div class="task-card priority-${priorityClass}" draggable="true" ondragstart="drag(event)" data-task-id="${task.id}">
+                    <div class="task-header">
+                        <h3 class="task-title">${task.name || 'Sin nombre'}</h3>
+                        <span class="task-id">${task.clickup_id || task.id}</span>
+                    </div>
+                    
+                    ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
+                    
+                    <div class="task-meta">
+                        <div class="task-assignee">
+                            <div class="assignee-avatar">${assigneeInitials}</div>
+                            <span>${assigneeName}</span>
+                        </div>
+                        ${dueDate ? `
+                            <div class="task-due-date ${isOverdue ? 'overdue' : ''}">
+                                <i class="fas fa-calendar"></i>
+                                ${dueDate.toLocaleDateString('es-ES')}
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="task-footer">
+                        <span class="task-priority priority-${priorityClass}">${priorityText}</span>
+                        <div class="task-actions">
+                            <button class="task-action-btn" onclick="editTask('${task.id}')" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="task-action-btn" onclick="deleteTask('${task.id}')" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getPriorityClass(priority) {
+            const classes = {
+                1: 'urgent',
+                2: 'high',
+                3: 'normal',
+                4: 'low'
+            };
+            return classes[priority] || 'normal';
+        }
+
+        function getPriorityText(priority) {
+            const texts = {
+                1: 'Urgente',
+                2: 'Alta',
+                3: 'Normal',
+                4: 'Baja'
+            };
+            return texts[priority] || 'Normal';
+        }
+
+        function getInitials(name) {
+            if (!name || name === 'Sin asignar') return '?';
+            return name.split(' ').map(word => word[0]).join('').toUpperCase().substring(0, 2);
+        }
+
+        // Funciones de drag and drop
+        function allowDrop(ev) {
+            ev.preventDefault();
+            ev.currentTarget.classList.add('drag-over');
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.dataset.taskId);
+            ev.target.classList.add('dragging');
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            ev.currentTarget.classList.remove('drag-over');
+            
+            const taskId = ev.dataTransfer.getData("text");
+            const newStatus = ev.currentTarget.closest('.kanban-column').dataset.status;
+            
+            // Remover clase dragging de todos los elementos
+            document.querySelectorAll('.task-card').forEach(card => {
+                card.classList.remove('dragging');
+            });
+            
+            // Actualizar estado de la tarea
+            updateTaskStatus(taskId, newStatus);
+        }
+
+        // Remover clase drag-over cuando se sale del área
+        document.addEventListener('dragleave', function(e) {
+            if (e.target.classList.contains('tasks-container')) {
+                e.target.classList.remove('drag-over');
+            }
+        });
+
+        async function updateTaskStatus(taskId, newStatus) {
+            try {
+                const task = allTasks.find(t => t.id == taskId);
+                if (!task) {
+                    console.error('Tarea no encontrada:', taskId);
+                    return;
+                }
+
+                console.log(`🔄 Actualizando tarea: ${taskId}`);
+                console.log(`📋 Estado actual: ${task.status} -> Nuevo estado: ${newStatus}`);
+
+                // Mapear estado de inglés a español para la API
+                const statusMapping = {
+                    'to do': 'pendiente',
+                    'in progress': 'en curso',
+                    'complete': 'complete'
+                };
+                
+                const mappedStatus = statusMapping[newStatus] || newStatus;
+                console.log(`🔄 Estado mapeado: ${newStatus} -> ${mappedStatus}`);
+
+                // Crear objeto de actualización solo con los campos necesarios
+                const updateData = {
+                    name: task.name,
+                    description: task.description,
+                    status: mappedStatus,
+                    priority: task.priority,
+                    due_date: task.due_date,
+                    start_date: task.start_date,
+                    assignee_id: task.assignee_id,
+                    tags: task.tags,
+                    custom_fields: task.custom_fields
+                };
+
+                console.log(`📋 Datos de actualización:`, updateData);
+
+                const response = await fetch(`/api/v1/tasks/${taskId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (response.ok) {
+                    // Actualizar tarea local con el estado mapeado
+                    task.status = mappedStatus;
+                    renderKanbanBoard();
+                    console.log(`✅ Tarea ${taskId} movida a ${mappedStatus}`);
+                } else {
+                    const errorText = await response.text();
+                    console.error(`❌ Error ${response.status}:`, errorText);
+                    throw new Error(`Error ${response.status}: ${errorText}`);
+                }
+            } catch (error) {
+                console.error('Error actualizando estado de tarea:', error);
+                showError('Error actualizando la tarea: ' + error.message);
+            }
+        }
+
+        // Funciones de filtrado
+        function filterTasks() {
+            const workspaceFilter = document.getElementById('workspace-filter').value;
+            const assigneeFilter = document.getElementById('assignee-filter').value;
+            const priorityFilter = document.getElementById('priority-filter').value;
+
+            filteredTasks = allTasks.filter(task => {
+                let matches = true;
+
+                if (workspaceFilter && task.workspace_id !== workspaceFilter) {
+                    matches = false;
+                }
+
+                if (assigneeFilter && task.assignee_id !== assigneeFilter) {
+                    matches = false;
+                }
+
+                if (priorityFilter && task.priority != priorityFilter) {
+                    matches = false;
+                }
+
+                return matches;
+            });
+
+            renderKanbanBoard();
+        }
+
+        // Funciones del modal
+        function showCreateTaskModal() {
+            document.getElementById('create-task-modal').style.display = 'block';
+            loadClickUpLists();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            if (modalId === 'create-task-modal') {
+                document.getElementById('create-task-form').reset();
+            }
+        }
+
+        async function loadClickUpLists() {
+            try {
+                // Cargar workspaces
+                const workspaceResponse = await fetch('/api/v1/workspaces/');
+                const workspaceData = await workspaceResponse.json();
+                
+                const workspaceSelect = document.getElementById('task-workspace');
+                workspaceSelect.innerHTML = '<option value="">Selecciona un workspace</option>';
+                
+                if (workspaceData.workspaces && workspaceData.workspaces.length > 0) {
+                    workspaceData.workspaces.forEach(workspace => {
+                        const option = document.createElement('option');
+                        option.value = workspace.id;
+                        option.textContent = workspace.name;
+                        workspaceSelect.appendChild(option);
+                    });
+                }
+
+                // Cargar listas del primer workspace
+                if (workspaceData.workspaces && workspaceData.workspaces.length > 0) {
+                    const firstWorkspaceId = workspaceData.workspaces[0].id;
+                    const response = await fetch(`/api/v1/lists/?workspace_id=${firstWorkspaceId}`);
+                    const data = await response.json();
+                    
+                    const listSelect = document.getElementById('task-list');
+                    listSelect.innerHTML = '<option value="">Selecciona una lista</option>';
+                    
+                    if (data.lists && data.lists.length > 0) {
+                        data.lists.forEach(list => {
+                            const option = document.createElement('option');
+                            option.value = list.id;
+                            option.textContent = list.name;
+                            listSelect.appendChild(option);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error cargando listas de ClickUp:', error);
+            }
+        }
+
+        async function submitCreateTask() {
+            try {
+                const form = document.getElementById('create-task-form');
+                const formData = new FormData(form);
+                
+                const phoneNumber = formData.get('phone');
+                let description = formData.get('description') || '';
+                
+                // Agregar número de teléfono a la descripción si se proporciona
+                if (phoneNumber && phoneNumber.trim()) {
+                    const phoneText = `\n\n📱 **Número de Celular para WhatsApp:** ${phoneNumber.trim()}`;
+                    description += phoneText;
+                }
+                
+                const taskData = {
+                    name: formData.get('name'),
+                    description: description,
+                    status: formData.get('status'),
+                    priority: parseInt(formData.get('priority')),
+                    due_date: formData.get('due_date'),
+                    list_id: formData.get('list_id'),
+                    workspace_id: formData.get('workspace_id'),
+                    assignee_id: formData.get('assignee_id') || null
+                };
+                
+                // Validar datos requeridos
+                if (!taskData.name || !taskData.list_id || !taskData.workspace_id) {
+                    throw new Error('Nombre de tarea, lista y workspace son obligatorios');
+                }
+                
+                const response = await fetch('/api/v1/tasks/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(taskData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Error creando tarea');
+                }
+                
+                const result = await response.json();
+                console.log('✅ Tarea creada exitosamente:', result);
+                
+                // Cerrar modal y recargar
+                closeModal('create-task-modal');
+                await loadKanbanBoard();
+                
+                alert('🎉 ¡Tarea creada exitosamente!');
+                
+            } catch (error) {
+                console.error('Error creando tarea:', error);
+                alert('❌ Error creando tarea: ' + error.message);
+            }
+        }
+
+        // Funciones auxiliares
+        function refreshKanban() {
+            loadKanbanBoard();
+        }
+
+        function editTask(taskId) {
+            // Implementar edición de tarea
+            console.log('Editar tarea:', taskId);
+        }
+
+        function deleteTask(taskId) {
+            if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
+                // Implementar eliminación de tarea
+                console.log('Eliminar tarea:', taskId);
+            }
+        }
+
+        function showError(message) {
+            console.error(message);
+            // Aquí podrías mostrar un toast o notificación de error
+        }
+
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('create-task-modal');
+            if (event.target === modal) {
+                closeModal('create-task-modal');
+            }
+        }
+    </script>
+</body>
+</html>
