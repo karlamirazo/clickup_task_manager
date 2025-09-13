@@ -181,19 +181,8 @@ import datetime
 
 @app.get("/")
 async def root():
-    """Serve dashboard as main page with AGGRESSIVE NO CACHE"""
-    response = FileResponse("static/dashboard.html")
-    
-    # AGGRESSIVE NO CACHE HEADERS - EVEN MORE AGGRESSIVE
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0, private"
-    response.headers["Pragma"] = "no-cache"
-    response.headers["Expires"] = "Thu, 01 Jan 1970 00:00:00 GMT"
-    response.headers["Last-Modified"] = "Thu, 01 Jan 1970 00:00:00 GMT"
-    response.headers["ETag"] = f'"{hash("dashboard.html")}"'
-    response.headers["Vary"] = "*"
-    response.headers["Surrogate-Control"] = "no-store"
-    
-    return response
+    """Redirect to login page"""
+    return RedirectResponse(url="/api/auth/login")
 
 @app.get("/index", response_class=HTMLResponse)
 async def read_index():
