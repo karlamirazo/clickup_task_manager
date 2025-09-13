@@ -117,167 +117,121 @@ async def login_page():
 @router.get("/clickup")
 async def clickup_oauth_login():
     """Iniciar proceso de OAuth con ClickUp"""
-    try:
-        # Obtener configuración de OAuth
-        client_id = os.getenv('CLICKUP_OAUTH_CLIENT_ID', '')
-        redirect_uri = os.getenv('CLICKUP_OAUTH_REDIRECT_URI', 'https://clickuptaskmanager-production.up.railway.app/api/auth/callback')
-        
-        if not client_id:
-            return HTMLResponse(content="""
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Error de Configuración</title>
-                <style>
-                    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-                    .error { color: #e74c3c; background: #fdf2f2; padding: 20px; border-radius: 10px; margin: 20px; }
-                </style>
-            </head>
-            <body>
-                <h1>⚠️ Configuración Requerida</h1>
-                <div class="error">
-                    <p>OAuth de ClickUp no está configurado.</p>
-                    <p>Por favor, configura las variables de entorno:</p>
-                    <ul style="text-align: left; display: inline-block;">
-                        <li>CLICKUP_OAUTH_CLIENT_ID</li>
-                        <li>CLICKUP_OAUTH_CLIENT_SECRET</li>
-                        <li>CLICKUP_OAUTH_REDIRECT_URI</li>
-                    </ul>
-                </div>
-                <p><a href="/api/auth/login">← Volver al Login</a></p>
-            </body>
-            </html>
-            """)
-        
-        # Generar state para seguridad
-        state = secrets.token_urlsafe(32)
-        
-        # Construir URL de autorización
-        auth_url = f"https://app.clickup.com/api/v2/oauth/authorize?" + urlencode({
-            'client_id': client_id,
-            'redirect_uri': redirect_uri,
-            'response_type': 'code',
-            'state': state,
-            'scope': 'read:user read:workspace read:task write:task'
-        })
-        
-        return RedirectResponse(url=auth_url)
-        
-    except Exception as e:
-        return HTMLResponse(content=f"""
+    # Obtener configuración de OAuth
+    client_id = os.getenv('CLICKUP_OAUTH_CLIENT_ID', '')
+    redirect_uri = os.getenv('CLICKUP_OAUTH_REDIRECT_URI', 'https://clickuptaskmanager-production.up.railway.app/api/auth/callback')
+    
+    if not client_id:
+        return HTMLResponse(content="""
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Error del Servidor</title>
+            <title>Error de Configuración</title>
             <style>
-                body {{ font-family: Arial, sans-serif; text-align: center; padding: 50px; }}
-                .error {{ color: #e74c3c; background: #fdf2f2; padding: 20px; border-radius: 10px; margin: 20px; }}
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+                .error { color: #e74c3c; background: #fdf2f2; padding: 20px; border-radius: 10px; margin: 20px; }
             </style>
         </head>
         <body>
-            <h1>❌ Error del Servidor</h1>
+            <h1>⚠️ Configuración Requerida</h1>
             <div class="error">
-                <p>Error: {str(e)}</p>
-                <p>Por favor, intenta de nuevo más tarde.</p>
+                <p>OAuth de ClickUp no está configurado.</p>
+                <p>Por favor, configura las variables de entorno:</p>
+                <ul style="text-align: left; display: inline-block;">
+                    <li>CLICKUP_OAUTH_CLIENT_ID</li>
+                    <li>CLICKUP_OAUTH_CLIENT_SECRET</li>
+                    <li>CLICKUP_OAUTH_REDIRECT_URI</li>
+                </ul>
             </div>
             <p><a href="/api/auth/login">← Volver al Login</a></p>
         </body>
         </html>
         """)
+    
+    # Generar state para seguridad
+    state = secrets.token_urlsafe(32)
+    
+    # Construir URL de autorización
+    auth_url = f"https://app.clickup.com/api/v2/oauth/authorize?" + urlencode({
+        'client_id': client_id,
+        'redirect_uri': redirect_uri,
+        'response_type': 'code',
+        'state': state,
+        'scope': 'read:user read:workspace read:task write:task'
+    })
+    
+    return RedirectResponse(url=auth_url)
 
 @router.get("/callback")
 async def clickup_oauth_callback(code: str = None, state: str = None, error: str = None):
     """Callback de OAuth de ClickUp"""
-    try:
-        if error:
-            return HTMLResponse(content=f"""
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Error de Autorización</title>
-                <style>
-                    body {{ font-family: Arial, sans-serif; text-align: center; padding: 50px; }}
-                    .error {{ color: #e74c3c; background: #fdf2f2; padding: 20px; border-radius: 10px; margin: 20px; }}
-                </style>
-            </head>
-            <body>
-                <h1>❌ Error de Autorización</h1>
-                <div class="error">
-                    <p>Error: {error}</p>
-                    <p>No se pudo completar la autenticación con ClickUp.</p>
-                </div>
-                <p><a href="/api/auth/login">← Intentar de nuevo</a></p>
-            </body>
-            </html>
-            """)
-        
-        if not code:
-            return HTMLResponse(content="""
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Error de Callback</title>
-                <style>
-                    body {{ font-family: Arial, sans-serif; text-align: center; padding: 50px; }}
-                    .error {{ color: #e74c3c; background: #fdf2f2; padding: 20px; border-radius: 10px; margin: 20px; }}
-                </style>
-            </head>
-            <body>
-                <h1>❌ Error de Callback</h1>
-                <div class="error">
-                    <p>No se recibió el código de autorización de ClickUp.</p>
-                </div>
-                <p><a href="/api/auth/login">← Volver al Login</a></p>
-            </body>
-            </html>
-            """)
-        
-        # Por ahora, redirigir al dashboard con un mensaje de éxito
+    if error:
         return HTMLResponse(content=f"""
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Autenticación Exitosa</title>
-            <style>
-                body {{ font-family: Arial, sans-serif; text-align: center; padding: 50px; }}
-                .success {{ color: #27ae60; background: #f0f9f0; padding: 20px; border-radius: 10px; margin: 20px; }}
-                .btn {{ background: #667eea; color: white; padding: 15px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; text-decoration: none; display: inline-block; margin: 10px; }}
-            </style>
-        </head>
-        <body>
-            <h1>✅ ¡Autenticación Exitosa!</h1>
-            <div class="success">
-                <p>Te has autenticado correctamente con ClickUp.</p>
-                <p>Código recibido: {code[:20] if code else 'N/A'}...</p>
-                <p><small>Nota: La integración completa de OAuth está en desarrollo.</small></p>
-            </div>
-            <a href="/dashboard" class="btn">📊 Ir al Dashboard</a>
-            <a href="/api/auth/login" class="btn">🔐 Volver al Login</a>
-        </body>
-        </html>
-        """)
-        
-    except Exception as e:
-        return HTMLResponse(content=f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Error del Servidor</title>
+            <title>Error de Autorización</title>
             <style>
                 body {{ font-family: Arial, sans-serif; text-align: center; padding: 50px; }}
                 .error {{ color: #e74c3c; background: #fdf2f2; padding: 20px; border-radius: 10px; margin: 20px; }}
             </style>
         </head>
         <body>
-            <h1>❌ Error del Servidor</h1>
+            <h1>❌ Error de Autorización</h1>
             <div class="error">
-                <p>Error: {str(e)}</p>
-                <p>Por favor, intenta de nuevo más tarde.</p>
+                <p>Error: {error}</p>
+                <p>No se pudo completar la autenticación con ClickUp.</p>
+            </div>
+            <p><a href="/api/auth/login">← Intentar de nuevo</a></p>
+        </body>
+        </html>
+        """)
+    
+    if not code:
+        return HTMLResponse(content="""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Error de Callback</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; text-align: center; padding: 50px; }}
+                .error {{ color: #e74c3c; background: #fdf2f2; padding: 20px; border-radius: 10px; margin: 20px; }}
+            </style>
+        </head>
+        <body>
+            <h1>❌ Error de Callback</h1>
+            <div class="error">
+                <p>No se recibió el código de autorización de ClickUp.</p>
             </div>
             <p><a href="/api/auth/login">← Volver al Login</a></p>
         </body>
         </html>
         """)
+    
+    # Por ahora, redirigir al dashboard con un mensaje de éxito
+    return HTMLResponse(content=f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Autenticación Exitosa</title>
+        <style>
+            body {{ font-family: Arial, sans-serif; text-align: center; padding: 50px; }}
+            .success {{ color: #27ae60; background: #f0f9f0; padding: 20px; border-radius: 10px; margin: 20px; }}
+            .btn {{ background: #667eea; color: white; padding: 15px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; text-decoration: none; display: inline-block; margin: 10px; }}
+        </style>
+    </head>
+    <body>
+        <h1>✅ ¡Autenticación Exitosa!</h1>
+        <div class="success">
+            <p>Te has autenticado correctamente con ClickUp.</p>
+            <p>Código recibido: {code[:20] if code else 'N/A'}...</p>
+            <p><small>Nota: La integración completa de OAuth está en desarrollo.</small></p>
+        </div>
+        <a href="/dashboard" class="btn">📊 Ir al Dashboard</a>
+        <a href="/api/auth/login" class="btn">🔐 Volver al Login</a>
+    </body>
+    </html>
+    """)
 
 @router.get("/status")
 async def auth_status():
@@ -293,3 +247,8 @@ async def auth_status():
         "redirect_uri": redirect_uri,
         "status": "ready" if client_id and client_secret else "needs_configuration"
     }
+
+@router.get("/test")
+async def test_endpoint():
+    """Endpoint de prueba simple"""
+    return {"message": "OAuth test endpoint working", "status": "ok"}
