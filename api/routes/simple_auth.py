@@ -204,6 +204,11 @@ async def auth_status():
         "status": "ready" if client_id and client_secret else "needs_configuration"
     }
 
+@router.get("/test")
+async def test_endpoint():
+    """Endpoint de prueba simple"""
+    return {"message": "OAuth test endpoint working", "status": "ok"}
+
 @router.get("/debug")
 async def debug_endpoint():
     """Endpoint de debug para identificar problemas"""
