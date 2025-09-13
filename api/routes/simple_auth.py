@@ -122,31 +122,7 @@ async def clickup_oauth_login():
     redirect_uri = os.getenv('CLICKUP_OAUTH_REDIRECT_URI', 'https://clickuptaskmanager-production.up.railway.app/api/auth/callback')
     
     if not client_id:
-        return HTMLResponse(content="""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Error de Configuración</title>
-            <style>
-                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-                .error { color: #e74c3c; background: #fdf2f2; padding: 20px; border-radius: 10px; margin: 20px; }
-            </style>
-        </head>
-        <body>
-            <h1>⚠️ Configuración Requerida</h1>
-            <div class="error">
-                <p>OAuth de ClickUp no está configurado.</p>
-                <p>Por favor, configura las variables de entorno:</p>
-                <ul style="text-align: left; display: inline-block;">
-                    <li>CLICKUP_OAUTH_CLIENT_ID</li>
-                    <li>CLICKUP_OAUTH_CLIENT_SECRET</li>
-                    <li>CLICKUP_OAUTH_REDIRECT_URI</li>
-                </ul>
-            </div>
-            <p><a href="/api/auth/login">← Volver al Login</a></p>
-        </body>
-        </html>
-        """)
+        return {"error": "OAuth not configured", "client_id": client_id}
     
     # Generar state para seguridad
     state = secrets.token_urlsafe(32)
@@ -252,3 +228,34 @@ async def auth_status():
 async def test_endpoint():
     """Endpoint de prueba simple"""
     return {"message": "OAuth test endpoint working", "status": "ok"}
+
+@router.get("/debug")
+async def debug_endpoint():
+    """Endpoint de debug para identificar problemas"""
+    try:
+        # Verificar importaciones básicas
+        import os
+        import secrets
+        from urllib.parse import urlencode
+        from fastapi.responses import HTMLResponse, RedirectResponse
+        
+        # Verificar variables de entorno
+        client_id = os.getenv('CLICKUP_OAUTH_CLIENT_ID', '')
+        client_secret = os.getenv('CLICKUP_OAUTH_CLIENT_SECRET', '')
+        redirect_uri = os.getenv('CLICKUP_OAUTH_REDIRECT_URI', '')
+        
+        return {
+            "status": "ok",
+            "imports": "successful",
+            "client_id_present": bool(client_id),
+            "client_secret_present": bool(client_secret),
+            "redirect_uri_present": bool(redirect_uri),
+            "redirect_uri_value": redirect_uri,
+            "python_version": "3.11.9"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "error_type": type(e).__name__
+        }
