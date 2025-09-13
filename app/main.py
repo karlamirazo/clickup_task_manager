@@ -185,6 +185,177 @@ async def root():
     from fastapi.responses import RedirectResponse
     return RedirectResponse(url="/api/auth/login")
 
+@app.get("/api/auth/login")
+async def login_page_direct():
+    """Página de login directa"""
+    return HTMLResponse(content="""
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Iniciar Sesión - ClickUp Task Manager</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+            
+            .login-container {
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                padding: 40px;
+                width: 100%;
+                max-width: 400px;
+                text-align: center;
+            }
+            
+            .logo {
+                font-size: 2.5rem;
+                color: #667eea;
+                margin-bottom: 10px;
+            }
+            
+            .title {
+                color: #333;
+                margin-bottom: 30px;
+                font-size: 1.5rem;
+                font-weight: 600;
+            }
+            
+            .subtitle {
+                color: #666;
+                margin-bottom: 40px;
+                font-size: 1rem;
+            }
+            
+            .oauth-button {
+                background: #667eea;
+                color: white;
+                border: none;
+                padding: 15px 30px;
+                border-radius: 10px;
+                font-size: 1.1rem;
+                font-weight: 600;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-block;
+                transition: all 0.3s ease;
+                width: 100%;
+                margin-bottom: 20px;
+            }
+            
+            .oauth-button:hover {
+                background: #5a6fd8;
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            }
+            
+            .features {
+                text-align: left;
+                margin-top: 30px;
+            }
+            
+            .feature {
+                display: flex;
+                align-items: center;
+                margin-bottom: 15px;
+                color: #666;
+                font-size: 0.9rem;
+            }
+            
+            .feature-icon {
+                margin-right: 10px;
+                color: #667eea;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="login-container">
+            <div class="logo">📋</div>
+            <h1 class="title">ClickUp Task Manager</h1>
+            <p class="subtitle">Gestiona tus tareas de manera inteligente</p>
+            
+            <a href="/api/auth/clickup" class="oauth-button">
+                🔐 Iniciar con ClickUp
+            </a>
+            
+            <div class="features">
+                <div class="feature">
+                    <span class="feature-icon">✓</span>
+                    Sincronización automática con ClickUp
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">✓</span>
+                    Notificaciones inteligentes
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">✓</span>
+                    Dashboard personalizado
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    """)
+
+@app.get("/api/auth/clickup")
+async def clickup_oauth_direct():
+    """OAuth de ClickUp directo"""
+    import os
+    import secrets
+    from urllib.parse import urlencode
+    from fastapi.responses import RedirectResponse
+    
+    # Obtener configuración de OAuth
+    client_id = os.getenv('CLICKUP_OAUTH_CLIENT_ID', '')
+    redirect_uri = os.getenv('CLICKUP_OAUTH_REDIRECT_URI', 'https://clickuptaskmanager-production.up.railway.app/api/auth/callback')
+    
+    if not client_id:
+        return {"error": "OAuth not configured", "client_id": client_id}
+    
+    # Generar state para seguridad
+    state = secrets.token_urlsafe(32)
+    
+    # Construir URL de autorización
+    auth_url = f"https://app.clickup.com/api/v2/oauth/authorize?" + urlencode({
+        'client_id': client_id,
+        'redirect_uri': redirect_uri,
+        'response_type': 'code',
+        'state': state,
+        'scope': 'read:user read:workspace read:task write:task'
+    })
+    
+    return RedirectResponse(url=auth_url)
+
+@app.get("/api/auth/callback")
+async def clickup_oauth_callback_direct(code: str = None, state: str = None, error: str = None):
+    """Callback de OAuth de ClickUp directo"""
+    if error:
+        return {"error": f"Authorization error: {error}"}
+    
+    if not code:
+        return {"error": "No authorization code received"}
+    
+    return {
+        "message": "OAuth callback successful",
+        "code": code[:20] + "..." if code else None,
+        "state": state
+    }
+
 @app.get("/index", response_class=HTMLResponse)
 async def read_index():
     """Serve original index page"""
