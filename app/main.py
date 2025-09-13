@@ -182,6 +182,7 @@ import datetime
 @app.get("/")
 async def root():
     """Redirect to login page"""
+    from fastapi.responses import RedirectResponse
     return RedirectResponse(url="/api/auth/login")
 
 @app.get("/index", response_class=HTMLResponse)
