@@ -25,6 +25,11 @@ class Settings(BaseSettings):
     CLICKUP_SPACE_ID: str = os.getenv("CLICKUP_SPACE_ID", "90143983983")  # ID real del space
     CLICKUP_WEBHOOK_SECRET: str = os.getenv("CLICKUP_WEBHOOK_SECRET", "")
     
+    # Configuracion de ClickUp OAuth 2.0
+    CLICKUP_OAUTH_CLIENT_ID: str = os.getenv("CLICKUP_OAUTH_CLIENT_ID", "")
+    CLICKUP_OAUTH_CLIENT_SECRET: str = os.getenv("CLICKUP_OAUTH_CLIENT_SECRET", "")
+    CLICKUP_OAUTH_REDIRECT_URI: str = os.getenv("CLICKUP_OAUTH_REDIRECT_URI", "https://clickuptaskmanager-production.up.railway.app/api/auth/callback")
+    
     # Configuracion de autenticacion
     JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "your-secret-key-here-change-in-production")
     JWT_ALGORITHM: str = "HS256"

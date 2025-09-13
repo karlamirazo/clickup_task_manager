@@ -34,6 +34,11 @@ class User(Base):
     api_key_active = Column(Boolean, default=False)
     api_key_created_at = Column(DateTime, nullable=True)
     
+    # OAuth tokens
+    clickup_access_token = Column(Text, nullable=True)
+    clickup_refresh_token = Column(Text, nullable=True)
+    clickup_token_expires_at = Column(DateTime, nullable=True)
+    
     # Informacion de contacto para notificaciones
     phone = Column(String(20), nullable=True)
     telegram_id = Column(String(100), nullable=True)

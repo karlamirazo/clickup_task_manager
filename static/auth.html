@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autenticación - ClickUp Project Manager</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 900px;
+            min-height: 600px;
+            display: flex;
+        }
+
+        .auth-left {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-left::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .auth-left h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-left p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .features {
+            list-style: none;
+            position: relative;
+            z-index: 1;
+        }
+
+        .features li {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+        }
+
+        .features i {
+            margin-right: 12px;
+            font-size: 1.2rem;
+            color: #ffd700;
+        }
+
+        .auth-right {
+            flex: 1;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #667eea;
+            border-radius: 2px 2px 0 0;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .auth-button {
+            width: 100%;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .auth-button:active {
+            transform: translateY(0);
+        }
+
+        .auth-button.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .auth-button.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .clickup-oauth {
+            background: #7b68ee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .clickup-oauth:hover {
+            background: linear-gradient(135deg, #7b68ee 0%, #6a5acd 100%);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+            color: #666;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e0e0e0;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c33;
+            display: none;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3c3;
+            display: none;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .forgot-password a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+        .role-info {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .role-info h4 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .role-info ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .role-info li {
+            padding: 5px 0;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .role-info li i {
+            color: #28a745;
+            margin-right: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                flex-direction: column;
+                max-width: 400px;
+            }
+
+            .auth-left {
+                padding: 40px 30px;
+            }
+
+            .auth-left h1 {
+                font-size: 2rem;
+            }
+
+            .auth-right {
+                padding: 40px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-left">
+            <h1><i class="fas fa-tasks"></i> ClickUp Manager</h1>
+            <p>Gestiona tus proyectos de manera eficiente con nuestra plataforma integrada con ClickUp</p>
+            
+            <ul class="features">
+                <li><i class="fas fa-check-circle"></i> Sincronización automática con ClickUp</li>
+                <li><i class="fas fa-check-circle"></i> Notificaciones inteligentes</li>
+                <li><i class="fas fa-check-circle"></i> Dashboard personalizado</li>
+                <li><i class="fas fa-check-circle"></i> Gestión de equipos</li>
+                <li><i class="fas fa-check-circle"></i> Reportes avanzados</li>
+            </ul>
+        </div>
+
+        <div class="auth-right">
+            <div class="auth-tabs">
+                <button class="tab-button active" onclick="switchTab('login')">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                </button>
+                <button class="tab-button" onclick="switchTab('register')">
+                    <i class="fas fa-user-plus"></i> Registrarse
+                </button>
+            </div>
+
+            <div id="error-message" class="error-message"></div>
+            <div id="success-message" class="success-message"></div>
+
+            <!-- Formulario de Inicio de Sesión -->
+            <div id="login-tab" class="tab-content active">
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">Correo Electrónico</label>
+                        <input type="email" id="login-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Contraseña</label>
+                        <input type="password" id="login-password" name="password" required>
+                    </div>
+                    <button type="submit" class="auth-button">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </button>
+                </form>
+
+                <div class="divider">
+                    <span>O continúa con</span>
+                </div>
+
+                <button class="auth-button clickup-oauth" onclick="loginWithClickUp()">
+                    <i class="fab fa-clickup"></i> Iniciar con ClickUp
+                </button>
+
+                <div class="forgot-password">
+                    <a href="#" onclick="showForgotPassword()">¿Olvidaste tu contraseña?</a>
+                </div>
+            </div>
+
+            <!-- Formulario de Registro -->
+            <div id="register-tab" class="tab-content">
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="register-email">Correo Electrónico</label>
+                        <input type="email" id="register-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-username">Nombre de Usuario</label>
+                        <input type="text" id="register-username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Contraseña</label>
+                        <input type="password" id="register-password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-confirm-password">Confirmar Contraseña</label>
+                        <input type="password" id="register-confirm-password" name="confirm_password" required>
+                    </div>
+                    <button type="submit" class="auth-button">
+                        <i class="fas fa-user-plus"></i> Crear Cuenta
+                    </button>
+                </form>
+
+                <div class="divider">
+                    <span>O regístrate con</span>
+                </div>
+
+                <button class="auth-button clickup-oauth" onclick="registerWithClickUp()">
+                    <i class="fab fa-clickup"></i> Registrarse con ClickUp
+                </button>
+            </div>
+
+            <!-- Información de Roles -->
+            <div class="role-info">
+                <h4><i class="fas fa-info-circle"></i> Información de Acceso</h4>
+                <ul>
+                    <li><i class="fas fa-user"></i> <strong>Usuario:</strong> Ve solo sus tareas asignadas</li>
+                    <li><i class="fas fa-user-tie"></i> <strong>Gerente:</strong> Acceso a todas las tareas del proyecto</li>
+                    <li><i class="fas fa-crown"></i> <strong>Administrador:</strong> Control total del sistema</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        const API_BASE = '/api';
+        let currentUser = null;
+
+        // Cambiar entre pestañas
+        function switchTab(tabName) {
+            // Ocultar todos los contenidos
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remover clase active de todos los botones
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Mostrar pestaña seleccionada
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+            
+            // Limpiar mensajes
+            hideMessages();
+        }
+
+        // Mostrar mensajes de error
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(hideMessages, 5000);
+        }
+
+        // Mostrar mensajes de éxito
+        function showSuccess(message) {
+            const successDiv = document.getElementById('success-message');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(hideMessages, 3000);
+        }
+
+        // Ocultar mensajes
+        function hideMessages() {
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('success-message').style.display = 'none';
+        }
+
+        // Mostrar loading en botón
+        function setButtonLoading(button, loading) {
+            if (loading) {
+                button.classList.add('loading');
+                button.disabled = true;
+            } else {
+                button.classList.remove('loading');
+                button.disabled = false;
+            }
+        }
+
+        // Iniciar sesión con ClickUp OAuth
+        function loginWithClickUp() {
+            const button = event.target;
+            setButtonLoading(button, true);
+            
+            // Redirigir a la URL de autorización de ClickUp
+            const clientId = 'YOUR_CLICKUP_CLIENT_ID'; // Reemplazar con tu Client ID
+            const redirectUri = encodeURIComponent(window.location.origin + '/auth/callback');
+            const state = generateRandomString();
+            
+            // Guardar state en localStorage para verificación
+            localStorage.setItem('oauth_state', state);
+            
+            const authUrl = `https://app.clickup.com/api/v2/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
+            
+            window.location.href = authUrl;
+        }
+
+        // Registrarse con ClickUp OAuth
+        function registerWithClickUp() {
+            loginWithClickUp(); // Mismo flujo para registro
+        }
+
+        // Generar string aleatorio para state
+        function generateRandomString() {
+            return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        }
+
+        // Manejar formulario de login
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const button = this.querySelector('.auth-button');
+            setButtonLoading(button, true);
+            
+            const formData = new FormData(this);
+            const loginData = {
+                email: formData.get('email'),
+                password: formData.get('password')
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(loginData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('¡Inicio de sesión exitoso!');
+                    localStorage.setItem('auth_token', result.access_token);
+                    currentUser = result.user;
+                    
+                    // Redirigir al dashboard después de un breve delay
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 1500);
+                } else {
+                    showError(result.detail || 'Error al iniciar sesión');
+                }
+            } catch (error) {
+                showError('Error de conexión. Inténtalo de nuevo.');
+                console.error('Login error:', error);
+            } finally {
+                setButtonLoading(button, false);
+            }
+        });
+
+        // Manejar formulario de registro
+        document.getElementById('register-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const button = this.querySelector('.auth-button');
+            setButtonLoading(button, true);
+            
+            const formData = new FormData(this);
+            const password = formData.get('password');
+            const confirmPassword = formData.get('confirm_password');
+            
+            if (password !== confirmPassword) {
+                showError('Las contraseñas no coinciden');
+                setButtonLoading(button, false);
+                return;
+            }
+            
+            const registerData = {
+                email: formData.get('email'),
+                username: formData.get('username'),
+                password: password
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(registerData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('¡Cuenta creada exitosamente!');
+                    setTimeout(() => {
+                        switchTab('login');
+                    }, 2000);
+                } else {
+                    showError(result.detail || 'Error al crear la cuenta');
+                }
+            } catch (error) {
+                showError('Error de conexión. Inténtalo de nuevo.');
+                console.error('Register error:', error);
+            } finally {
+                setButtonLoading(button, false);
+            }
+        });
+
+        // Mostrar formulario de recuperación de contraseña
+        function showForgotPassword() {
+            const email = prompt('Ingresa tu correo electrónico para recuperar tu contraseña:');
+            if (email) {
+                // Aquí implementarías la lógica de recuperación
+                showSuccess('Se ha enviado un enlace de recuperación a tu correo');
+            }
+        }
+
+        // Verificar si ya está autenticado
+        window.addEventListener('load', function() {
+            const token = localStorage.getItem('auth_token');
+            if (token) {
+                // Verificar si el token es válido
+                fetch(`${API_BASE}/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Usuario ya autenticado, redirigir al dashboard
+                        window.location.href = '/dashboard';
+                    }
+                })
+                .catch(error => {
+                    // Token inválido, limpiar y mostrar login
+                    localStorage.removeItem('auth_token');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

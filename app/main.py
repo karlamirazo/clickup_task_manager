@@ -11,7 +11,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 import os
 
-from api.routes import tasks, workspaces, lists, users, automation, reports, integrations, spaces, webhooks, dashboard, search, auth, railway_monitor, automation_control
+# Importar middleware de autenticación (comentado temporalmente)
+# from auth.middleware import auth_middleware
+
+from api.routes import tasks, workspaces, lists, users, automation, reports, integrations, spaces, webhooks, dashboard, search, auth, railway_monitor, automation_control, simple_auth
 from core.config import settings
 from core.database import init_db
 
@@ -82,6 +85,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add authentication middleware (comentado temporalmente)
+# app.middleware("http")(auth_middleware)
+
 # Mount static files with NO CACHE
 app.mount("/static", StaticFiles(directory="static", check_dir=False), name="static")
 
@@ -147,6 +153,7 @@ app.include_router(webhooks.router, prefix="/api/v1/webhooks", tags=["webhooks"]
 app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboard"])
 app.include_router(search.router, prefix="/api/v1", tags=["search"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(simple_auth.router, tags=["auth simple"])
 # app.include_router(notifications.router, prefix="/api/v1", tags=["notifications"])  # Módulo no existe
 app.include_router(railway_monitor.router)
 app.include_router(automation_control.router, prefix="/api/v1", tags=["Automation Control"])
@@ -283,6 +290,11 @@ async def read_kanban_board():
     response.headers["ETag"] = f'"{hash("kanban_board.html")}"'
     
     return response
+
+@app.get("/login", response_class=HTMLResponse)
+async def login_page():
+    """Página de login - redirige a la ruta de autenticación"""
+    return RedirectResponse(url="/api/auth/login")
 
 @app.get("/api")
 async def api_root():
