@@ -153,7 +153,7 @@ app.include_router(webhooks.router, prefix="/api/v1/webhooks", tags=["webhooks"]
 app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboard"])
 app.include_router(search.router, prefix="/api/v1", tags=["search"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
-app.include_router(simple_auth.router, tags=["auth simple"])
+app.include_router(simple_auth.router, prefix="/api/auth", tags=["auth simple"])
 # app.include_router(notifications.router, prefix="/api/v1", tags=["notifications"])  # Módulo no existe
 app.include_router(railway_monitor.router)
 app.include_router(automation_control.router, prefix="/api/v1", tags=["Automation Control"])
