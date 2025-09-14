@@ -26,9 +26,13 @@ class Settings(BaseSettings):
     CLICKUP_WEBHOOK_SECRET: str = os.getenv("CLICKUP_WEBHOOK_SECRET", "")
     
     # Configuracion de ClickUp OAuth 2.0
-    CLICKUP_OAUTH_CLIENT_ID: str = os.getenv("CLICKUP_OAUTH_CLIENT_ID", "")
-    CLICKUP_OAUTH_CLIENT_SECRET: str = os.getenv("CLICKUP_OAUTH_CLIENT_SECRET", "")
-    CLICKUP_OAUTH_REDIRECT_URI: str = os.getenv("CLICKUP_OAUTH_REDIRECT_URI", "https://clickuptaskmanager-production.up.railway.app/api/auth/callback")
+    CLICKUP_OAUTH_CLIENT_ID: str = os.getenv("CLICKUP_OAUTH_CLIENT_ID", "7US6KJX26FOROTI3ZSOZYCAXBCG7W386")
+    CLICKUP_OAUTH_CLIENT_SECRET: str = os.getenv("CLICKUP_OAUTH_CLIENT_SECRET", "H4M3AVO1L6OG7RDH8XMPUK756PB0X2R28E5KTIJBV8PDQNSORKRSAXI7ZGI5MCXC")
+    # URL de redirección dinámica basada en el entorno
+    CLICKUP_OAUTH_REDIRECT_URI: str = os.getenv(
+        "CLICKUP_OAUTH_REDIRECT_URI", 
+        "http://127.0.0.1:8000/api/auth/callback"  # Usar 127.0.0.1 para ClickUp
+    )
     
     # Configuracion de autenticacion
     JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "your-secret-key-here-change-in-production")

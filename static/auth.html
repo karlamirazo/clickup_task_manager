@@ -511,17 +511,8 @@
             const button = event.target;
             setButtonLoading(button, true);
             
-            // Redirigir a la URL de autorización de ClickUp
-            const clientId = 'YOUR_CLICKUP_CLIENT_ID'; // Reemplazar con tu Client ID
-            const redirectUri = encodeURIComponent(window.location.origin + '/auth/callback');
-            const state = generateRandomString();
-            
-            // Guardar state en localStorage para verificación
-            localStorage.setItem('oauth_state', state);
-            
-            const authUrl = `https://app.clickup.com/api/v2/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
-            
-            window.location.href = authUrl;
+            // Redirigir a la URL de autorización de ClickUp usando la API
+            window.location.href = '/api/auth/clickup';
         }
 
         // Registrarse con ClickUp OAuth
@@ -637,12 +628,34 @@
 
         // Verificar si ya está autenticado
         window.addEventListener('load', function() {
-            const token = localStorage.getItem('auth_token');
+            // Verificar si hay un token en la URL (callback de OAuth)
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            const error = urlParams.get('error');
+            
+            if (error) {
+                // Error en OAuth
+                showError(`Error de autenticación: ${decodeURIComponent(error)}`);
+                return;
+            }
+            
             if (token) {
+                // Token recibido del callback de OAuth
+                localStorage.setItem('auth_token', token);
+                showSuccess('¡Autenticación exitosa! Redirigiendo...');
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 1500);
+                return;
+            }
+            
+            // Verificar token existente en localStorage
+            const existingToken = localStorage.getItem('auth_token');
+            if (existingToken) {
                 // Verificar si el token es válido
                 fetch(`${API_BASE}/auth/me`, {
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${existingToken}`
                     }
                 })
                 .then(response => {

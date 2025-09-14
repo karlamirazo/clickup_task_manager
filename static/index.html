@@ -467,5 +467,38 @@
     </div>
 
     <script src="/script.js?v=20250119"></script>
+    
+    <script>
+        // Manejo del token OAuth
+        window.addEventListener('load', function() {
+            // Verificar si hay un token en la URL (callback de OAuth)
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            const error = urlParams.get('error');
+
+            if (error) {
+                // Error en OAuth
+                alert(`Error de autenticación: ${decodeURIComponent(error)}`);
+                return;
+            }
+
+            if (token) {
+                // Token recibido del callback de OAuth
+                localStorage.setItem('auth_token', token);
+                
+                // Mostrar mensaje de éxito
+                const statusElement = document.getElementById('connection-status');
+                if (statusElement) {
+                    statusElement.innerHTML = '<i class="fas fa-check-circle"></i> Autenticado con ClickUp';
+                    statusElement.className = 'status-badge status-success';
+                }
+                
+                // Limpiar la URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                console.log('Token OAuth guardado:', token.substring(0, 20) + '...');
+            }
+        });
+    </script>
 </body>
 </html>
