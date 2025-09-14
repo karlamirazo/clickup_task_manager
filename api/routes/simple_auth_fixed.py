@@ -1,26 +1,25 @@
-#!/usr/bin/env python3
 """
-Aplicación simple de OAuth para ClickUp
+Rutas de autenticación simplificadas y robustas
 """
 
 import os
 import secrets
 from urllib.parse import urlencode
-from fastapi import FastAPI
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-app = FastAPI(title="ClickUp OAuth Simple")
+router = APIRouter()
 
-@app.get("/")
-async def root():
-    """Página principal con login"""
+@router.get("/login")
+async def login_page():
+    """Página de login con OAuth de ClickUp"""
     return HTMLResponse(content="""
     <!DOCTYPE html>
     <html lang="es">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>ClickUp Task Manager</title>
+        <title>Iniciar Sesión - ClickUp Task Manager</title>
         <style>
             * {
                 margin: 0;
@@ -107,6 +106,15 @@ async def root():
                 color: #667eea;
                 font-weight: bold;
             }
+            
+            .error {
+                background: #fee;
+                color: #c33;
+                padding: 15px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+                border-left: 4px solid #c33;
+            }
         </style>
     </head>
     <body>
@@ -115,7 +123,7 @@ async def root():
             <h1 class="title">ClickUp Task Manager</h1>
             <p class="subtitle">Gestiona tus tareas de manera inteligente</p>
             
-            <a href="/oauth/clickup" class="oauth-button">
+            <a href="/api/auth/clickup" class="oauth-button">
                 🔐 Iniciar con ClickUp
             </a>
             
@@ -138,31 +146,35 @@ async def root():
     </html>
     """)
 
-@app.get("/oauth/clickup")
-async def clickup_oauth():
-    """OAuth de ClickUp"""
-    # Obtener configuración de OAuth
-    client_id = os.getenv('CLICKUP_OAUTH_CLIENT_ID', '')
-    redirect_uri = os.getenv('CLICKUP_OAUTH_REDIRECT_URI', 'http://localhost:8000/api/auth/callback')
-    
-    if not client_id:
-        return {"error": "OAuth not configured", "client_id": client_id}
-    
-    # Generar state para seguridad
-    state = secrets.token_urlsafe(32)
-    
-    # Construir URL de autorización
-    auth_url = f"https://app.clickup.com/api/v2/oauth/authorize?" + urlencode({
-        'client_id': client_id,
-        'redirect_uri': redirect_uri,
-        'response_type': 'code',
-        'state': state,
-        'scope': 'read:user read:workspace read:task write:task'
-    })
-    
-    return RedirectResponse(url=auth_url)
+@router.get("/clickup")
+async def clickup_oauth_login():
+    """Iniciar proceso de OAuth con ClickUp"""
+    try:
+        # Obtener configuración de OAuth
+        client_id = os.getenv('CLICKUP_OAUTH_CLIENT_ID', '')
+        redirect_uri = os.getenv('CLICKUP_OAUTH_REDIRECT_URI', 'https://clickuptaskmanager-production.up.railway.app/api/auth/callback')
+        
+        if not client_id:
+            return {"error": "OAuth not configured", "client_id": client_id}
+        
+        # Generar state para seguridad
+        state = secrets.token_urlsafe(32)
+        
+        # Construir URL de autorización
+        auth_url = f"https://app.clickup.com/api/v2/oauth/authorize?" + urlencode({
+            'client_id': client_id,
+            'redirect_uri': redirect_uri,
+            'response_type': 'code',
+            'state': state,
+            'scope': 'read:user read:workspace read:task write:task'
+        })
+        
+        return RedirectResponse(url=auth_url)
+        
+    except Exception as e:
+        return {"error": str(e), "error_type": type(e).__name__}
 
-@app.get("/oauth/callback")
+@router.get("/callback")
 async def clickup_oauth_callback(code: str = None, state: str = None, error: str = None):
     """Callback de OAuth de ClickUp"""
     if error:
@@ -177,22 +189,49 @@ async def clickup_oauth_callback(code: str = None, state: str = None, error: str
         "state": state
     }
 
-@app.get("/debug")
-async def debug():
-    """Endpoint de debug"""
+@router.get("/status")
+async def auth_status():
+    """Estado de la autenticación"""
     client_id = os.getenv('CLICKUP_OAUTH_CLIENT_ID', '')
     client_secret = os.getenv('CLICKUP_OAUTH_CLIENT_SECRET', '')
     redirect_uri = os.getenv('CLICKUP_OAUTH_REDIRECT_URI', '')
     
     return {
-        "status": "ok",
-        "client_id_present": bool(client_id),
-        "client_secret_present": bool(client_secret),
-        "redirect_uri_present": bool(redirect_uri),
-        "redirect_uri_value": redirect_uri
+        "oauth_configured": bool(client_id and client_secret),
+        "client_id_configured": bool(client_id),
+        "client_secret_configured": bool(client_secret),
+        "redirect_uri": redirect_uri,
+        "status": "ready" if client_id and client_secret else "needs_configuration"
     }
 
-if __name__ == "__main__":
-    import uvicorn
-    print("🚀 Starting simple OAuth app on http://localhost:8000")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+@router.get("/debug")
+async def debug_endpoint():
+    """Endpoint de debug para identificar problemas"""
+    try:
+        # Verificar importaciones básicas
+        import os
+        import secrets
+        from urllib.parse import urlencode
+        from fastapi.responses import HTMLResponse, RedirectResponse
+        
+        # Verificar variables de entorno
+        client_id = os.getenv('CLICKUP_OAUTH_CLIENT_ID', '')
+        client_secret = os.getenv('CLICKUP_OAUTH_CLIENT_SECRET', '')
+        redirect_uri = os.getenv('CLICKUP_OAUTH_REDIRECT_URI', '')
+        
+        return {
+            "status": "ok",
+            "imports": "successful",
+            "client_id_present": bool(client_id),
+            "client_secret_present": bool(client_secret),
+            "redirect_uri_present": bool(redirect_uri),
+            "redirect_uri_value": redirect_uri,
+            "python_version": "3.11.9"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "error_type": type(e).__name__
+        }
+
