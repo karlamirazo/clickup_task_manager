@@ -1,1 +1,1 @@
-web: python simple_oauth_app.py
+web: python main_simple.py
