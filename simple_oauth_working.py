@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Aplicación ClickUp OAuth que SÍ funciona
+Solución OAuth simple que SÍ funciona
 """
 
 from fastapi import FastAPI, Request
