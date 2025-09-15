@@ -5,7 +5,7 @@ Configuracion del proyecto ClickUp Project Manager
 import os
 import json
 from typing import List, Any
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings
 # from dotenv import load_dotenv
 # load_dotenv()
@@ -58,21 +58,39 @@ class Settings(BaseSettings):
     # Configuracion de Redis
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
     
-    # Configuracion de CORS - usando Field para manejar JSON parsing
-    ALLOWED_ORIGINS: List[str] = Field(
-        default=[
-            "http://localhost:8000",  # Puerto unificado principal
-            "http://127.0.0.1:8000",  # Puerto unificado principal
-            "http://localhost:8001",  # Puerto alternativo
-            "http://127.0.0.1:8001",  # Puerto alternativo
-            "http://localhost:3000",   # Puerto alternativo
-            "http://127.0.0.1:3000",  # Puerto alternativo
+    # Configuracion de CORS - usando property para manejar parsing robusto
+    ALLOWED_ORIGINS_RAW: str = Field(default="", alias="ALLOWED_ORIGINS")
+    
+    @property
+    def ALLOWED_ORIGINS(self) -> List[str]:
+        """Lista de orígenes permitidos para CORS"""
+        # Valores por defecto
+        default_origins = [
+            "http://localhost:8000",
+            "http://127.0.0.1:8000",
+            "http://localhost:8001",
+            "http://127.0.0.1:8001",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
             "https://clickuptaskmanager-production.up.railway.app",
             "https://*.up.railway.app",
-            "*"  # Temporal para debugging - remover en produccion
-        ],
-        description="Lista de orígenes permitidos para CORS"
-    )
+            "*"
+        ]
+        
+        # Si no hay valor o está vacío, usar valores por defecto
+        if not self.ALLOWED_ORIGINS_RAW or not self.ALLOWED_ORIGINS_RAW.strip():
+            return default_origins
+        
+        # Intentar parsear como JSON
+        try:
+            parsed = json.loads(self.ALLOWED_ORIGINS_RAW.strip())
+            if isinstance(parsed, list):
+                return parsed
+            else:
+                return default_origins
+        except (json.JSONDecodeError, ValueError, TypeError):
+            # Si falla el parsing, usar valores por defecto
+            return default_origins
     
     # Configuracion de seguridad
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-here")
@@ -143,56 +161,6 @@ class Settings(BaseSettings):
     # Configuracion del motor de busqueda RAG
     SEARCH_ENGINE_ENABLED: bool = os.getenv("SEARCH_ENGINE_ENABLED", "True").lower() == "true"
     
-    @field_validator('ALLOWED_ORIGINS', mode='before')
-    @classmethod
-    def parse_allowed_origins(cls, v: Any) -> List[str]:
-        """Validador personalizado para ALLOWED_ORIGINS"""
-        if isinstance(v, str):
-            # Si es una cadena, intentar parsear como JSON
-            try:
-                if v.strip():
-                    return json.loads(v)
-                else:
-                    # Si está vacío, usar valores por defecto
-                    return [
-                        "http://localhost:8000",
-                        "http://127.0.0.1:8000",
-                        "http://localhost:8001",
-                        "http://127.0.0.1:8001",
-                        "http://localhost:3000",
-                        "http://127.0.0.1:3000",
-                        "https://clickuptaskmanager-production.up.railway.app",
-                        "https://*.up.railway.app",
-                        "*"
-                    ]
-            except json.JSONDecodeError:
-                # Si falla el parsing JSON, usar valores por defecto
-                return [
-                    "http://localhost:8000",
-                    "http://127.0.0.1:8000",
-                    "http://localhost:8001",
-                    "http://127.0.0.1:8001",
-                    "http://localhost:3000",
-                    "http://127.0.0.1:3000",
-                    "https://clickuptaskmanager-production.up.railway.app",
-                    "https://*.up.railway.app",
-                    "*"
-                ]
-        elif isinstance(v, list):
-            return v
-        else:
-            # Para cualquier otro tipo, usar valores por defecto
-            return [
-                "http://localhost:8000",
-                "http://127.0.0.1:8000",
-                "http://localhost:8001",
-                "http://127.0.0.1:8001",
-                "http://localhost:3000",
-                "http://127.0.0.1:3000",
-                "https://clickuptaskmanager-production.up.railway.app",
-                "https://*.up.railway.app",
-                "*"
-            ]
 
     class Config:
         env_file = ".env"
