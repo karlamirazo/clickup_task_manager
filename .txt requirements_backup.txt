@@ -1,0 +1,5 @@
+[33m619c184a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m Fix: Corregir error de parsing JSON en ALLOWED_ORIGINS - Agregar validador personalizado para manejar variables de entorno vacías o inválidas
+[33m0518afd4[m fix: Configuración automática de Railway
+[33m65dba1de[m fix: Solución inmediata para Railway - reemplazar main.py
+[33m0b4237fc[m feat: Agregar scripts de OAuth y documentación completa
+[33m2e89d449[m fix: Arreglar deploy de Railway para usar main_simple.py

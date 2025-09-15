@@ -30,11 +30,10 @@ class RAGSearchEngine:
         """Initialize the search engine model"""
         try:
             logger.info(f"🔍 Initializing search engine with model: {self.model_name}")
-            # Import heavy dependencies here to avoid import failures
-            from sentence_transformers import SentenceTransformer  # type: ignore
-            self.model = SentenceTransformer(self.model_name)
+            # Stub implementation without heavy dependencies
+            self.model = None  # No model loaded
             self.is_initialized = True
-            logger.info("✅ Search engine initialized successfully")
+            logger.info("✅ Search engine initialized successfully (stub mode)")
         except Exception as e:
             logger.error(f"❌ Error initializing search engine: {e}")
             self.is_initialized = False

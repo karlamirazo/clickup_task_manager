@@ -70,3 +70,4 @@ if __name__ == "__main__":
         apply_temp_fix()
         print("\n💡 Para restaurar el archivo original, ejecuta:")
         print("   python auth_oauth_temp_fix.py restore")
+

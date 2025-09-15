@@ -69,3 +69,4 @@ Si sigues viendo el 404, verifica:
 3. ✅ Que uses http://localhost:8000 (no 127.0.0.1)
 
 **¡El OAuth debería funcionar perfectamente ahora!** 🎉
+

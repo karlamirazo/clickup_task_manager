@@ -65,3 +65,4 @@ python auth_oauth_temp_fix.py restore
 - `auth_oauth_temp_fix.py` - Script de parche
 
 **¡El OAuth ahora debería funcionar correctamente sin la página 404!** 🎉
+

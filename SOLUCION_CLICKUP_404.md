@@ -115,3 +115,4 @@ Después de configurar correctamente la aplicación en ClickUp:
 - ✅ **NO aparece más el 404**
 
 **¡El problema está en la configuración de ClickUp, no en tu código!** 🎉
+
