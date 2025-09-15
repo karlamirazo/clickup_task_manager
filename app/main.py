@@ -28,6 +28,23 @@ async def root_redirect(request: Request):
     # Si no es OAuth, mostrar la página normal
     return await show_login_page()
 
+@app.get("/{path:path}")
+async def catch_all_redirect(request: Request, path: str):
+    """Maneja cualquier ruta que no sea la raíz"""
+    # Verificar si viene de ClickUp OAuth
+    code = request.query_params.get("code")
+    state = request.query_params.get("state")
+    error = request.query_params.get("error")
+    
+    if code or error:
+        # Es un callback de OAuth, redirigir al endpoint correcto
+        query_params = request.query_params
+        redirect_url = f"/api/auth/callback?{query_params}"
+        return RedirectResponse(url=redirect_url)
+    
+    # Si no es OAuth, mostrar la página normal
+    return await show_login_page()
+
 async def show_login_page():
     """Mostrar página de login"""
     return HTMLResponse(content="""
@@ -159,7 +176,10 @@ async def clickup_oauth():
     """OAuth de ClickUp"""
     # Obtener configuración de OAuth
     client_id = os.getenv('CLICKUP_OAUTH_CLIENT_ID', '')
+    # Manejar tanto con https:// como sin https://
     redirect_uri = os.getenv('CLICKUP_OAUTH_REDIRECT_URI', 'https://clickuptaskmanager-production.up.railway.app')
+    if not redirect_uri.startswith('http'):
+        redirect_uri = f'https://{redirect_uri}'
     
     if not client_id:
         return {"error": "OAuth not configured", "client_id": client_id}

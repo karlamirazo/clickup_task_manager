@@ -1,73 +1,73 @@
-#!/usr/bin/env python3
-"""
-Probar OAuth con configuración simple
-"""
 
-import requests
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
 
-def test_oauth():
-    """Probar OAuth con 127.0.0.1:8000"""
-    print("🧪 PROBANDO OAUTH CON CONFIGURACIÓN SIMPLE")
-    print("=" * 50)
+app = FastAPI(title="ClickUp OAuth Test")
+
+@app.get("/")
+async def root(request: Request):
+    """Maneja todas las rutas"""
+    # Verificar si viene de ClickUp OAuth
+    code = request.query_params.get("code")
+    state = request.query_params.get("state")
+    error = request.query_params.get("error")
     
-    try:
-        # Probar URL de OAuth
-        response = requests.get("http://127.0.0.1:8000/api/auth/clickup", allow_redirects=False)
-        
-        print(f"📊 Status: {response.status_code}")
-        
-        if response.status_code == 307:
-            redirect_url = response.headers.get('Location', '')
-            print(f"✅ URL generada: {redirect_url}")
-            
-            if '127.0.0.1:8000' in redirect_url:
-                print("✅ URL usa 127.0.0.1:8000 correctamente")
-                return True
-            else:
-                print("❌ URL no usa 127.0.0.1:8000")
-                return False
-        else:
-            print(f"❌ Error: {response.status_code}")
-            return False
-            
-    except Exception as e:
-        print(f"❌ Error: {e}")
-        return False
+    if code:
+        return HTMLResponse(f"""
+        <!DOCTYPE html>
+        <html>
+        <head><title>OAuth Success</title></head>
+        <body style="font-family: Arial; text-align: center; padding: 50px;">
+            <h1>🎉 OAuth Success!</h1>
+            <p>Code: {code[:20]}...</p>
+            <p>State: {state}</p>
+            <p>✅ ClickUp está redirigiendo correctamente</p>
+        </body>
+        </html>
+        """)
+    
+    if error:
+        return HTMLResponse(f"""
+        <!DOCTYPE html>
+        <html>
+        <head><title>OAuth Error</title></head>
+        <body style="font-family: Arial; text-align: center; padding: 50px;">
+            <h1>❌ OAuth Error</h1>
+            <p>Error: {error}</p>
+        </body>
+        </html>
+        """)
+    
+    # Página normal
+    return HTMLResponse("""
+    <!DOCTYPE html>
+    <html>
+    <head><title>ClickUp OAuth Test</title></head>
+    <body style="font-family: Arial; text-align: center; padding: 50px;">
+        <h1>🔐 ClickUp OAuth Test</h1>
+        <p>Si ves esta página, la aplicación está funcionando</p>
+        <a href="/test-oauth" style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px;">
+            Probar OAuth
+        </a>
+    </body>
+    </html>
+    """)
 
-def show_clickup_instructions():
-    """Mostrar instrucciones para ClickUp"""
-    print("\n📋 CONFIGURAR CLICKUP")
-    print("=" * 50)
-    print("1. Ve a: https://app.clickup.com/settings/apps")
-    print("2. Busca 'clickuptaskmanager'")
-    print("3. Haz clic en 'Edit'")
-    print("4. Cambia Redirect URI a:")
-    print("   http://127.0.0.1:8000")
-    print("5. Guarda los cambios")
-    print()
-    print("🔧 PERMISOS NECESARIOS:")
-    print("   - read:user")
-    print("   - read:workspace")
-    print("   - read:task")
-    print("   - write:task")
-
-def main():
-    """Función principal"""
-    if test_oauth():
-        print("\n🎉 ¡CONFIGURACIÓN FUNCIONANDO!")
-        print("=" * 60)
-        print("✅ OAuth generando URL correcta")
-        print("✅ ClickUp debería aceptar esta URL")
-        print()
-        show_clickup_instructions()
-        print()
-        print("📋 PRÓXIMOS PASOS:")
-        print("1. Configura ClickUp con: http://127.0.0.1:8000")
-        print("2. Prueba el OAuth completo")
-        print("3. ¡Debería funcionar ahora!")
-    else:
-        print("\n❌ Error en la configuración")
+@app.get("/test-oauth")
+async def test_oauth():
+    """Probar OAuth"""
+    client_id = "0J2LPSHXIM5PRB5VDE5CRJY7FJP86L0H"
+    redirect_uri = "https://clickuptaskmanager-production.up.railway.app"
+    
+    auth_url = f"https://app.clickup.com/api/v2/oauth/authorize?" + urlencode({
+        'client_id': client_id,
+        'redirect_uri': redirect_uri,
+        'response_type': 'code',
+        'scope': 'read:user read:workspace read:task write:task'
+    })
+    
+    return RedirectResponse(url=auth_url)
 
 if __name__ == "__main__":
-    main()
-
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
