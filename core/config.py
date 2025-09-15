@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     # URL de redirección dinámica basada en el entorno
     CLICKUP_OAUTH_REDIRECT_URI: str = os.getenv(
         "CLICKUP_OAUTH_REDIRECT_URI", 
-        "http://127.0.0.1:8000/api/auth/callback"  # Usar 127.0.0.1 para ClickUp
+        "https://clickuptaskmanager-production.up.railway.app/api/auth/callback"  # URL de Railway
     )
     
     # Configuracion de autenticacion
