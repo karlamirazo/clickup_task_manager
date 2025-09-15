@@ -140,6 +140,46 @@
             border-radius: 2px 2px 0 0;
         }
 
+        /* Estilos para OAuth simplificado */
+        .auth-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .auth-header h2 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .auth-header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .oauth-container {
+            text-align: center;
+        }
+
+        .oauth-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .oauth-info p {
+            margin: 10px 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .oauth-info i {
+            color: #667eea;
+            margin-right: 8px;
+        }
+
         .tab-content {
             display: none;
         }
@@ -362,78 +402,24 @@
         </div>
 
         <div class="auth-right">
-            <div class="auth-tabs">
-                <button class="tab-button active" onclick="switchTab('login')">
-                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-                </button>
-                <button class="tab-button" onclick="switchTab('register')">
-                    <i class="fas fa-user-plus"></i> Registrarse
-                </button>
+            <div class="auth-header">
+                <h2>Iniciar Sesión</h2>
+                <p>Accede con tu cuenta de ClickUp</p>
             </div>
 
             <div id="error-message" class="error-message"></div>
             <div id="success-message" class="success-message"></div>
 
-            <!-- Formulario de Inicio de Sesión -->
-            <div id="login-tab" class="tab-content active">
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="login-email">Correo Electrónico</label>
-                        <input type="email" id="login-email" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="login-password">Contraseña</label>
-                        <input type="password" id="login-password" name="password" required>
-                    </div>
-                    <button type="submit" class="auth-button">
-                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-                    </button>
-                </form>
-
-                <div class="divider">
-                    <span>O continúa con</span>
-                </div>
-
+            <!-- ClickUp OAuth Only -->
+            <div class="oauth-container">
                 <button class="auth-button clickup-oauth" onclick="loginWithClickUp()">
                     <i class="fab fa-clickup"></i> Iniciar con ClickUp
                 </button>
-
-                <div class="forgot-password">
-                    <a href="#" onclick="showForgotPassword()">¿Olvidaste tu contraseña?</a>
+                
+                <div class="oauth-info">
+                    <p><i class="fas fa-info-circle"></i> Solo necesitas tu cuenta de ClickUp para acceder</p>
+                    <p><i class="fas fa-shield-alt"></i> Tus datos están seguros y sincronizados</p>
                 </div>
-            </div>
-
-            <!-- Formulario de Registro -->
-            <div id="register-tab" class="tab-content">
-                <form id="register-form">
-                    <div class="form-group">
-                        <label for="register-email">Correo Electrónico</label>
-                        <input type="email" id="register-email" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="register-username">Nombre de Usuario</label>
-                        <input type="text" id="register-username" name="username" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="register-password">Contraseña</label>
-                        <input type="password" id="register-password" name="password" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="register-confirm-password">Confirmar Contraseña</label>
-                        <input type="password" id="register-confirm-password" name="confirm_password" required>
-                    </div>
-                    <button type="submit" class="auth-button">
-                        <i class="fas fa-user-plus"></i> Crear Cuenta
-                    </button>
-                </form>
-
-                <div class="divider">
-                    <span>O regístrate con</span>
-                </div>
-
-                <button class="auth-button clickup-oauth" onclick="registerWithClickUp()">
-                    <i class="fab fa-clickup"></i> Registrarse con ClickUp
-                </button>
             </div>
 
             <!-- Información de Roles -->
@@ -453,24 +439,10 @@
         const API_BASE = '/api';
         let currentUser = null;
 
-        // Cambiar entre pestañas
+        // Función simplificada - solo OAuth
         function switchTab(tabName) {
-            // Ocultar todos los contenidos
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Remover clase active de todos los botones
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.classList.remove('active');
-            });
-            
-            // Mostrar pestaña seleccionada
-            document.getElementById(tabName + '-tab').classList.add('active');
-            event.target.classList.add('active');
-            
-            // Limpiar mensajes
-            hideMessages();
+            // Ya no necesitamos cambiar pestañas
+            return;
         }
 
         // Mostrar mensajes de error
@@ -525,106 +497,21 @@
             return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
         }
 
-        // Manejar formulario de login
+        // Funciones de login tradicional eliminadas - solo OAuth
+        /*
+        // Login tradicional comentado - solo usamos OAuth
         document.getElementById('login-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const button = this.querySelector('.auth-button');
-            setButtonLoading(button, true);
-            
-            const formData = new FormData(this);
-            const loginData = {
-                email: formData.get('email'),
-                password: formData.get('password')
-            };
-            
-            try {
-                const response = await fetch(`${API_BASE}/auth/login`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(loginData)
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    showSuccess('¡Inicio de sesión exitoso!');
-                    localStorage.setItem('auth_token', result.access_token);
-                    currentUser = result.user;
-                    
-                    // Redirigir al dashboard después de un breve delay
-                    setTimeout(() => {
-                        window.location.href = '/dashboard';
-                    }, 1500);
-                } else {
-                    showError(result.detail || 'Error al iniciar sesión');
-                }
-            } catch (error) {
-                showError('Error de conexión. Inténtalo de nuevo.');
-                console.error('Login error:', error);
-            } finally {
-                setButtonLoading(button, false);
-            }
+            // ... código comentado
         });
 
-        // Manejar formulario de registro
         document.getElementById('register-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const button = this.querySelector('.auth-button');
-            setButtonLoading(button, true);
-            
-            const formData = new FormData(this);
-            const password = formData.get('password');
-            const confirmPassword = formData.get('confirm_password');
-            
-            if (password !== confirmPassword) {
-                showError('Las contraseñas no coinciden');
-                setButtonLoading(button, false);
-                return;
-            }
-            
-            const registerData = {
-                email: formData.get('email'),
-                username: formData.get('username'),
-                password: password
-            };
-            
-            try {
-                const response = await fetch(`${API_BASE}/auth/register`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(registerData)
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    showSuccess('¡Cuenta creada exitosamente!');
-                    setTimeout(() => {
-                        switchTab('login');
-                    }, 2000);
-                } else {
-                    showError(result.detail || 'Error al crear la cuenta');
-                }
-            } catch (error) {
-                showError('Error de conexión. Inténtalo de nuevo.');
-                console.error('Register error:', error);
-            } finally {
-                setButtonLoading(button, false);
-            }
+            // ... código comentado
         });
 
-        // Mostrar formulario de recuperación de contraseña
         function showForgotPassword() {
-            const email = prompt('Ingresa tu correo electrónico para recuperar tu contraseña:');
-            if (email) {
-                // Aquí implementarías la lógica de recuperación
-                showSuccess('Se ha enviado un enlace de recuperación a tu correo');
-            }
+            // ... código comentado
         }
+        */
 
         // Verificar si ya está autenticado
         window.addEventListener('load', function() {
