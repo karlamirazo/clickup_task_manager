@@ -6,14 +6,30 @@ Aplicación simple de OAuth para ClickUp
 import os
 import secrets
 from urllib.parse import urlencode
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 app = FastAPI(title="ClickUp OAuth Simple")
 
 @app.get("/")
-async def root():
-    """Página principal con login"""
+async def root_redirect(request: Request):
+    """Maneja la redirección desde ClickUp OAuth"""
+    # Verificar si viene de ClickUp OAuth
+    code = request.query_params.get("code")
+    state = request.query_params.get("state")
+    error = request.query_params.get("error")
+    
+    if code or error:
+        # Es un callback de OAuth, redirigir al endpoint correcto
+        query_params = request.query_params
+        redirect_url = f"/api/auth/callback?{query_params}"
+        return RedirectResponse(url=redirect_url)
+    
+    # Si no es OAuth, mostrar la página normal
+    return await show_login_page()
+
+async def show_login_page():
+    """Mostrar página de login"""
     return HTMLResponse(content="""
     <!DOCTYPE html>
     <html lang="es">
@@ -143,7 +159,7 @@ async def clickup_oauth():
     """OAuth de ClickUp"""
     # Obtener configuración de OAuth
     client_id = os.getenv('CLICKUP_OAUTH_CLIENT_ID', '')
-    redirect_uri = os.getenv('CLICKUP_OAUTH_REDIRECT_URI', 'http://localhost:8000/api/auth/callback')
+    redirect_uri = os.getenv('CLICKUP_OAUTH_REDIRECT_URI', 'https://clickuptaskmanager-production.up.railway.app')
     
     if not client_id:
         return {"error": "OAuth not configured", "client_id": client_id}
