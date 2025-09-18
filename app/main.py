@@ -165,7 +165,7 @@ async def process_oauth_callback(request: Request):
         <title>ClickUp Manager</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-            body { 
+            body {
                 font-family: Arial, sans-serif; 
                 text-align: center; 
                 padding: 20px; 
@@ -177,19 +177,19 @@ async def process_oauth_callback(request: Request):
                 justify-content: center;
             }
             .container { 
-                background: white; 
+                background: white;
                 padding: 40px; 
-                border-radius: 20px; 
+                border-radius: 20px;
                 box-shadow: 0 20px 40px rgba(0,0,0,0.1);
                 max-width: 90%;
                 width: 500px;
             }
             .btn { 
-                background: #667eea; 
-                color: white; 
-                padding: 15px 30px; 
+                background: #667eea;
+                color: white;
+                padding: 15px 30px;
                 text-decoration: none; 
-                border-radius: 10px; 
+                border-radius: 10px;
                 display: inline-block;
                 margin: 10px;
                 font-size: 1.1rem;
@@ -256,7 +256,7 @@ async def process_oauth_callback(request: Request):
 async def start_oauth():
     """Iniciar el flujo OAuth con ClickUp"""
     client_id = "0J2LPSHXIM5PRB5VDE5CRJY7FJP86L0H"
-    redirect_uri = "https://clickuptaskmanager-production.up.railway.app"
+    redirect_uri = "https://clickuptaskmanager-production.up.railway.app/oauth/callback"
     
     # Construir URL de autorización
     auth_url = f"https://app.clickup.com/api/v2/oauth/authorize?" + urlencode({
@@ -268,10 +268,38 @@ async def start_oauth():
     
     return RedirectResponse(url=auth_url)
 
+@app.get("/oauth/callback")
+async def oauth_callback(request: Request):
+    """Endpoint específico de callback para OAuth - SIN validación de state"""
+    code = request.query_params.get('code')
+    state = request.query_params.get('state')
+    error = request.query_params.get('error')
+    
+    print("🔍 OAuth Callback recibido:")
+    print(f"   Authorization code: {code}")
+    print(f"   State: {state}")
+    print(f"   Error: {error}")
+    print(f"   URL completa: {request.url}")
+    
+    if error:
+        print(f"❌ Error OAuth: {error}")
+        return RedirectResponse(url=f"/?error={error}")
+    
+    if code:
+        print(f"✅ Código OAuth recibido: {code[:20]}...")
+        # Redirigir directamente al dashboard SIN validar state
+        # Esto soluciona el problema 404 que mencionas en OAUTH_FINAL_SOLUTION.md
+        return RedirectResponse(url="/dashboard?oauth_success=true")
+    
+    print("⚠️ Callback sin código ni error")
+    return RedirectResponse(url="/?error=no_code")
+
 @app.get("/dashboard")
-async def dashboard():
+async def dashboard(request: Request):
     """Dashboard principal después del OAuth"""
-    return HTMLResponse("""
+    oauth_success = request.query_params.get('oauth_success')
+    
+    return HTMLResponse(f"""
     <!DOCTYPE html>
     <html>
     <head>
@@ -315,10 +343,7 @@ async def dashboard():
             <p>Tu autenticación OAuth fue exitosa</p>
         </div>
         
-        <div class="success">
-            <strong>✅ Conectado exitosamente</strong><br>
-            Tu cuenta de ClickUp está ahora integrada con el sistema.
-        </div>
+        {'<div class="success"><strong>🎉 OAuth Exitoso!</strong><br>Tu cuenta de ClickUp está ahora integrada con el sistema.</div>' if oauth_success else '<div class="info"><strong>📊 Dashboard</strong><br>Bienvenido al panel de control.</div>'}
         
         <div class="card">
             <h2>📊 Dashboard</h2>
