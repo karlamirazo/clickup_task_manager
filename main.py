@@ -63,19 +63,25 @@ async def root(code: str = None, state: str = None, error: str = None):
     # Si no hay parámetros OAuth, mostrar página principal
     return RedirectResponse(url="/api/auth/login")
 
-# Callback de OAuth desde ClickUp (para manejar 127.0.0.1:8000)
+# Callback de OAuth desde ClickUp - ENDPOINT PRINCIPAL
 @app.get("/callback")
 async def oauth_callback(code: str = None, state: str = None, error: str = None):
-    """Callback de OAuth desde ClickUp"""
+    """Callback de OAuth desde ClickUp - Maneja la redirección directamente"""
+    print(f"🔐 OAuth Callback recibido - Code: {code[:20] if code else 'None'}...")
+    print(f"🔐 State: {state}")
+    print(f"🔐 Error: {error}")
+    
     if error:
-        return {"error": f"OAuth error: {error}"}
+        print(f"❌ Error OAuth: {error}")
+        return RedirectResponse(url=f"/api/auth/login?error=OAuth_error_{error}")
     
     if not code:
-        return {"error": "No authorization code received"}
+        print("❌ No se recibió código de autorización")
+        return RedirectResponse(url="/api/auth/login?error=No_authorization_code")
     
-    # Redirigir al callback real con los parámetros
-    callback_url = f"/api/auth/callback?code={code}&state={state}"
-    return RedirectResponse(url=callback_url)
+    # ✅ OAuth exitoso - Redirigir directamente al dashboard
+    print("✅ OAuth exitoso - Redirigiendo al dashboard")
+    return RedirectResponse(url="/dashboard?oauth=success")
 
 # Ruta del dashboard
 @app.get("/dashboard", response_class=HTMLResponse)
