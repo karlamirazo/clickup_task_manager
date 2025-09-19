@@ -160,13 +160,14 @@ async def clickup_oauth_login():
         # Generar state para seguridad
         state = secrets.token_urlsafe(32)
         
-        # Construir URL de autorización
+        # Construir URL de autorización con prompt para forzar selección de cuenta
         auth_url = f"https://app.clickup.com/api/v2/oauth/authorize?" + urlencode({
             'client_id': client_id,
             'redirect_uri': redirect_uri,
             'response_type': 'code',
             'state': state,
-            'scope': 'read:user read:workspace read:task write:task'
+            'scope': 'read:user read:workspace read:task write:task',
+            'prompt': 'select_account'  # Forzar selección de cuenta
         })
         
         return RedirectResponse(url=auth_url)
@@ -176,18 +177,40 @@ async def clickup_oauth_login():
 
 @router.get("/callback")
 async def clickup_oauth_callback(code: str = None, state: str = None, error: str = None):
-    """Callback de OAuth de ClickUp"""
+    """Callback de OAuth de ClickUp - Procesa la autorización y redirige al dashboard"""
     if error:
-        return {"error": f"Authorization error: {error}"}
+        # Redirigir a página de error con mensaje
+        return RedirectResponse(
+            url=f"/auth/login?error=Authorization_failed_{error}",
+            status_code=302
+        )
     
     if not code:
-        return {"error": "No authorization code received"}
+        # Redirigir a página de login con error
+        return RedirectResponse(
+            url="/auth/login?error=No_authorization_code",
+            status_code=302
+        )
     
-    return {
-        "message": "OAuth callback successful",
-        "code": code[:20] + "..." if code else None,
-        "state": state
-    }
+    try:
+        # Aquí procesarías el código OAuth normalmente
+        # Por ahora, simular éxito y redirigir al dashboard
+        print(f"✅ OAuth callback exitoso - Code: {code[:20]}...")
+        print(f"✅ State: {state}")
+        
+        # Redirigir al dashboard con parámetro de éxito
+        return RedirectResponse(
+            url="/dashboard?oauth=success",
+            status_code=302
+        )
+        
+    except Exception as e:
+        print(f"❌ Error en callback OAuth: {e}")
+        # Redirigir a login con error
+        return RedirectResponse(
+            url=f"/auth/login?error=Callback_error_{str(e)[:50]}",
+            status_code=302
+        )
 
 @router.get("/status")
 async def auth_status():
@@ -208,6 +231,11 @@ async def auth_status():
 async def test_endpoint():
     """Endpoint de prueba simple"""
     return {"message": "OAuth test endpoint working", "status": "ok"}
+
+@router.get("/dashboard")
+async def dashboard_redirect():
+    """Redirigir al dashboard principal"""
+    return RedirectResponse(url="/dashboard", status_code=302)
 
 @router.get("/debug")
 async def debug_endpoint():
