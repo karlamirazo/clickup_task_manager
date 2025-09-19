@@ -38,7 +38,7 @@ def update_env_file():
     print("-" * 50)
     
     # URL correcta con endpoint completo
-    correct_redirect_uri = "https://clickuptaskmanager-production.up.railway.app/api/auth/callback"
+    correct_redirect_uri = "https://ctm-pro.up.railway.app/api/auth/callback"
     
     env_files = ['.env', 'env.production', 'env.oauth.simple']
     
@@ -88,8 +88,8 @@ def update_config_file():
             content = f.read()
         
         # Reemplazar la URL incorrecta
-        old_url = '"https://clickuptaskmanager-production.up.railway.app"  # URL de Railway (solo dominio)'
-        new_url = '"https://clickuptaskmanager-production.up.railway.app/api/auth/callback"  # URL completa con endpoint'
+        old_url = '"https://ctm-pro.up.railway.app"  # URL de Railway (solo dominio)'
+        new_url = '"https://ctm-pro.up.railway.app/api/auth/callback"  # URL completa con endpoint'
         
         if old_url in content:
             content = content.replace(old_url, new_url)
@@ -114,7 +114,7 @@ def print_clickup_instructions():
     print("2. 🔍 Busca tu aplicación 'ClickUp Project Manager v2'")
     print("3. ✏️ Haz clic en 'Editar' o el ícono de configuración")
     print("4. 📝 En 'Redirect URI', cambia la URL a:")
-    print("   📍 https://clickuptaskmanager-production.up.railway.app/api/auth/callback")
+    print("   📍 https://ctm-pro.up.railway.app/api/auth/callback")
     print("5. 💾 Guarda los cambios")
     print("6. ✅ ¡Listo! Ahora el OAuth debería funcionar correctamente")
     print()

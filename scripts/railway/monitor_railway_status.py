@@ -11,7 +11,7 @@ import sys
 
 def check_railway_status():
     """Verificar estado actual de Railway"""
-    railway_url = "https://clickuptaskmanager-production.up.railway.app"
+    railway_url = "https://ctm-pro.up.railway.app"
     
     print(f"🔍 Verificando estado de Railway: {datetime.now().strftime('%H:%M:%S')}")
     print(f"🔗 URL: {railway_url}")
@@ -53,7 +53,7 @@ def check_railway_status():
 
 def test_database_endpoints():
     """Probar endpoints de base de datos"""
-    railway_url = "https://clickuptaskmanager-production.up.railway.app"
+    railway_url = "https://ctm-pro.up.railway.app"
     endpoints = [
         "/api/v1/tasks/debug",
         "/api/v1/tasks/config",

@@ -5,7 +5,7 @@ git commit -m "Universal OAuth handler - captures ALL ClickUp redirects"
 git push origin master
 echo.
 echo ¡Desplegado! Espera 3 minutos y prueba:
-echo https://clickuptaskmanager-production.up.railway.app
+echo https://ctm-pro.up.railway.app
 echo.
 echo Esta version captura TODAS las redirecciones de ClickUp
 pause

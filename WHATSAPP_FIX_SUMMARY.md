@@ -23,7 +23,7 @@ WHATSAPP_SIMULATOR_ENABLED=True
 WHATSAPP_EVOLUTION_URL=https://evolution-api-production-9d5d.up.railway.app
 WHATSAPP_EVOLUTION_API_KEY=clickup-evolution-v223
 WHATSAPP_INSTANCE_NAME=clickup-v23
-WHATSAPP_WEBHOOK_URL=https://clickuptaskmanager-production.up.railway.app/api/webhooks/whatsapp
+WHATSAPP_WEBHOOK_URL=https://ctm-pro.up.railway.app/api/webhooks/whatsapp
 WHATSAPP_SIMULATOR_ENABLED=False
 ```
 

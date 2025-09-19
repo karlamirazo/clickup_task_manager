@@ -78,7 +78,7 @@ async def get_system_status():
         return {
             "timestamp": current_time.isoformat(),
             "system_status": system_status,
-            "railway_url": "https://clickuptaskmanager-production.up.railway.app",
+            "railway_url": "https://ctm-pro.up.railway.app",
             "monitoring_active": monitor_instance is not None,
             "active_alerts_count": len(active_alerts),
             "environment": settings.ENVIRONMENT,

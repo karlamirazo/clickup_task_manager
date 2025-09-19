@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     # URL de redirección dinámica basada en el entorno
     CLICKUP_OAUTH_REDIRECT_URI: str = os.getenv(
         "CLICKUP_OAUTH_REDIRECT_URI", 
-        "https://clickuptaskmanager-production.up.railway.app/callback"  # URL más corta
+        "https://ctm-pro.up.railway.app/callback"  # Nuevo dominio más corto
     )
     
     # Configuracion de autenticacion
@@ -72,7 +72,7 @@ class Settings(BaseSettings):
             "http://127.0.0.1:8001",
             "http://localhost:3000",
             "http://127.0.0.1:3000",
-            "https://clickuptaskmanager-production.up.railway.app",
+            "https://ctm-pro.up.railway.app",
             "https://*.up.railway.app",
             "*"
         ]

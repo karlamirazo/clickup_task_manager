@@ -20,7 +20,7 @@ def get_oauth_credentials():
     print("1. Ve a https://app.clickup.com/settings/apps")
     print("2. Crea una nueva aplicación OAuth")
     print("3. Configura la URL de redirección:")
-    print("   https://clickuptaskmanager-production.up.railway.app/api/auth/callback")
+    print("   https://ctm-pro.up.railway.app/api/auth/callback")
     print("4. Selecciona los permisos:")
     print("   ✅ read:user - Leer información del usuario")
     print("   ✅ read:workspace - Leer información del workspace")
@@ -51,7 +51,7 @@ def create_railway_env_file(client_id, client_secret):
     env_content = f"""# Variables de entorno para Railway - OAuth ClickUp
 CLICKUP_OAUTH_CLIENT_ID={client_id}
 CLICKUP_OAUTH_CLIENT_SECRET={client_secret}
-CLICKUP_OAUTH_REDIRECT_URI=https://clickuptaskmanager-production.up.railway.app/api/auth/callback
+CLICKUP_OAUTH_REDIRECT_URI=https://ctm-pro.up.railway.app/api/auth/callback
 
 # Configuración de seguridad
 JWT_SECRET_KEY=your-super-secure-jwt-secret-key-here
@@ -91,7 +91,7 @@ def show_railway_setup_instructions():
     print()
     print("   CLICKUP_OAUTH_CLIENT_ID = [tu_client_id]")
     print("   CLICKUP_OAUTH_CLIENT_SECRET = [tu_client_secret]")
-    print("   CLICKUP_OAUTH_REDIRECT_URI = https://clickuptaskmanager-production.up.railway.app/api/auth/callback")
+    print("   CLICKUP_OAUTH_REDIRECT_URI = https://ctm-pro.up.railway.app/api/auth/callback")
     print("   JWT_SECRET_KEY = [una_clave_secreta_super_segura]")
     print()
     print("5. Haz clic en 'Deploy' para aplicar los cambios")
@@ -102,7 +102,7 @@ def test_oauth_url(client_id):
     if not client_id:
         return
     
-    redirect_uri = "https://clickuptaskmanager-production.up.railway.app/api/auth/callback"
+    redirect_uri = "https://ctm-pro.up.railway.app/api/auth/callback"
     
     auth_url = f"https://app.clickup.com/api/v2/oauth/authorize?" + urlencode({
         'client_id': client_id,
@@ -135,7 +135,7 @@ def show_deploy_instructions():
     print("   git push origin main")
     print()
     print("3. Railway detectará automáticamente los cambios y hará deploy")
-    print("4. Ve a https://clickuptaskmanager-production.up.railway.app")
+    print("4. Ve a https://ctm-pro.up.railway.app")
     print("5. Prueba la autenticación OAuth")
     print()
 

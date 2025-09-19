@@ -49,7 +49,7 @@ def check_environment():
     
     if not redirect_uri or redirect_uri == 'http://localhost:8000/api/auth/callback':
         print("⚠️  CLICKUP_OAUTH_REDIRECT_URI usando valor por defecto")
-        redirect_uri = "https://clickuptaskmanager-production.up.railway.app/api/auth/callback"
+        redirect_uri = "https://ctm-pro.up.railway.app/api/auth/callback"
     
     print("✅ Configuración de OAuth encontrada")
     return True
@@ -63,7 +63,7 @@ def show_oauth_setup_instructions():
     print("3. Completa la información:")
     print("   - App Name: ClickUp Project Manager")
     print("   - Description: Gestión de proyectos con ClickUp")
-    print("   - Redirect URI: https://clickuptaskmanager-production.up.railway.app/api/auth/callback")
+    print("   - Redirect URI: https://ctm-pro.up.railway.app/api/auth/callback")
     print("4. Selecciona los siguientes permisos:")
     print("   ✅ read:user")
     print("   ✅ read:workspace") 
@@ -85,7 +85,7 @@ def test_oauth_flow():
     load_dotenv()
     
     client_id = os.getenv('CLICKUP_OAUTH_CLIENT_ID')
-    redirect_uri = os.getenv('CLICKUP_OAUTH_REDIRECT_URI', 'https://clickuptaskmanager-production.up.railway.app/api/auth/callback')
+    redirect_uri = os.getenv('CLICKUP_OAUTH_REDIRECT_URI', 'https://ctm-pro.up.railway.app/api/auth/callback')
     
     # Generar URL de autorización
     auth_url = f"https://app.clickup.com/api/v2/oauth/authorize?" + urlencode({
@@ -199,14 +199,14 @@ def show_next_steps():
     print("   python -m uvicorn app.main:app --reload")
     print()
     print("2. Ve a la página de login:")
-    print("   https://clickuptaskmanager-production.up.railway.app/api/auth/login")
+    print("   https://ctm-pro.up.railway.app/api/auth/login")
     print()
     print("3. Prueba la autenticación:")
     print("   - Login con usuario de prueba: test@example.com / test123")
     print("   - O haz clic en 'Iniciar con ClickUp' para OAuth")
     print()
     print("4. Verifica el dashboard:")
-    print("   https://clickuptaskmanager-production.up.railway.app/dashboard")
+    print("   https://ctm-pro.up.railway.app/dashboard")
     print()
 
 def main():

@@ -86,7 +86,7 @@ class RailwayLogMonitor:
     """Monitor principal de logs de Railway"""
     
     def __init__(self):
-        self.railway_url = "https://clickuptaskmanager-production.up.railway.app"
+        self.railway_url = "https://ctm-pro.up.railway.app"
         self.monitoring_active = False
         self.log_buffer: List[LogEntry] = []
         self.metrics_buffer: List[SystemMetrics] = []

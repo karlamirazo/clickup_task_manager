@@ -13,7 +13,7 @@ def setup_railway_oauth_final():
     print("=" * 50)
     
     # URL de Railway
-    railway_url = "https://clickuptaskmanager-production.up.railway.app"
+    railway_url = "https://ctm-pro.up.railway.app"
     redirect_uri = f"{railway_url}/api/auth/callback"
     
     print(f"📊 Configuración:")
@@ -124,7 +124,7 @@ def test_production_oauth():
     print(f"\n🧪 PROBANDO OAUTH EN PRODUCCIÓN")
     print("=" * 40)
     
-    railway_url = "https://clickuptaskmanager-production.up.railway.app"
+    railway_url = "https://ctm-pro.up.railway.app"
     
     # Probar página de login
     print("1. Probando página de login...")

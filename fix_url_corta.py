@@ -22,7 +22,7 @@ def update_env_files():
     print("-" * 50)
     
     # URL más corta que ClickUp puede manejar
-    new_url = "https://clickuptaskmanager-production.up.railway.app/callback"
+    new_url = "https://ctm-pro.up.railway.app/callback"
     
     env_files = ['.env', 'env.production', 'env.oauth.simple']
     
@@ -63,7 +63,7 @@ def print_instructions():
     print("🌐 Ahora usa esta URL MÁS CORTA en ClickUp:")
     print()
     print("🔗 URL CORTA PARA CLICKUP:")
-    print("   📍 https://clickuptaskmanager-production.up.railway.app/callback")
+    print("   📍 https://ctm-pro.up.railway.app/callback")
     print()
     print("✅ VENTAJAS DE LA URL CORTA:")
     print("   • ClickUp la acepta sin problemas")
@@ -76,7 +76,7 @@ def print_instructions():
     print("2. Busca 'ClickUp Project Manager v2'")
     print("3. Edita la aplicación")
     print("4. En 'Redirect URI', pega:")
-    print("   https://clickuptaskmanager-production.up.railway.app/callback")
+    print("   https://ctm-pro.up.railway.app/callback")
     print("5. Guarda los cambios")
 
 def main():
