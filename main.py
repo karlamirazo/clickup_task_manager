@@ -43,24 +43,31 @@ app.add_middleware(
 # Montar archivos estáticos
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Ruta principal - También funciona como callback OAuth
+# Ruta principal - CALLBACK OAUTH DEFINITIVO
 @app.get("/", response_class=HTMLResponse)
 async def root(code: str = None, state: str = None, error: str = None):
-    """Página principal - También maneja callback OAuth si vienen parámetros"""
+    """ENDPOINT RAÍZ - ClickUp solo acepta dominio sin paths"""
+    
     # Si vienen parámetros OAuth, manejar como callback
     if code or error:
+        print(f"🔐 OAuth ROOT Callback - Code: {code[:20] if code else 'None'}...")
+        print(f"🔐 State: {state}")
+        print(f"🔐 Error: {error}")
+        
         if error:
+            print(f"❌ Error OAuth: {error}")
             return RedirectResponse(url=f"/api/auth/login?error=OAuth_error_{error}")
         
         if code:
-            print(f"✅ OAuth callback en raíz - Code: {code[:20]}...")
-            print(f"✅ State: {state}")
-            # Redirigir al dashboard con éxito OAuth
+            print("✅ OAuth ROOT exitoso - Redirigiendo al dashboard")
+            # ✅ OAuth exitoso - Redirigir directamente al dashboard
             return RedirectResponse(url="/dashboard?oauth=success")
         
-        return RedirectResponse(url="/api/auth/login?error=No_code")
+        print("❌ No se recibió código OAuth")
+        return RedirectResponse(url="/api/auth/login?error=No_authorization_code")
     
     # Si no hay parámetros OAuth, mostrar página principal
+    print("🏠 Acceso normal a página principal")
     return RedirectResponse(url="/api/auth/login")
 
 # Callback de OAuth desde ClickUp - ENDPOINT PRINCIPAL

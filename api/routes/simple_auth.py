@@ -152,7 +152,7 @@ async def clickup_oauth_login():
     try:
         # Obtener configuración de OAuth
         client_id = os.getenv('CLICKUP_OAUTH_CLIENT_ID', '')
-        redirect_uri = os.getenv('CLICKUP_OAUTH_REDIRECT_URI', 'https://ctm-pro.up.railway.app/oauth')
+        redirect_uri = os.getenv('CLICKUP_OAUTH_REDIRECT_URI', 'https://ctm-pro.up.railway.app')
         
         if not client_id:
             return {"error": "OAuth not configured", "client_id": client_id}
