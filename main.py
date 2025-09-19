@@ -83,6 +83,26 @@ async def oauth_callback(code: str = None, state: str = None, error: str = None)
     print("✅ OAuth exitoso - Redirigiendo al dashboard")
     return RedirectResponse(url="/dashboard?oauth=success")
 
+# Endpoint OAuth más corto - ClickUp puede guardar este
+@app.get("/oauth")
+async def oauth_short_callback(code: str = None, state: str = None, error: str = None):
+    """Callback OAuth CORTO - ClickUp puede guardar /oauth fácilmente"""
+    print(f"🔐 OAuth SHORT Callback - Code: {code[:20] if code else 'None'}...")
+    print(f"🔐 State: {state}")
+    print(f"🔐 Error: {error}")
+    
+    if error:
+        print(f"❌ Error OAuth: {error}")
+        return RedirectResponse(url=f"/api/auth/login?error=OAuth_error_{error}")
+    
+    if not code:
+        print("❌ No se recibió código de autorización")
+        return RedirectResponse(url="/api/auth/login?error=No_authorization_code")
+    
+    # ✅ OAuth exitoso - Redirigir directamente al dashboard
+    print("✅ OAuth SHORT exitoso - Redirigiendo al dashboard")
+    return RedirectResponse(url="/dashboard?oauth=success")
+
 # Ruta del dashboard
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard():

@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     # URL de redirección dinámica basada en el entorno
     CLICKUP_OAUTH_REDIRECT_URI: str = os.getenv(
         "CLICKUP_OAUTH_REDIRECT_URI", 
-        "https://ctm-pro.up.railway.app/callback"  # Usar /callback que funciona correctamente
+        "https://ctm-pro.up.railway.app/oauth"  # Endpoint más corto - ClickUp puede guardarlo
     )
     
     # Configuracion de autenticacion
