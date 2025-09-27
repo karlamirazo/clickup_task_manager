@@ -600,17 +600,21 @@
             syncStatus.textContent = 'Iniciando sincronización...';
 
             try {
-                // Simular sincronización por ahora
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                // Sincronizar tareas reales
+                const response = await fetch('/api/v1/tasks/sync', {
+                    method: 'POST'
+                });
                 
-                syncStatus.className = 'sync-status success';
-                syncStatus.textContent = 'Sincronización exitosa';
+                if (response.ok) {
+                    const result = await response.json();
+                    syncStatus.className = 'sync-status success';
+                    syncStatus.textContent = result.message || 'Sincronización exitosa';
+                } else {
+                    throw new Error('Error en la sincronización');
+                }
                 
-                // Actualizar contadores
-                document.getElementById('total-tasks').textContent = Math.floor(Math.random() * 50) + 10;
-                document.getElementById('pending-tasks').textContent = Math.floor(Math.random() * 20) + 5;
-                document.getElementById('completed-tasks').textContent = Math.floor(Math.random() * 30) + 10;
-                document.getElementById('overdue-tasks').textContent = Math.floor(Math.random() * 5);
+                // Recargar estadísticas reales
+                await loadDashboardStats();
                 
             } catch (error) {
                 console.error('Error en sincronización:', error);
@@ -627,13 +631,50 @@
             }
         }
 
+        // Función para cargar estadísticas reales del dashboard
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch('/api/v1/dashboard/stats?period=24h');
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('📊 Estadísticas del dashboard:', data);
+                    
+                    if (data.tasks) {
+                        document.getElementById('total-tasks').textContent = data.tasks.total || 0;
+                        
+                        const byStatus = data.tasks.by_status || {};
+                        const pendingCount = (byStatus['to do'] || 0) + (byStatus['in progress'] || 0);
+                        const completedCount = byStatus['complete'] || 0;
+                        
+                        document.getElementById('pending-tasks').textContent = pendingCount;
+                        document.getElementById('completed-tasks').textContent = completedCount;
+                        document.getElementById('overdue-tasks').textContent = data.tasks.overdue || 0;
+                    }
+                } else {
+                    console.warn('Error cargando estadísticas, usando valores por defecto');
+                    // Fallback a valores por defecto si la API falla
+                    document.getElementById('total-tasks').textContent = '0';
+                    document.getElementById('pending-tasks').textContent = '0';
+                    document.getElementById('completed-tasks').textContent = '0';
+                    document.getElementById('overdue-tasks').textContent = '0';
+                }
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+                // Mostrar ceros en caso de error
+                document.getElementById('total-tasks').textContent = '0';
+                document.getElementById('pending-tasks').textContent = '0';
+                document.getElementById('completed-tasks').textContent = '0';
+                document.getElementById('overdue-tasks').textContent = '0';
+            }
+        }
+
         // Inicializar dashboard
         document.addEventListener('DOMContentLoaded', function() {
-            // Cargar datos iniciales
-            document.getElementById('total-tasks').textContent = Math.floor(Math.random() * 50) + 10;
-            document.getElementById('pending-tasks').textContent = Math.floor(Math.random() * 20) + 5;
-            document.getElementById('completed-tasks').textContent = Math.floor(Math.random() * 30) + 10;
-            document.getElementById('overdue-tasks').textContent = Math.floor(Math.random() * 5);
+            // Cargar estadísticas reales al inicio
+            loadDashboardStats();
+            
+            // Recargar estadísticas cada 30 segundos
+            setInterval(loadDashboardStats, 30000);
         });
     </script>
 </body>

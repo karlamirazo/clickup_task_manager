@@ -149,8 +149,13 @@ async def dashboard(token: str = None, oauth: str = None, error: str = None):
         print(f"❌ Error cargando dashboard: {e}")
         return RedirectResponse(url="/api/auth/login?error=Error_cargando_dashboard")
 
-# Incluir solo las rutas de autenticación
+# Incluir rutas de API
 app.include_router(auth.router, prefix="/api")
+
+# Importar y agregar routers de API
+from api.routes import dashboard, tasks
+app.include_router(dashboard.router, prefix="/api/v1/dashboard")
+app.include_router(tasks.router, prefix="/api/v1")
 
 # Endpoint para lista de usuarios y tareas
 @app.get("/users-tasks", response_class=HTMLResponse)
