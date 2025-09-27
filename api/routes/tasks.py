@@ -1643,3 +1643,124 @@ async def get_task(task_id: str, db: Session = Depends(get_db)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error obtener tarea: {str(e)}"
         )
+
+
+@router.post("/sync-missing-tasks")
+async def sync_missing_tasks_endpoint(db: Session = Depends(get_db)):
+    """
+    Endpoint para sincronizar tareas faltantes de ClickUp a la base de datos
+    """
+    try:
+        print("🔄 Iniciando sincronización de tareas faltantes...")
+        
+        # Obtener cliente de ClickUp
+        clickup_client = get_clickup_client()
+        
+        # Obtener workspaces
+        workspaces = await clickup_client.get_workspaces()
+        if not workspaces:
+            raise HTTPException(status_code=404, detail="No se encontraron workspaces")
+        
+        workspace_id = workspaces[0]['id']
+        print(f"📁 Usando workspace: {workspace_id}")
+        
+        # Obtener spaces
+        spaces = await clickup_client.get_spaces(workspace_id)
+        if not spaces:
+            raise HTTPException(status_code=404, detail="No se encontraron spaces")
+        
+        total_synced = 0
+        total_new = 0
+        
+        for space in spaces:
+            space_id = space['id']
+            space_name = space['name']
+            print(f"📂 Procesando space: {space_name}")
+            
+            # Obtener folders
+            folders = await clickup_client.get_folders(space_id)
+            
+            for folder in folders:
+                folder_id = folder['id']
+                folder_name = folder['name']
+                print(f"  📁 Procesando folder: {folder_name}")
+                
+                # Obtener lists
+                lists = await clickup_client.get_lists(folder_id)
+                
+                for list_item in lists:
+                    list_id = list_item['id']
+                    list_name = list_item['name']
+                    print(f"    📋 Procesando list: {list_name}")
+                    
+                    # Obtener tareas
+                    tasks = await clickup_client.get_tasks(list_id, include_closed=True)
+                    
+                    for task_data in tasks:
+                        task_id = task_data['id']
+                        
+                        # Verificar si la tarea ya existe en BD
+                        existing_task = db.query(Task).filter(Task.clickup_id == task_id).first()
+                        
+                        if not existing_task:
+                            print(f"      ➕ Nueva tarea: {task_data['name'][:50]}...")
+                            
+                            # Crear nueva tarea
+                            new_task = Task(
+                                clickup_id=task_id,
+                                name=task_data['name'],
+                                description=task_data.get('description', ''),
+                                status=task_data['status']['status'].lower(),
+                                priority=task_data.get('priority', {}).get('priority', 'normal').lower() if task_data.get('priority') else 'normal',
+                                due_date=None,
+                                assignee_id=None,
+                                workspace_id=workspace_id,
+                                space_id=space_id,
+                                folder_id=folder_id,
+                                list_id=list_id
+                            )
+                            
+                            db.add(new_task)
+                            total_new += 1
+                        else:
+                            # Actualizar tarea existente
+                            existing_task.name = task_data['name']
+                            existing_task.status = task_data['status']['status'].lower()
+                            existing_task.description = task_data.get('description', '')
+                            if task_data.get('priority'):
+                                existing_task.priority = task_data['priority']['priority'].lower()
+                        
+                        total_synced += 1
+        
+        # Guardar cambios
+        db.commit()
+        
+        # Obtener conteos finales
+        result = db.execute(text("""
+            SELECT status, COUNT(*) as count 
+            FROM tasks 
+            GROUP BY status 
+            ORDER BY count DESC
+        """))
+        
+        final_counts = {}
+        total_tasks = 0
+        for row in result:
+            final_counts[row.status] = row.count
+            total_tasks += row.count
+        
+        print(f"✅ Sincronización completada: {total_new} nuevas tareas, {total_synced} procesadas")
+        
+        return {
+            "status": "success",
+            "message": "Sincronización completada exitosamente",
+            "total_synced": total_synced,
+            "new_tasks": total_new,
+            "final_counts": final_counts,
+            "total_tasks": total_tasks,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        print(f"❌ Error en sync_missing_tasks_endpoint: {e}")
+        raise HTTPException(status_code=500, detail=f"Error sincronizando tareas: {str(e)}")
