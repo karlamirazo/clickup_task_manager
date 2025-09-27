@@ -445,11 +445,11 @@ async def _get_task_stats(db: Session, since: datetime) -> Dict[str, Any]:
         func.count().label('count')
     ).group_by(Task.priority).all()
     
-    # Overdue tasks
+    # Overdue tasks - corregir para estados en español
     overdue = db.query(Task).filter(
         and_(
             Task.due_date < datetime.now(),
-            Task.status != 'complete'
+            Task.status != 'completado'  # Estados en español
         )
     ).count()
     

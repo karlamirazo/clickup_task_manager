@@ -367,8 +367,9 @@
                         document.getElementById('total-tasks').textContent = data.tasks.total || 0;
                         
                         const byStatus = data.tasks.by_status || {};
-                        const pendingCount = (byStatus['to do'] || 0) + (byStatus['in progress'] || 0);
-                        const completedCount = byStatus['complete'] || 0;
+                        // Mapear estados en español
+                        const pendingCount = (byStatus['pendiente'] || 0) + (byStatus['en progreso'] || 0);
+                        const completedCount = byStatus['completado'] || 0;
                         
                         document.getElementById('pending-tasks').textContent = pendingCount;
                         document.getElementById('completed-tasks').textContent = completedCount;
