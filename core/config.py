@@ -28,6 +28,8 @@ class Settings(BaseSettings):
     CLICKUP_WEBHOOK_SECRET: str = os.getenv("CLICKUP_WEBHOOK_SECRET", "")
     
     # Configuracion de ClickUp OAuth 2.0
+    # NOTA: OAuth requiere plan de pago de ClickUp - actualmente deshabilitado
+    CLICKUP_OAUTH_ENABLED: bool = os.getenv("CLICKUP_OAUTH_ENABLED", "False").lower() == "true"
     CLICKUP_OAUTH_CLIENT_ID: str = os.getenv("CLICKUP_OAUTH_CLIENT_ID") or "0J2LPSHXIM5PRB5VDE5CRJY7FJP86L0H"
     CLICKUP_OAUTH_CLIENT_SECRET: str = os.getenv("CLICKUP_OAUTH_CLIENT_SECRET") or "KJ1GM87ATJ0EOCJFQJMZK1811R95U12Y6324CFY39J38KCGETHIEEVLDDKN38JUQ"
     # URL de redirección dinámica basada en el entorno

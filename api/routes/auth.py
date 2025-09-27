@@ -154,6 +154,11 @@ async def register(
 @router.get("/clickup")
 async def clickup_oauth_login():
     """Iniciar proceso de OAuth con ClickUp"""
+    # Verificar si OAuth está habilitado
+    if not settings.CLICKUP_OAUTH_ENABLED:
+        logger.info("OAuth deshabilitado - redirigiendo a página de información")
+        return RedirectResponse(url="/api/auth/login?info=oauth_disabled")
+    
     try:
         state = oauth_state_manager.create_state()
         auth_url = clickup_oauth.get_authorization_url(state)
@@ -174,6 +179,11 @@ async def clickup_oauth_callback(
     db: Session = Depends(get_db)
 ):
     """Callback de OAuth de ClickUp"""
+    # Verificar si OAuth está habilitado
+    if not settings.CLICKUP_OAUTH_ENABLED:
+        logger.warning("⚠️ Recibido callback OAuth pero OAuth está deshabilitado")
+        return RedirectResponse(url="/api/auth/login?error=OAuth_no_disponible_en_plan_gratuito", status_code=302)
+    
     try:
         logger.info(f"🔐 Procesando OAuth callback - Code: {code[:20]}..., State: {state}")
         
@@ -198,6 +208,26 @@ async def clickup_oauth_callback(
         logger.error(f"❌ Error general en callback OAuth: {e}")
         error_url = f"/api/auth/login?error=Error_procesando_autenticacion"
         return RedirectResponse(url=error_url, status_code=302)
+
+@router.get("/oauth-status")
+async def oauth_status():
+    """Verificar estado de OAuth y planes disponibles"""
+    return {
+        "oauth_enabled": settings.CLICKUP_OAUTH_ENABLED,
+        "oauth_available": False,  # Siempre False en plan gratuito
+        "message": "OAuth requiere plan de pago de ClickUp",
+        "upgrade_info": {
+            "current_plan": "Gratuito",
+            "required_plan": "Pago (Unlimited, Business, Enterprise)",
+            "benefits": [
+                "Autenticación OAuth segura",
+                "Gestión multi-usuario",
+                "Sincronización automática",
+                "Webhooks avanzados"
+            ]
+        },
+        "alternative": "Usa API Token personal mientras tanto"
+    }
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(
