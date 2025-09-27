@@ -152,6 +152,38 @@ async def dashboard(token: str = None, oauth: str = None, error: str = None):
 # Incluir solo las rutas de autenticación
 app.include_router(auth.router, prefix="/api")
 
+# Endpoint para lista de usuarios y tareas
+@app.get("/users-tasks", response_class=HTMLResponse)
+async def users_tasks():
+    """Página de tabla de usuarios y tareas"""
+    print("📋 Accedido endpoint users-tasks")
+    try:
+        with open("static/users_tasks_table.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        print("❌ Archivo users_tasks_table.html no encontrado")
+        return HTMLResponse(content="""
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Lista de Tareas - ClickUp Project Manager</title>
+            <link rel="stylesheet" href="/static/styles.css">
+        </head>
+        <body>
+            <div class="container">
+                <h1>Lista de Usuarios y Tareas</h1>
+                <p>Página en construcción...</p>
+                <a href="/dashboard">Volver al Dashboard</a>
+            </div>
+        </body>
+        </html>
+        """, status_code=200)
+    except Exception as e:
+        print(f"❌ Error cargando users-tasks: {e}")
+        return RedirectResponse(url="/dashboard?error=Error_cargando_lista_tareas")
+
 # Ruta de salud
 @app.get("/health")
 async def health_check():
