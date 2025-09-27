@@ -406,6 +406,49 @@
             text-decoration: underline;
         }
 
+        .dashboard-access-btn {
+            width: 100%;
+            padding: 14px 20px;
+            background: var(--success-gradient);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .dashboard-access-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .dashboard-access-btn:active {
+            transform: translateY(0);
+        }
+
+        .dashboard-info {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .dashboard-info i {
+            color: #4facfe;
+        }
+
         /* Messages */
         .message {
             padding: 12px 16px;
@@ -619,6 +662,17 @@
                     Con plan gratuito, puedes usar tu <a href="https://app.clickup.com/settings/apps" target="_blank" class="api-token-link">API Token personal</a> 
                     directamente en el dashboard para acceder a todas las funcionalidades.
                 </div>
+                
+                <!-- Botón de acceso directo al dashboard -->
+                <button class="dashboard-access-btn" onclick="goToDashboard()">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Ir al Dashboard
+                </button>
+                
+                <div class="dashboard-info">
+                    <i class="fas fa-info-circle"></i>
+                    Accede directamente y configura tu API Token en el dashboard
+                </div>
             </div>
         </div>
     </div>
@@ -816,6 +870,14 @@
             document.querySelectorAll('.message').forEach(msg => {
                 msg.style.display = 'none';
             });
+        }
+
+        // Función para ir al dashboard directamente
+        function goToDashboard() {
+            showInfo('Redirigiendo al dashboard...', 2000);
+            setTimeout(() => {
+                window.location.href = '/dashboard';
+            }, 1000);
         }
     </script>
 </body>
