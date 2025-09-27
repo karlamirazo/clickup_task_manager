@@ -29,6 +29,12 @@ if (window.location.hostname.includes('railway.app')) {
             console.log('INFO: URL relativa convertida a HTTPS absoluta:', urlString);
         }
         
+        // FORZAR HTTPS en todas las URLs que contengan nuestro dominio
+        if (urlString.includes('ctm-pro.up.railway.app') && urlString.startsWith('http://')) {
+            urlString = urlString.replace('http://', 'https://');
+            console.log('FIXED: Forzado HTTPS para Railway:', urlString);
+        }
+        
         console.log('INFO: Realizando fetch a:', urlString);
         
         // Obtener token de localStorage si existe
@@ -299,18 +305,18 @@ async function loadInitialData() {
 // Cargar datos del dashboard
 async function loadDashboardData() {
     try {
-        console.log('DEBUG: loadDashboardData iniciado - Cargando tareas automáticamente');
+        console.log('DEBUG: loadDashboardData iniciado - NO actualizando contadores (ya se cargan desde loadDashboardStats)');
         
-        // Cargar tareas automáticamente para mostrar contadores reales
-        const allTasks = await fetchAllTasksForDashboard();
-        updateDashboardStats(allTasks);
+        // NOTA: NO cargar estadísticas aquí porque loadDashboardStats() ya las carga correctamente
+        // const allTasks = await fetchAllTasksForDashboard();
+        // updateDashboardStats(allTasks);
         
-        console.log('DEBUG: Dashboard actualizado con tareas reales');
+        console.log('DEBUG: Dashboard data ready - contadores se mantienen desde loadDashboardStats');
         
     } catch (error) {
-        console.error('Error cargando datos del dashboard:', error);
-        // Fallback: mostrar contadores en 0
-        updateDashboardStats([]);
+        console.error('Error en loadDashboardData:', error);
+        // NO sobrescribir contadores aquí
+        // updateDashboardStats([]);
     }
 }
 
@@ -365,9 +371,12 @@ async function loadDashboardCountersManually() {
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
             
-            // Cargar TODAS las tareas para los contadores
-            const allTasks = await fetchAllTasksForDashboard();
-            updateDashboardStats(allTasks);
+            // NOTA: Ya no cargar tareas aquí, usar estadísticas de API directamente
+            // const allTasks = await fetchAllTasksForDashboard();
+            // updateDashboardStats(allTasks);
+            
+            // En su lugar, recargar estadísticas desde la API
+            await loadDashboardStats();
             
             // Restaurar botón
             button.disabled = false;
