@@ -230,13 +230,13 @@
                 <!-- Botón de menú móvil -->
                 <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menú móvil">
                     <i class="fas fa-bars"></i>
-                </button>
+                            </button>
                 
                 <!-- Navegación principal -->
                 <div class="nav-buttons">
                     <button onclick="window.location.href='/kanban'" class="nav-btn primary">
                         <i class="fas fa-columns"></i> <span class="btn-text">Kanban Board</span>
-                    </button>
+                        </button>
                     <button onclick="window.location.href='/users-tasks'" class="nav-btn secondary">
                         <i class="fas fa-tasks"></i> <span class="btn-text">Ver Lista de Tareas</span>
                     </button>
@@ -245,8 +245,8 @@
                     </button>
                 </div>
             </div>
-        </div>
-
+                </div>
+                
         <!-- Contadores de Tareas -->
         <div class="stats-grid">
             <div class="stat-card">
@@ -258,27 +258,27 @@
             </div>
             <div class="stat-card">
                 <div class="stat-icon">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stat-number" id="pending-tasks">-</div>
-                <div class="stat-label">Pendientes</div>
+                    <i class="fas fa-play-circle"></i>
+    </div>
+                <div class="stat-number" id="in-progress-tasks">-</div>
+                <div class="stat-label">En Curso</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">
                     <i class="fas fa-check-circle"></i>
-                </div>
+                    </div>
                 <div class="stat-number" id="completed-tasks">-</div>
                 <div class="stat-label">Completadas</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">
                     <i class="fas fa-exclamation-triangle"></i>
-                </div>
+        </div>
                 <div class="stat-number" id="overdue-tasks">-</div>
                 <div class="stat-label">Vencidas</div>
-            </div>
-        </div>
-
+                        </div>
+                    </div>
+                    
         <!-- Información del sistema -->
         <div class="info-section" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); margin-bottom: 20px; border: 1px solid #e9ecef;">
             <h3 style="text-align: center; margin-bottom: 20px; color: #2c3e50;">
@@ -367,11 +367,20 @@
                         document.getElementById('total-tasks').textContent = data.tasks.total || 0;
                         
                         const byStatus = data.tasks.by_status || {};
-                        // Mapear estados en español
-                        const pendingCount = (byStatus['pendiente'] || 0) + (byStatus['en progreso'] || 0);
-                        const completedCount = byStatus['completado'] || 0;
+                        console.log('🔍 Estados recibidos de API:', byStatus);
                         
-                        document.getElementById('pending-tasks').textContent = pendingCount;
+                        // Mapear estados exactos de ClickUp
+                        const pendingCount = byStatus['pendiente'] || 0;
+                        const inProgressCount = (byStatus['en curso'] || 0) + (byStatus['en progreso'] || 0);
+                        const completedCount = (byStatus['completado'] || 0) + (byStatus['complete'] || 0) + (byStatus['closed'] || 0);
+                        
+                        console.log('📊 Conteos calculados:', {
+                            pendiente: pendingCount,
+                            enCurso: inProgressCount, 
+                            completado: completedCount
+                        });
+                        
+                        document.getElementById('in-progress-tasks').textContent = inProgressCount;
                         document.getElementById('completed-tasks').textContent = completedCount;
                         document.getElementById('overdue-tasks').textContent = data.tasks.overdue || 0;
                         
@@ -383,7 +392,7 @@
                     console.warn('⚠️ Error cargando estadísticas, código:', response.status);
                     // Fallback a cero si la API falla
                     document.getElementById('total-tasks').textContent = '0';
-                    document.getElementById('pending-tasks').textContent = '0';
+                    document.getElementById('in-progress-tasks').textContent = '0';
                     document.getElementById('completed-tasks').textContent = '0';
                     document.getElementById('overdue-tasks').textContent = '0';
                 }
