@@ -163,7 +163,7 @@ if __name__ == "__main__":
     print(f"📚 Documentación: http://{settings.HOST}:{settings.PORT}/docs")
     print(f"🔐 Autenticación: http://{settings.HOST}:{settings.PORT}/api/auth/login")
     uvicorn.run(
-        "main_simple:app",
+        "main:app",
         host=settings.HOST,
         port=settings.PORT,
         reload=settings.DEBUG
