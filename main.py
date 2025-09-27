@@ -15,6 +15,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
 
 # Importar configuración
 from core.config import settings
@@ -203,6 +204,64 @@ async def kanban_board():
     except Exception as e:
         print(f"❌ Error cargando kanban: {e}")
         return RedirectResponse(url="/dashboard?error=Error_cargando_kanban")
+
+# Endpoint para ejecutar migraciones de base de datos
+@app.post("/api/migrate-db")
+async def migrate_database():
+    """Ejecutar migraciones de base de datos"""
+    try:
+        from core.database import engine
+        from models import Base
+        
+        print("🔄 Ejecutando migraciones de base de datos...")
+        
+        # Crear todas las tablas
+        Base.metadata.create_all(bind=engine)
+        
+        print("✅ Migraciones ejecutadas exitosamente")
+        
+        return {
+            "status": "success",
+            "message": "Migraciones de base de datos ejecutadas exitosamente",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        print(f"❌ Error ejecutando migraciones: {e}")
+        return {
+            "status": "error",
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+# Endpoint para inicializar base de datos
+@app.post("/api/init-db")
+async def init_database():
+    """Inicializar base de datos con esquema completo"""
+    try:
+        from core.database import engine
+        from models import Base
+        
+        print("🔄 Inicializando base de datos...")
+        
+        # Crear todas las tablas
+        Base.metadata.create_all(bind=engine)
+        
+        print("✅ Base de datos inicializada exitosamente")
+        
+        return {
+            "status": "success",
+            "message": "Base de datos inicializada exitosamente",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        print(f"❌ Error inicializando base de datos: {e}")
+        return {
+            "status": "error",
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        }
 
 # Ruta de salud
 @app.get("/health")
