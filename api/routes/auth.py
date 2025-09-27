@@ -25,9 +25,14 @@ router = APIRouter(prefix="/auth", tags=["autenticación"])
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page():
-    """Página de login"""
-    with open("static/auth.html", "r", encoding="utf-8") as f:
-        return HTMLResponse(content=f.read())
+    """Página de login mejorada"""
+    try:
+        with open("static/auth_enhanced.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        # Fallback a la versión original si no existe la nueva
+        with open("static/auth.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
 
 @router.post("/login", response_model=TokenResponse)
 async def login(

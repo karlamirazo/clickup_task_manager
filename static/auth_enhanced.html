@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClickUp Project Manager - Inicio</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #fdbb2d 0%, #22c1c3 100%);
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --text-light: #718096;
+            --border-color: #e2e8f0;
+            --bg-soft: #f7fafc;
+            --bg-card: #ffffff;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+            background-size: 300% 300%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 1fr 500px;
+            gap: 40px;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Floating Elements Background */
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .floating-element {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        .floating-element:nth-child(1) { width: 80px; height: 80px; top: 10%; left: 10%; animation-delay: 0s; }
+        .floating-element:nth-child(2) { width: 120px; height: 120px; top: 70%; left: 80%; animation-delay: 5s; }
+        .floating-element:nth-child(3) { width: 60px; height: 60px; top: 50%; left: 5%; animation-delay: 10s; }
+        .floating-element:nth-child(4) { width: 100px; height: 100px; top: 20%; left: 85%; animation-delay: 15s; }
+        .floating-element:nth-child(5) { width: 40px; height: 40px; top: 80%; left: 20%; animation-delay: 8s; }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+            100% { transform: translateY(0px) rotate(360deg); opacity: 0.7; }
+        }
+
+        /* Left Section - Hero */
+        .hero-section {
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .hero-badge i {
+            margin-right: 8px;
+            color: #ffd700;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            font-weight: 400;
+            line-height: 1.6;
+            margin-bottom: 32px;
+            opacity: 0.9;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .feature-item i {
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            color: #ffd700;
+            font-size: 1.1rem;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffd700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+        /* Right Section - Auth Card */
+        .auth-card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-xl);
+            padding: 48px;
+            position: relative;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .auth-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* OAuth Status */
+        .oauth-status {
+            background: var(--bg-soft);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 2px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .oauth-status.disabled {
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            border-color: #feb2b2;
+        }
+
+        .oauth-status.enabled {
+            background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+            border-color: #9ae6b4;
+        }
+
+        .oauth-status-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .oauth-status-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+
+        .oauth-status-icon.disabled { color: #e53e3e; }
+        .oauth-status-icon.enabled { color: #38a169; }
+
+        .oauth-status-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .oauth-status-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .oauth-upgrade-info {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .upgrade-badge {
+            display: inline-flex;
+            align-items: center;
+            background: var(--warning-gradient);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .upgrade-badge i {
+            margin-right: 6px;
+        }
+
+        /* Auth Button */
+        .auth-button {
+            width: 100%;
+            padding: 16px 24px;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .auth-button:active {
+            transform: translateY(0);
+        }
+
+        .auth-button.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .auth-button.disabled {
+            background: linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%);
+            cursor: not-allowed;
+        }
+
+        .auth-button.disabled:hover {
+            transform: none;
+            box-shadow: var(--shadow-md);
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        .auth-button.loading .spinner {
+            display: block;
+        }
+
+        .auth-button.loading .button-text {
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Alternative Auth */
+        .auth-divider {
+            text-align: center;
+            margin: 24px 0;
+            position: relative;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .auth-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .auth-divider span {
+            background: var(--bg-card);
+            padding: 0 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .api-token-info {
+            background: #f7fafc;
+            border: 2px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .api-token-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .api-token-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .api-token-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .api-token-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Messages */
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .message.error {
+            background: #fed7d7;
+            color: #c53030;
+            border: 1px solid #feb2b2;
+        }
+
+        .message.success {
+            background: #c6f6d5;
+            color: #2f855a;
+            border: 1px solid #9ae6b4;
+        }
+
+        .message.info {
+            background: #bee3f8;
+            color: #2b6cb0;
+            border: 1px solid #90cdf4;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 32px;
+                text-align: center;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                justify-items: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                max-width: 400px;
+            }
+
+            .auth-card {
+                padding: 32px 24px;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .stats-row {
+                justify-content: center;
+            }
+        }
+
+        /* Loading Animation */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading-pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Background Elements -->
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+
+    <div class="main-container">
+        <!-- Left Section - Hero -->
+        <div class="hero-section">
+            <div class="hero-badge">
+                <i class="fas fa-star"></i>
+                Gestión Profesional de Proyectos
+            </div>
+            
+            <h1 class="hero-title">
+                ClickUp Project<br>
+                <span style="background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Manager</span>
+            </h1>
+            
+            <p class="hero-subtitle">
+                Potencia tu productividad con nuestra plataforma integrada. 
+                Gestiona tareas, equipos y proyectos de manera inteligente y eficiente.
+            </p>
+            
+            <div class="features-grid">
+                <div class="feature-item">
+                    <i class="fas fa-sync-alt"></i>
+                    Sincronización en tiempo real
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-bell"></i>
+                    Notificaciones inteligentes
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-chart-line"></i>
+                    Reportes avanzados
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-users"></i>
+                    Colaboración en equipo
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-mobile-alt"></i>
+                    Acceso desde cualquier lugar
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-shield-alt"></i>
+                    Seguridad garantizada
+                </div>
+            </div>
+            
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-number">99.9%</span>
+                    <span class="stat-label">Tiempo de actividad</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">10k+</span>
+                    <span class="stat-label">Tareas gestionadas</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">24/7</span>
+                    <span class="stat-label">Soporte técnico</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Section - Auth Card -->
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2 class="auth-title">Iniciar Sesión</h2>
+                <p class="auth-subtitle">Accede con tu cuenta de ClickUp</p>
+            </div>
+
+            <!-- Messages -->
+            <div id="error-message" class="message error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span id="error-text"></span>
+            </div>
+            <div id="success-message" class="message success">
+                <i class="fas fa-check-circle"></i>
+                <span id="success-text"></span>
+            </div>
+            <div id="info-message" class="message info">
+                <i class="fas fa-info-circle"></i>
+                <span id="info-text"></span>
+            </div>
+
+            <!-- OAuth Status -->
+            <div id="oauth-status" class="oauth-status">
+                <div class="oauth-status-header">
+                    <i id="oauth-icon" class="oauth-status-icon fas fa-circle-question"></i>
+                    <div id="oauth-title" class="oauth-status-title">Verificando estado OAuth...</div>
+                </div>
+                <div id="oauth-text" class="oauth-status-text">
+                    Comprobando disponibilidad de autenticación OAuth...
+                </div>
+                <div id="oauth-upgrade" class="oauth-upgrade-info" style="display: none;">
+                    <div class="upgrade-badge">
+                        <i class="fas fa-crown"></i>
+                        Upgrade Requerido
+                    </div>
+                    <div class="oauth-status-text">
+                        OAuth requiere plan de pago de ClickUp. Beneficios: autenticación segura, gestión multi-usuario, webhooks avanzados.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Auth Button -->
+            <button id="auth-button" class="auth-button" onclick="handleAuth()">
+                <div class="spinner"></div>
+                <i class="fab fa-clickup button-text"></i>
+                <span class="button-text">Iniciar con ClickUp</span>
+            </button>
+
+            <!-- Alternative Auth -->
+            <div class="auth-divider">
+                <span>Alternativa para plan gratuito</span>
+            </div>
+
+            <div class="api-token-info">
+                <div class="api-token-title">
+                    <i class="fas fa-key"></i>
+                    API Token Personal
+                </div>
+                <div class="api-token-text">
+                    Con plan gratuito, puedes usar tu <a href="https://app.clickup.com/settings/apps" target="_blank" class="api-token-link">API Token personal</a> 
+                    directamente en el dashboard para acceder a todas las funcionalidades.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        const API_BASE = '/api';
+        let oauthStatus = null;
+
+        // Inicializar aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            checkOAuthStatus();
+            handleUrlParameters();
+            checkExistingAuth();
+        });
+
+        // Verificar estado OAuth
+        async function checkOAuthStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/oauth-status`);
+                oauthStatus = await response.json();
+                updateOAuthDisplay();
+            } catch (error) {
+                console.error('Error checking OAuth status:', error);
+                updateOAuthDisplay(null);
+            }
+        }
+
+        // Actualizar display de OAuth
+        function updateOAuthDisplay(status = oauthStatus) {
+            const statusDiv = document.getElementById('oauth-status');
+            const iconEl = document.getElementById('oauth-icon');
+            const titleEl = document.getElementById('oauth-title');
+            const textEl = document.getElementById('oauth-text');
+            const upgradeEl = document.getElementById('oauth-upgrade');
+            const buttonEl = document.getElementById('auth-button');
+
+            if (!status) {
+                // Error al obtener estado
+                statusDiv.className = 'oauth-status disabled';
+                iconEl.className = 'oauth-status-icon disabled fas fa-exclamation-triangle';
+                titleEl.textContent = 'Error verificando OAuth';
+                textEl.textContent = 'No se pudo verificar el estado de OAuth. Usando API Token.';
+                upgradeEl.style.display = 'none';
+                
+                buttonEl.className = 'auth-button disabled';
+                buttonEl.innerHTML = '<i class="fas fa-key"></i> Usar API Token Personal';
+                return;
+            }
+
+            if (status.oauth_enabled && status.oauth_available) {
+                // OAuth habilitado y disponible
+                statusDiv.className = 'oauth-status enabled';
+                iconEl.className = 'oauth-status-icon enabled fas fa-check-circle';
+                titleEl.textContent = 'OAuth Activo';
+                textEl.textContent = 'Autenticación OAuth habilitada. Plan de pago detectado.';
+                upgradeEl.style.display = 'none';
+                
+                buttonEl.className = 'auth-button';
+                buttonEl.innerHTML = '<i class="fab fa-clickup button-text"></i><span class="button-text">Iniciar con ClickUp OAuth</span><div class="spinner"></div>';
+            } else {
+                // OAuth deshabilitado (plan gratuito)
+                statusDiv.className = 'oauth-status disabled';
+                iconEl.className = 'oauth-status-icon disabled fas fa-times-circle';
+                titleEl.textContent = 'OAuth No Disponible';
+                textEl.textContent = status.message || 'OAuth requiere plan de pago de ClickUp';
+                upgradeEl.style.display = 'block';
+                
+                buttonEl.className = 'auth-button disabled';
+                buttonEl.innerHTML = '<i class="fas fa-crown"></i> OAuth - Requiere Plan Pago';
+            }
+        }
+
+        // Manejar autenticación
+        function handleAuth() {
+            const button = document.getElementById('auth-button');
+            
+            if (!oauthStatus || !oauthStatus.oauth_enabled) {
+                showInfo('OAuth no disponible. Usa tu API Token personal en el dashboard.', 5000);
+                setTimeout(() => {
+                    window.open('https://app.clickup.com/settings/apps', '_blank');
+                }, 1000);
+                return;
+            }
+
+            if (button.classList.contains('disabled')) {
+                showInfo('OAuth requiere plan de pago de ClickUp. Considera upgrader tu plan.', 5000);
+                return;
+            }
+
+            setButtonLoading(true);
+            window.location.href = '/api/auth/clickup';
+        }
+
+        // Manejar parámetros URL
+        function handleUrlParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            const error = urlParams.get('error');
+            const info = urlParams.get('info');
+
+            if (error) {
+                let errorMessage = decodeURIComponent(error);
+                if (errorMessage.includes('OAuth_no_disponible')) {
+                    errorMessage = 'OAuth no está disponible en el plan gratuito de ClickUp';
+                } else if (errorMessage.includes('oauth_disabled')) {
+                    errorMessage = 'OAuth está deshabilitado. Usa tu API Token personal.';
+                }
+                showError(errorMessage);
+                // Limpiar URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+                return;
+            }
+
+            if (info) {
+                let infoMessage = decodeURIComponent(info);
+                if (infoMessage.includes('oauth_disabled')) {
+                    infoMessage = 'OAuth deshabilitado para plan gratuito. Usa API Token personal.';
+                }
+                showInfo(infoMessage);
+                // Limpiar URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+                return;
+            }
+
+            if (token) {
+                localStorage.setItem('auth_token', token);
+                showSuccess('¡Autenticación exitosa! Redirigiendo al dashboard...');
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 1500);
+                return;
+            }
+        }
+
+        // Verificar autenticación existente
+        function checkExistingAuth() {
+            const existingToken = localStorage.getItem('auth_token');
+            if (existingToken) {
+                fetch(`${API_BASE}/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${existingToken}`
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        showInfo('Ya tienes una sesión activa. Redirigiendo...', 2000);
+                        setTimeout(() => {
+                            window.location.href = '/dashboard';
+                        }, 1000);
+                    }
+                })
+                .catch(() => {
+                    localStorage.removeItem('auth_token');
+                });
+            }
+        }
+
+        // Funciones de utilidad
+        function setButtonLoading(loading) {
+            const button = document.getElementById('auth-button');
+            if (loading) {
+                button.classList.add('loading');
+            } else {
+                button.classList.remove('loading');
+            }
+        }
+
+        function showMessage(type, message, duration = 5000) {
+            hideMessages();
+            const messageEl = document.getElementById(`${type}-message`);
+            const textEl = document.getElementById(`${type}-text`);
+            
+            textEl.textContent = message;
+            messageEl.style.display = 'flex';
+            
+            if (duration > 0) {
+                setTimeout(hideMessages, duration);
+            }
+        }
+
+        function showError(message, duration = 5000) {
+            showMessage('error', message, duration);
+        }
+
+        function showSuccess(message, duration = 3000) {
+            showMessage('success', message, duration);
+        }
+
+        function showInfo(message, duration = 5000) {
+            showMessage('info', message, duration);
+        }
+
+        function hideMessages() {
+            document.querySelectorAll('.message').forEach(msg => {
+                msg.style.display = 'none';
+            });
+        }
+    </script>
+</body>
+</html>
