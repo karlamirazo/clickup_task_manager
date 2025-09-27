@@ -9,7 +9,7 @@
     <title>📊 Dashboard Principal - ClickUp Manager</title>
     <link rel="stylesheet" href="/static/styles.css?v=20250119">
     <link rel="stylesheet" href="/static/mobile.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .dashboard-container {
@@ -166,99 +166,6 @@
             letter-spacing: 0.5px;
             font-weight: 500;
         }
-        
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .chart-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-            border: 1px solid #e9ecef;
-        }
-        
-        .chart-title {
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin-bottom: 15px;
-            text-align: center;
-            color: #2c3e50;
-        }
-        
-        .chart-canvas {
-            max-height: 250px;
-        }
-        
-        .sync-section {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-            margin-bottom: 20px;
-            border: 1px solid #e9ecef;
-        }
-        
-        .sync-controls {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        
-        .sync-btn {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .sync-btn:hover {
-            background: #218838;
-        }
-        
-        .sync-btn:disabled {
-            background: #6c757d;
-            cursor: not-allowed;
-        }
-        
-        .sync-status {
-            text-align: center;
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 0.9rem;
-        }
-        
-        .sync-status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .sync-status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .sync-status.info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
 
         /* Estilos responsivos */
         @media (max-width: 768px) {
@@ -292,10 +199,6 @@
             .stats-grid {
                 grid-template-columns: 1fr 1fr;
                 gap: 10px;
-            }
-            
-            .charts-grid {
-                grid-template-columns: 1fr;
             }
         }
         
@@ -376,162 +279,23 @@
             </div>
         </div>
 
-        <!-- Controles de Sincronización -->
-        <div class="sync-section">
+        <!-- Información del sistema -->
+        <div class="info-section" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); margin-bottom: 20px; border: 1px solid #e9ecef;">
             <h3 style="text-align: center; margin-bottom: 20px; color: #2c3e50;">
-                <i class="fas fa-sync-alt"></i> Control de Sincronización
+                <i class="fas fa-info-circle"></i> Información del Dashboard
             </h3>
-            <div class="sync-controls">
-                <button class="sync-btn" onclick="manualSync()" id="sync-btn">
-                    <i class="fas fa-sync-alt"></i> Sincronizar Ahora
-                </button>
-                <button class="sync-btn" onclick="showCreateTaskModal()" style="background: #17a2b8;">
-                    <i class="fas fa-plus"></i> Crear Tarea
-                </button>
-            </div>
-            <div id="sync-status" class="sync-status" style="display: none;"></div>
-        </div>
-
-        <!-- Gráficos -->
-        <div class="charts-grid">
-            <div class="chart-card">
-                <div class="chart-title">Estado de Tareas</div>
-                <canvas id="tasks-status-chart" class="chart-canvas"></canvas>
-            </div>
-            <div class="chart-card">
-                <div class="chart-title">Prioridades</div>
-                <canvas id="tasks-priority-chart" class="chart-canvas"></canvas>
+            <p style="text-align: center; color: #6c757d; margin-bottom: 15px;">
+                <i class="fas fa-info-circle"></i> 
+                <strong>Dashboard Principal</strong> - Aquí puedes ver estadísticas generales del sistema. 
+                La <strong>Lista de Tareas</strong> está disponible para gestión detallada.
+            </p>
+            <div style="text-align: center;">
+                <a href="/users-tasks" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea, #764ba2); border: none; padding: 12px 24px; border-radius: 8px; color: white; text-decoration: none; font-weight: 500; transition: transform 0.2s ease;">
+                    <i class="fas fa-users"></i> Ver Tabla de Usuarios y Tareas
+                </a>
             </div>
         </div>
     </div>
-
-    <!-- Modal para crear tarea -->
-    <div id="create-task-modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('create-task-modal')">&times;</span>
-            <h2><i class="fas fa-plus-circle"></i> Crear Nueva Tarea</h2>
-            
-            <form id="create-task-form">
-                <div class="form-group">
-                    <label for="task-name">Nombre de la Tarea *</label>
-                    <input type="text" id="task-name" name="name" required placeholder="Ingresa el nombre de la tarea">
-                </div>
-                
-                <div class="form-group">
-                    <label for="task-description">Descripción</label>
-                    <textarea id="task-description" name="description" rows="3" placeholder="Describe la tarea (opcional)"></textarea>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Crear Tarea
-                    </button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('create-task-modal')">
-                        Cancelar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <style>
-        /* Estilos para el modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-        
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 90%;
-            max-width: 600px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        .close:hover {
-            color: #000;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #333;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        
-        .form-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            margin-top: 20px;
-        }
-        
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-    </style>
 
     <script src="/static/script.js?v=20250119"></script>
     
@@ -565,6 +329,9 @@
                 
                 console.log('Token OAuth guardado:', token.substring(0, 20) + '...');
             }
+
+            // Cargar estadísticas reales al inicio
+            loadDashboardStats();
         });
 
         // Funciones básicas del dashboard
@@ -582,62 +349,19 @@
         }
 
         function showCreateTaskModal() {
-            document.getElementById('create-task-modal').style.display = 'block';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        async function manualSync() {
-            const syncBtn = document.getElementById('sync-btn');
-            const syncStatus = document.getElementById('sync-status');
-            
-            syncBtn.disabled = true;
-            syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
-            syncStatus.style.display = 'block';
-            syncStatus.className = 'sync-status info';
-            syncStatus.textContent = 'Iniciando sincronización...';
-
-            try {
-                // Sincronizar tareas reales
-                const response = await fetch('/api/v1/tasks/sync', {
-                    method: 'POST'
-                });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    syncStatus.className = 'sync-status success';
-                    syncStatus.textContent = result.message || 'Sincronización exitosa';
-                } else {
-                    throw new Error('Error en la sincronización');
-                }
-                
-                // Recargar estadísticas reales
-                await loadDashboardStats();
-                
-            } catch (error) {
-                console.error('Error en sincronización:', error);
-                syncStatus.className = 'sync-status error';
-                syncStatus.textContent = 'Error en la sincronización';
-            } finally {
-                syncBtn.disabled = false;
-                syncBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Sincronizar Ahora';
-                
-                // Ocultar mensaje después de 5 segundos
-                setTimeout(() => {
-                    syncStatus.style.display = 'none';
-                }, 5000);
-            }
+            // Redirigir a la tabla de tareas donde está el modal funcional
+            window.location.href = '/users-tasks';
         }
 
         // Función para cargar estadísticas reales del dashboard
         async function loadDashboardStats() {
             try {
+                console.log('📊 Cargando estadísticas del dashboard...');
                 const response = await fetch('/api/v1/dashboard/stats?period=24h');
+                
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('📊 Estadísticas del dashboard:', data);
+                    console.log('📊 Estadísticas recibidas:', data);
                     
                     if (data.tasks) {
                         document.getElementById('total-tasks').textContent = data.tasks.total || 0;
@@ -649,17 +373,21 @@
                         document.getElementById('pending-tasks').textContent = pendingCount;
                         document.getElementById('completed-tasks').textContent = completedCount;
                         document.getElementById('overdue-tasks').textContent = data.tasks.overdue || 0;
+                        
+                        console.log('✅ Estadísticas actualizadas en la interfaz');
+                    } else {
+                        console.warn('⚠️ No se recibieron datos de tareas en la respuesta');
                     }
                 } else {
-                    console.warn('Error cargando estadísticas, usando valores por defecto');
-                    // Fallback a valores por defecto si la API falla
+                    console.warn('⚠️ Error cargando estadísticas, código:', response.status);
+                    // Fallback a cero si la API falla
                     document.getElementById('total-tasks').textContent = '0';
                     document.getElementById('pending-tasks').textContent = '0';
                     document.getElementById('completed-tasks').textContent = '0';
                     document.getElementById('overdue-tasks').textContent = '0';
                 }
             } catch (error) {
-                console.error('Error cargando estadísticas:', error);
+                console.error('❌ Error cargando estadísticas:', error);
                 // Mostrar ceros en caso de error
                 document.getElementById('total-tasks').textContent = '0';
                 document.getElementById('pending-tasks').textContent = '0';
@@ -667,15 +395,6 @@
                 document.getElementById('overdue-tasks').textContent = '0';
             }
         }
-
-        // Inicializar dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            // Cargar estadísticas reales al inicio
-            loadDashboardStats();
-            
-            // Recargar estadísticas cada 30 segundos
-            setInterval(loadDashboardStats, 30000);
-        });
     </script>
 </body>
 </html>

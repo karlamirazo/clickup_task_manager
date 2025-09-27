@@ -189,6 +189,21 @@ async def users_tasks():
         print(f"❌ Error cargando users-tasks: {e}")
         return RedirectResponse(url="/dashboard?error=Error_cargando_lista_tareas")
 
+# Endpoint para Kanban Board
+@app.get("/kanban", response_class=HTMLResponse)
+async def kanban_board():
+    """Página del Kanban Board con drag and drop"""
+    print("📋 Accedido endpoint kanban")
+    try:
+        with open("static/kanban_board.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        print("❌ Archivo kanban_board.html no encontrado")
+        return RedirectResponse(url="/dashboard?error=Kanban_no_disponible")
+    except Exception as e:
+        print(f"❌ Error cargando kanban: {e}")
+        return RedirectResponse(url="/dashboard?error=Error_cargando_kanban")
+
 # Ruta de salud
 @app.get("/health")
 async def health_check():
