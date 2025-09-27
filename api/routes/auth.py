@@ -11,6 +11,7 @@ from fastapi.responses import RedirectResponse, HTMLResponse
 from sqlalchemy.orm import Session
 
 from core.database import get_db
+from core.config import settings
 from models.user import User
 from auth.auth import AuthManager, RoleManager, require_auth, get_current_user
 from auth.oauth import clickup_oauth, oauth_state_manager, authenticate_with_clickup
