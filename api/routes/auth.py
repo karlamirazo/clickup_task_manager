@@ -175,23 +175,29 @@ async def clickup_oauth_callback(
 ):
     """Callback de OAuth de ClickUp"""
     try:
+        logger.info(f"🔐 Procesando OAuth callback - Code: {code[:20]}..., State: {state}")
+        
         # Autenticar con ClickUp
         auth_result = await authenticate_with_clickup(code, state, db)
+        
+        logger.info(f"✅ OAuth exitoso - Token generado: {auth_result['access_token'][:20]}...")
         
         # Redirigir al dashboard con el token
         redirect_url = f"/dashboard?token={auth_result['access_token']}"
         
-        return RedirectResponse(url=redirect_url)
+        logger.info(f"🔗 Redirigiendo a: {redirect_url}")
+        
+        return RedirectResponse(url=redirect_url, status_code=302)
         
     except HTTPException as e:
-        logger.error(f"Error en callback OAuth: {e.detail}")
+        logger.error(f"❌ Error HTTPException en callback OAuth: {e.detail}")
         # Redirigir a la página de login con error
         error_url = f"/api/auth/login?error={e.detail}"
-        return RedirectResponse(url=error_url)
+        return RedirectResponse(url=error_url, status_code=302)
     except Exception as e:
-        logger.error(f"Error en callback OAuth: {e}")
-        error_url = f"/api/auth/login?error=Error procesando autenticación"
-        return RedirectResponse(url=error_url)
+        logger.error(f"❌ Error general en callback OAuth: {e}")
+        error_url = f"/api/auth/login?error=Error_procesando_autenticacion"
+        return RedirectResponse(url=error_url, status_code=302)
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(

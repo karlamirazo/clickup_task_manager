@@ -112,12 +112,24 @@ async def oauth_short_callback(code: str = None, state: str = None, error: str =
 
 # Ruta del dashboard
 @app.get("/dashboard", response_class=HTMLResponse)
-async def dashboard():
-    """Dashboard principal"""
+async def dashboard(token: str = None, oauth: str = None, error: str = None):
+    """Dashboard principal - Maneja redirecciones OAuth"""
+    print(f"🏠 Dashboard accedido - Token: {token[:20] if token else 'None'}..., OAuth: {oauth}, Error: {error}")
+    
+    if error:
+        print(f"❌ Error en dashboard: {error}")
+        return RedirectResponse(url=f"/api/auth/login?error={error}")
+    
     try:
+        # Leer el archivo del dashboard
         with open("static/index.html", "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read())
+            dashboard_content = f.read()
+            
+        print("✅ Dashboard cargado exitosamente")
+        return HTMLResponse(content=dashboard_content)
+        
     except FileNotFoundError:
+        print("❌ Archivo index.html no encontrado")
         return HTMLResponse(content="""
         <!DOCTYPE html>
         <html lang="es">
@@ -132,7 +144,10 @@ async def dashboard():
             <a href="/api/auth/login">Iniciar Sesión</a>
         </body>
         </html>
-        """)
+        """, status_code=200)
+    except Exception as e:
+        print(f"❌ Error cargando dashboard: {e}")
+        return RedirectResponse(url="/api/auth/login?error=Error_cargando_dashboard")
 
 # Incluir solo las rutas de autenticación
 app.include_router(auth.router, prefix="/api")
