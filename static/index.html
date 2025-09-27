@@ -369,10 +369,10 @@
                         const byStatus = data.tasks.by_status || {};
                         console.log('🔍 Estados recibidos de API:', byStatus);
                         
-                        // Mapear estados exactos de ClickUp
-                        const pendingCount = byStatus['pendiente'] || 0;
-                        const inProgressCount = (byStatus['en curso'] || 0) + (byStatus['en progreso'] || 0);
-                        const completedCount = (byStatus['completado'] || 0) + (byStatus['complete'] || 0) + (byStatus['closed'] || 0);
+                        // Mapear estados exactos de ClickUp - AMPLIADO para incluir todos los posibles
+                        const pendingCount = (byStatus['pendiente'] || 0) + (byStatus['to do'] || 0) + (byStatus['todo'] || 0);
+                        const inProgressCount = (byStatus['en curso'] || 0) + (byStatus['en progreso'] || 0) + (byStatus['in progress'] || 0) + (byStatus['doing'] || 0);
+                        const completedCount = (byStatus['completado'] || 0) + (byStatus['complete'] || 0) + (byStatus['completed'] || 0) + (byStatus['done'] || 0) + (byStatus['closed'] || 0) + (byStatus['finished'] || 0) + (byStatus['resolved'] || 0);
                         
                         console.log('📊 Conteos calculados:', {
                             pendiente: pendingCount,
