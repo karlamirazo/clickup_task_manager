@@ -3,7 +3,7 @@ let currentTab = 'dashboard';
 let tasks = [];
 let workspaces = [];
 
-// Interceptor de fetch para forzar HTTPS en Railway
+// Interceptor de fetch para forzar HTTPS en Railway y agregar autenticación
 if (window.location.hostname.includes('railway.app')) {
     console.log('INFO: Aplicando interceptor de fetch para Railway...');
     
@@ -31,12 +31,17 @@ if (window.location.hostname.includes('railway.app')) {
         
         console.log('INFO: Realizando fetch a:', urlString);
         
-        // Agregar headers para forzar HTTPS
+        // Obtener token de localStorage si existe
+        const authToken = localStorage.getItem('auth_token');
+        
+        // Agregar headers para forzar HTTPS y autenticación
         const httpsOptions = {
             ...options,
             headers: {
                 ...options.headers,
-                'Upgrade-Insecure-Requests': '1'
+                'Upgrade-Insecure-Requests': '1',
+                // Agregar token de autenticación si existe
+                ...(authToken && { 'Authorization': `Bearer ${authToken}` })
             }
         };
         
@@ -45,6 +50,33 @@ if (window.location.hostname.includes('railway.app')) {
     };
     
     console.log('SUCCESS: Interceptor de fetch aplicado exitosamente');
+} else {
+    // Para desarrollo local, también agregar el interceptor de autenticación
+    console.log('INFO: Aplicando interceptor de autenticación para desarrollo local...');
+    
+    // Guardar el fetch original
+    const originalFetch = window.fetch;
+    
+    // Crear interceptor personalizado
+    window.fetch = function(url, options = {}) {
+        // Obtener token de localStorage si existe
+        const authToken = localStorage.getItem('auth_token');
+        
+        // Agregar headers de autenticación
+        const authOptions = {
+            ...options,
+            headers: {
+                ...options.headers,
+                // Agregar token de autenticación si existe
+                ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+            }
+        };
+        
+        // Llamar al fetch original con las opciones modificadas
+        return originalFetch(url, authOptions);
+    };
+    
+    console.log('SUCCESS: Interceptor de autenticación aplicado');
 }
 
 // Variables globales para reportes
