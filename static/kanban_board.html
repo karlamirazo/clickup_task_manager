@@ -1124,6 +1124,15 @@
                                 const pendientes = (counts.pendientes || 0) + (counts.en_curso || 0);
                                 if (pendingEl) pendingEl.textContent = pendientes;
                                 if (completedEl) completedEl.textContent = counts.completadas || 0;
+                                
+                                // Broadcast a otras pestañas/ventanas
+                                try {
+                                    const bc = new BroadcastChannel('dashboard-updates');
+                                    bc.postMessage({ type: 'stats-updated', payload: stats });
+                                    bc.close();
+                                } catch (e2) {
+                                    console.warn('BroadcastChannel no disponible:', e2);
+                                }
                             }
                         }
                     } catch (e) {

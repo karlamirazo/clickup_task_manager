@@ -776,6 +776,32 @@
             setupEventListeners();
             adjustDashboardForDevice();
             
+            // Suscripción a BroadcastChannel para refresco en vivo desde Kanban
+            try {
+                const bc = new BroadcastChannel('dashboard-updates');
+                bc.onmessage = (ev) => {
+                    if (ev?.data?.type === 'stats-updated' && ev.data.payload) {
+                        const payload = ev.data.payload;
+                        if (payload?.tasks) {
+                            const totalEl = document.getElementById('total-tasks');
+                            const pendingEl = document.getElementById('pending-tasks');
+                            const completedEl = document.getElementById('completed-tasks');
+                            const overdueEl = document.getElementById('overdue-tasks');
+                            if (totalEl) totalEl.textContent = payload.tasks.total || 0;
+                            if (overdueEl) overdueEl.textContent = payload.tasks.overdue || 0;
+                            const counts = payload.tasks.dashboard_counts || {};
+                            const pendientes = (counts.pendientes || 0) + (counts.en_curso || 0);
+                            if (pendingEl) pendingEl.textContent = pendientes;
+                            if (completedEl) completedEl.textContent = counts.completadas || 0;
+                            // Refrescar gráficos con los datos recibidos
+                            renderCharts(payload);
+                        }
+                    }
+                };
+            } catch (e) {
+                console.warn('BroadcastChannel no disponible:', e);
+            }
+            
             // Ajustar dashboard cuando cambie el tamaño de la ventana
             window.addEventListener('resize', adjustDashboardForDevice);
             
