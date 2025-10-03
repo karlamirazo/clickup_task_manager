@@ -89,10 +89,10 @@ class SimpleSyncService:
                         try:
                             print(f"      📝 Procesando lista: {list_name}")
                             
-                            # Obtener tareas de la lista - SOLO ABIERTAS
+                            # Obtener tareas de la lista - incluir cerradas para reportes correctos
                             tasks = await self.clickup_client.get_tasks(
                                 list_id=list_id,
-                                include_closed=False,  # SOLO tareas ABIERTAS
+                                include_closed=True,  # incluir cerradas para conteos exactos
                                 page=0,
                                 limit=100
                             )
@@ -126,6 +126,7 @@ class SimpleSyncService:
             
             # 3. Detectar tareas eliminadas
             try:
+                # No eliminar agresivamente: comparar contra tareas abiertas + cerradas
                 deleted_count = await self._detect_deleted_tasks(workspace_id)
                 result["total_tasks_deleted"] = deleted_count
                 print(f"🗑️ Eliminadas {deleted_count} tareas obsoletas")
