@@ -795,6 +795,12 @@
                             if (completedEl) completedEl.textContent = counts.completadas || 0;
                             // Refrescar gráficos con los datos recibidos
                             renderCharts(payload);
+                            // Toast visual
+                            try {
+                                if (typeof showNotification === 'function') {
+                                    showNotification('Dashboard actualizado por cambios en Kanban', 'success');
+                                }
+                            } catch {}
                         }
                     }
                 };
