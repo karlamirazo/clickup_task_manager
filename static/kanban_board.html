@@ -7,8 +7,8 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>📋 Kanban Board - ClickUp Manager</title>
-    <link rel="stylesheet" href="/static/styles.css">
-    <link rel="stylesheet" href="/static/mobile.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="mobile.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* Estilos específicos para el Kanban Board */
@@ -1104,6 +1104,31 @@
                     
                     // Re-renderizar el Kanban Board con los datos actualizados
                     renderKanbanBoard();
+                    
+                    // Actualizar contadores globales del Dashboard en segundo plano
+                    try {
+                        const ts = Date.now();
+                        const statsResp = await fetch(`/api/v1/dashboard/stats?period=24h&_t=${ts}`);
+                        if (statsResp.ok) {
+                            const stats = await statsResp.json();
+                            if (stats && stats.tasks) {
+                                const totalEl = document.getElementById('total-tasks');
+                                const pendingEl = document.getElementById('pending-tasks');
+                                const completedEl = document.getElementById('completed-tasks');
+                                const overdueEl = document.getElementById('overdue-tasks');
+                                
+                                if (totalEl) totalEl.textContent = stats.tasks.total || 0;
+                                if (overdueEl) overdueEl.textContent = stats.tasks.overdue || 0;
+                                
+                                const counts = stats.tasks.dashboard_counts || {};
+                                const pendientes = (counts.pendientes || 0) + (counts.en_curso || 0);
+                                if (pendingEl) pendingEl.textContent = pendientes;
+                                if (completedEl) completedEl.textContent = counts.completadas || 0;
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('No se pudieron actualizar contadores del dashboard:', e);
+                    }
                     
                     console.log(`✅ Tarea ${taskId} movida a ${mappedStatus} y contadores actualizados`);
                     
