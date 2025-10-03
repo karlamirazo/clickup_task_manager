@@ -52,18 +52,18 @@ else:
             "options": "-c timezone=UTC -c client_min_messages=warning"
         }
     )
-    print("🗄️ Using PostgreSQL database with psycopg2 driver")
+    print("Using PostgreSQL database with psycopg2 driver")
     
     # Parse PostgreSQL URL to show useful information
     try:
         parsed_url = urlparse(database_url)
-        print(f"🔗 Host: {parsed_url.hostname}")
-        print(f"📊 Database: {parsed_url.path[1:] if parsed_url.path else 'N/A'}")
-        print(f"👤 User: {parsed_url.username}")
-        print(f"🔌 Port: {parsed_url.port or 5432}")
+        print(f"Host: {parsed_url.hostname}")
+        print(f"Database: {parsed_url.path[1:] if parsed_url.path else 'N/A'}")
+        print(f"User: {parsed_url.username}")
+        print(f"Port: {parsed_url.port or 5432}")
     except Exception as e:
-        print(f"🔗 URL: {database_url[:50]}...")
-        print(f"⚠️ Error parsing URL: {e}")
+        print(f"URL: {database_url[:50]}...")
+        print(f"Error parsing URL: {e}")
 
 # Create database session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

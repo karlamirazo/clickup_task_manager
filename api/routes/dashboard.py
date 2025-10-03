@@ -433,11 +433,17 @@ async def _get_task_stats(db: Session, since: datetime) -> Dict[str, Any]:
     # Tareas recientes
     recent = db.query(Task).filter(Task.last_sync >= since).count()
     
-    # Por estado
-    by_status = db.query(
+    # Por estado - normalizar estados
+    by_status_raw = db.query(
         Task.status,
         func.count().label('count')
     ).group_by(Task.status).all()
+    
+    # Normalizar estados para el conteo
+    by_status = {}
+    for item in by_status_raw:
+        status = item.status.lower().strip() if item.status else 'sin estado'
+        by_status[status] = item.count
     
     # Por prioridad
     by_priority = db.query(
@@ -445,20 +451,42 @@ async def _get_task_stats(db: Session, since: datetime) -> Dict[str, Any]:
         func.count().label('count')
     ).group_by(Task.priority).all()
     
-    # Overdue tasks - corregir para estados en español
+    # Overdue tasks - incluir más estados como no completados
     overdue = db.query(Task).filter(
         and_(
             Task.due_date < datetime.now(),
-            Task.status != 'completado'  # Estados en español
+            Task.status.notin_(['completado', 'complete', 'closed', 'cerrado'])
         )
     ).count()
+    
+    # Calcular conteos específicos para el dashboard
+    completadas = (by_status.get('completado', 0) + 
+                  by_status.get('complete', 0) + 
+                  by_status.get('closed', 0) + 
+                  by_status.get('cerrado', 0))
+    
+    en_curso = (by_status.get('en curso', 0) + 
+               by_status.get('in progress', 0) + 
+               by_status.get('en progreso', 0))
+    
+    pendientes = (by_status.get('pendiente', 0) + 
+                 by_status.get('to do', 0) + 
+                 by_status.get('open', 0) + 
+                 by_status.get('abierto', 0))
     
     return {
         "total": total,
         "recent": recent,
         "overdue": overdue,
-        "by_status": {item.status: item.count for item in by_status},
-        "by_priority": {item.priority: item.count for item in by_priority}
+        "by_status": {item.status: item.count for item in by_status_raw},
+        "by_priority": {item.priority: item.count for item in by_priority},
+        # Conteos normalizados para el dashboard
+        "dashboard_counts": {
+            "completadas": completadas,
+            "en_curso": en_curso,
+            "pendientes": pendientes,
+            "total_calculado": completadas + en_curso + pendientes
+        }
     }
 
 

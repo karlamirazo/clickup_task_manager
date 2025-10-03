@@ -7,8 +7,8 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>📊 Dashboard Principal - ClickUp Manager</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="mobile.css">
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/mobile.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/static/dashboard-config.js"></script>
@@ -847,11 +847,24 @@
                 if (data.tasks) {
                     document.getElementById('total-tasks').textContent = data.tasks.total || 0;
                     
-                    const byStatus = data.tasks.by_status || {};
-                    document.getElementById('pending-tasks').textContent = 
-                        (byStatus['pendiente'] || 0) + (byStatus['en curso'] || 0);
-                    document.getElementById('completed-tasks').textContent = 
-                        byStatus['completado'] || 0;
+                    // Usar conteos normalizados si están disponibles
+                    if (data.tasks.dashboard_counts) {
+                        const counts = data.tasks.dashboard_counts;
+                        document.getElementById('pending-tasks').textContent = counts.pendientes || 0;
+                        document.getElementById('completed-tasks').textContent = counts.completadas || 0;
+                        
+                        // Mostrar en curso como parte de pendientes
+                        const totalPendientes = (counts.pendientes || 0) + (counts.en_curso || 0);
+                        document.getElementById('pending-tasks').textContent = totalPendientes;
+                    } else {
+                        // Fallback al método anterior
+                        const byStatus = data.tasks.by_status || {};
+                        document.getElementById('pending-tasks').textContent = 
+                            (byStatus['pendiente'] || 0) + (byStatus['en curso'] || 0);
+                        document.getElementById('completed-tasks').textContent = 
+                            byStatus['completado'] || 0;
+                    }
+                    
                     document.getElementById('overdue-tasks').textContent = 
                         data.tasks.overdue || 0;
                 }
