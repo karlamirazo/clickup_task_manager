@@ -336,14 +336,16 @@ class SimpleSyncService:
             return None
     
     async def _detect_deleted_tasks(self, workspace_id: str) -> int:
-        """Detectar y marcar tareas eliminadas"""
+        """Detectar y eliminar SOLO tareas realmente inexistentes en ClickUp.
+        Incluye tareas cerradas para evitar borrar completadas válidas.
+        """
         db = next(get_db())
         try:
             # Obtener todas las tareas locales del workspace
             local_tasks = db.query(Task).filter(Task.workspace_id == workspace_id).all()
             local_task_ids = {task.clickup_id for task in local_tasks}
             
-            # Obtener tareas actuales de ClickUp
+            # Obtener tareas actuales de ClickUp (abiertas y cerradas)
             current_task_ids = set()
             
             try:
@@ -353,7 +355,7 @@ class SimpleSyncService:
                     for list_item in lists:
                         tasks = await self.clickup_client.get_tasks(
                             list_id=list_item["id"],
-                            include_closed=False,  # SOLO ABIERTAS
+                            include_closed=True,   # incluir cerradas para no borrar completadas
                             page=0,
                             limit=100
                         )
@@ -366,11 +368,15 @@ class SimpleSyncService:
             deleted_task_ids = local_task_ids - current_task_ids
             
             if deleted_task_ids:
-                # Marcar como eliminadas
-                deleted_count = db.query(Task).filter(
-                    Task.clickup_id.in_(deleted_task_ids)
-                ).delete(synchronize_session=False)
-                
+                # Borrado conservador: eliminar en lotes pequeños y solo si no hay dudas
+                deleted_count = 0
+                for chunk_id in list(deleted_task_ids):
+                    try:
+                        db.query(Task).filter(Task.clickup_id == chunk_id).delete(synchronize_session=False)
+                        deleted_count += 1
+                    except Exception as del_err:
+                        print(f"⚠️ Error eliminando tarea {chunk_id}: {del_err}")
+                        db.rollback()
                 db.commit()
                 return deleted_count
             
