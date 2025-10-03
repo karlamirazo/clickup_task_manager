@@ -12,7 +12,7 @@ root_dir = Path(__file__).parent
 sys.path.insert(0, str(root_dir))
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
@@ -122,11 +122,10 @@ async def dashboard(token: str = None, oauth: str = None, error: str = None):
         return RedirectResponse(url=f"/api/auth/login?error={error}")
     
     try:
-        # Leer el archivo del dashboard
-        with open("static/index.html", "r", encoding="utf-8") as f:
+        # Leer el archivo del dashboard completo (incluye gráficas y JS actualizado)
+        with open("static/dashboard.html", "r", encoding="utf-8") as f:
             dashboard_content = f.read()
-            
-        print("✅ Dashboard cargado exitosamente")
+        print("✅ Dashboard cargado exitosamente (dashboard.html)")
         return HTMLResponse(content=dashboard_content)
         
     except FileNotFoundError:
@@ -278,9 +277,8 @@ async def health_check():
 async def not_found_handler(request: Request, exc):
     """Manejo de errores 404"""
     if request.url.path.startswith("/api/"):
-        return {"error": "Endpoint no encontrado", "path": request.url.path}
-    else:
-        return RedirectResponse(url="/api/auth/login")
+        return JSONResponse(content={"error": "Endpoint no encontrado", "path": request.url.path}, status_code=404)
+    return RedirectResponse(url="/api/auth/login")
 
 if __name__ == "__main__":
     import uvicorn
