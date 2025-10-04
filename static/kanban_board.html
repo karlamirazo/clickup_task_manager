@@ -834,7 +834,13 @@
             
             statuses.forEach(status => {
                 const container = document.querySelector(`[data-status="${status}"] .tasks-container`);
-                const loading = document.getElementById(`${status.replace(' ', '-')}-loading`);
+                // Mapear IDs reales de los indicadores de carga
+                const loadingIdMap = {
+                    'to do': 'todo-loading',
+                    'in progress': 'progress-loading',
+                    'complete': 'done-loading'
+                };
+                const loading = document.getElementById(loadingIdMap[status]);
                 
                 if (loading) {
                     loading.style.display = 'none';
@@ -889,8 +895,13 @@
                     });
                 }
                 
-                // Actualizar contador
-                const countElement = document.getElementById(`${status.replace(' ', '-')}-count`);
+                // Actualizar contador (IDs reales en el DOM)
+                const countIdMap = {
+                    'to do': 'todo-count',
+                    'in progress': 'progress-count',
+                    'complete': 'done-count'
+                };
+                const countElement = document.getElementById(countIdMap[status]);
                 if (countElement) {
                     countElement.textContent = tasksInStatus.length;
                 }
@@ -1020,15 +1031,24 @@
         }
 
         function drag(ev) {
-            ev.dataTransfer.setData("text", ev.target.dataset.taskId);
-            ev.target.classList.add('dragging');
+            const card = ev.currentTarget.closest('.task-card') || ev.currentTarget;
+            const taskId = card && card.dataset ? card.dataset.taskId : ev.target.dataset.taskId;
+            try {
+                ev.dataTransfer.setData('text/plain', taskId);
+                ev.dataTransfer.setData('text', taskId);
+            } catch (e) {}
+            card && card.classList.add('dragging');
         }
 
         function drop(ev) {
             ev.preventDefault();
             ev.currentTarget.classList.remove('drag-over');
             
-            const taskId = ev.dataTransfer.getData("text");
+            let taskId = '';
+            try { taskId = ev.dataTransfer.getData('text/plain'); } catch (e) {}
+            if (!taskId) {
+                try { taskId = ev.dataTransfer.getData('text'); } catch (e2) {}
+            }
             const newStatus = ev.currentTarget.closest('.kanban-column').dataset.status;
             
             // Remover clase dragging de todos los elementos
@@ -1037,7 +1057,11 @@
             });
             
             // Actualizar estado de la tarea
-            updateTaskStatus(taskId, newStatus);
+            if (taskId) {
+                updateTaskStatus(taskId, newStatus);
+            } else {
+                console.warn('No se pudo obtener taskId del dataTransfer');
+            }
         }
 
         // Remover clase drag-over cuando se sale del área
