@@ -564,7 +564,7 @@
         <!-- Kanban Board -->
         <div class="kanban-board">
             <!-- Columna: To Do -->
-            <div class="kanban-column" data-status="to do">
+            <div class="kanban-column" data-status="to do" ondrop="drop(event)" ondragover="allowDrop(event)">
                 <div class="column-header">
                     <div class="column-title">
                         <i class="fas fa-clock"></i>
@@ -581,7 +581,7 @@
             </div>
 
             <!-- Columna: In Progress -->
-            <div class="kanban-column" data-status="in progress">
+            <div class="kanban-column" data-status="in progress" ondrop="drop(event)" ondragover="allowDrop(event)">
                 <div class="column-header">
                     <div class="column-title">
                         <i class="fas fa-play"></i>
@@ -598,7 +598,7 @@
             </div>
 
             <!-- Columna: Done -->
-            <div class="kanban-column" data-status="complete">
+            <div class="kanban-column" data-status="complete" ondrop="drop(event)" ondragover="allowDrop(event)">
                 <div class="column-header">
                     <div class="column-title">
                         <i class="fas fa-check-circle"></i>
@@ -1039,6 +1039,11 @@
             } catch (e) {}
             card && card.classList.add('dragging');
         }
+
+        document.addEventListener('dragend', function(e) {
+            document.querySelectorAll('.task-card').forEach(card => card.classList.remove('dragging'));
+            document.querySelectorAll('.tasks-container').forEach(c => c.classList.remove('drag-over'));
+        });
 
         function drop(ev) {
             ev.preventDefault();
