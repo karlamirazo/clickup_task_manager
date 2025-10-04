@@ -153,9 +153,14 @@ async def dashboard(token: str = None, oauth: str = None, error: str = None):
 app.include_router(auth.router, prefix="/api")
 
 # Importar y agregar routers de API
-from api.routes import dashboard, tasks
+from api.routes import dashboard, tasks, workspaces, users, lists
 app.include_router(dashboard.router, prefix="/api/v1/dashboard")
-app.include_router(tasks.router, prefix="/api/v1")
+# Alinear prefijos con el frontend: tasks bajo /api/v1/tasks
+app.include_router(tasks.router, prefix="/api/v1/tasks")
+# Exponer endpoints requeridos por Kanban
+app.include_router(workspaces.router, prefix="/api/v1/workspaces")
+app.include_router(users.router, prefix="/api/v1/users")
+app.include_router(lists.router, prefix="/api/v1/lists")
 
 # Endpoint para lista de usuarios y tareas
 @app.get("/users-tasks", response_class=HTMLResponse)
