@@ -1290,11 +1290,51 @@ class RelationshipCreate(BaseModel):
 @router.get("/{task_id}/relationships", response_model=Dict[str, Any])
 async def list_task_relationships(
     task_id: str,
-    clickup_client: ClickUpClient = Depends(get_clickup_client)
+    clickup_client: ClickUpClient = Depends(get_clickup_client),
+    db: Session = Depends(get_db)
 ):
-    """Listar relaciones/dependencias de una tarea."""
+    """Listar relaciones/dependencias de una tarea con nombres de tareas relacionadas."""
     try:
-        return await clickup_client.get_task_relationships(task_id)
+        raw = await clickup_client.get_task_relationships(task_id)
+
+        # Normalizar posibles estructuras del API
+        rel_candidates = []
+        for key in ("relationships", "data", "items", "dependencies"):
+            value = raw.get(key)
+            if isinstance(value, list):
+                rel_candidates.extend(value)
+
+        normalized_items = []
+        for rel in rel_candidates:
+            rel_type = rel.get("relationship_type") or rel.get("type")
+            to_task = rel.get("to_task") or rel.get("task_id") or rel.get("source_task") or rel.get("id")
+            relationship_id = rel.get("id") or rel.get("relationship_id")
+
+            # Resolver nombre desde BD local o ClickUp
+            to_task_name = None
+            if to_task:
+                try:
+                    local = db.query(Task).filter(Task.clickup_id == str(to_task)).first()
+                    if local:
+                        to_task_name = local.name
+                except Exception:
+                    to_task_name = None
+
+                if not to_task_name:
+                    try:
+                        remote = await clickup_client.get_task(str(to_task))
+                        to_task_name = remote.get("name")
+                    except Exception:
+                        to_task_name = None
+
+            normalized_items.append({
+                "relationship_type": rel_type,
+                "to_task": to_task,
+                "to_task_name": to_task_name,
+                "relationship_id": relationship_id,
+            })
+
+        return {"items": normalized_items, "raw": raw}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error obteniendo relaciones: {str(e)}")
 

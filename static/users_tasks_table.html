@@ -1531,14 +1531,17 @@
 
             const rows = items.map((r) => {
                 const relType = (r.relationship_type || r.type || '').toString();
-                const toTask = r.to_task || r.task_id || r.source_task || r.id || '';
+                const toTaskId = r.to_task || r.task_id || r.source_task || r.id || '';
+                const toTaskName = r.to_task_name || '';
                 const relId = r.id || r.relationship_id || '';
                 const canDelete = !!relId;
+                const displayName = toTaskName || toTaskId || 'N/D';
                 return `
                     <div style="display:flex; justify-content:space-between; align-items:center; border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:8px;">
                         <div>
                             <div><strong>Tipo:</strong> ${relType || 'N/D'}</div>
-                            <div><strong>Tarea relacionada:</strong> ${toTask || 'N/D'}</div>
+                            <div><strong>Tarea relacionada:</strong> ${displayName}</div>
+                            ${toTaskName && toTaskId ? `<div><small>ID: ${toTaskId}</small></div>` : ''}
                             ${relId ? `<div><small>ID relación: ${relId}</small></div>` : ''}
                         </div>
                         <div>
