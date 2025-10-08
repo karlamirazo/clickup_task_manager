@@ -291,6 +291,11 @@
             min-width: 100px;
         }
 
+        .blocked-indicator {
+            margin-left: 8px;
+            color: #dc2626;
+        }
+
                  .status-pending {
              background: #f3f4f6;
              color: #374151;
@@ -751,6 +756,47 @@
         </div>
     </div>
 
+    <!-- Modal para dependencias -->
+    <div id="dependencies-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeDependenciesModal()">&times;</span>
+            <h2><i class="fas fa-link"></i> Dependencias de la Tarea</h2>
+
+            <div id="dependencies-task-info" style="margin: 10px 0 20px 0; color: #6c757d;"></div>
+
+            <div id="dependencies-list">
+                <div class="empty-state">
+                    <i class="fas fa-spinner loading-spinner"></i>
+                    <h3>Cargando dependencias...</h3>
+                </div>
+            </div>
+
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+            <h3 style="margin-bottom: 10px;"><i class="fas fa-plus-circle"></i> Agregar dependencia</h3>
+            <form id="add-dependency-form" onsubmit="handleAddDependency(event)">
+                <div class="form-group">
+                    <label for="dependency-to-task-id">ID de tarea a relacionar</label>
+                    <input type="text" id="dependency-to-task-id" list="dependency-to-task-datalist" placeholder="ID de la tarea bloqueadora o bloqueada" required>
+                    <datalist id="dependency-to-task-datalist"></datalist>
+                </div>
+                <div class="form-group">
+                    <label for="dependency-type">Tipo de relación</label>
+                    <select id="dependency-type" required>
+                        <option value="blocked_by">Esta tarea está bloqueada por</option>
+                        <option value="blocks">Esta tarea bloquea a</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeDependenciesModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar Dependencia
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         let currentData = [];
         let filteredData = [];
@@ -829,6 +875,31 @@
                 console.log('🔍 Espacios:', spaces.length, spaces);
                 
                 processData(tasks, users, spaces);
+
+                // Poblar datalist para autocompletado de dependencias con IDs de tareas
+                try {
+                    const datalist = document.getElementById('dependency-to-task-datalist');
+                    if (datalist) {
+                        const opts = tasks.map(t => `<option value="${t.clickup_id}">${(t.name || '').replace(/"/g, '')}</option>`).join('');
+                        datalist.innerHTML = opts;
+                    }
+                } catch(_e) {}
+
+                // Marcar indicadores de bloqueo por fila (consulta rápida, best-effort)
+                try {
+                    for (const t of tasks.slice(0, 100)) { // limitar por rendimiento
+                        const el = document.getElementById(`blocked-indicator-${t.clickup_id}`);
+                        if (!el) continue;
+                        const resp = await fetch(`/api/v1/tasks/${t.clickup_id}/relationships`);
+                        if (!resp.ok) continue;
+                        const data = await resp.json();
+                        const lists = [data?.relationships, data?.data, data?.items, data?.dependencies].filter(Array.isArray);
+                        const anyItems = lists.some(arr => (arr || []).length > 0);
+                        if (anyItems) el.style.display = 'inline-block';
+                    }
+                } catch (e) {
+                    console.warn('No se pudieron cargar indicadores de bloqueo:', e);
+                }
                 
             } catch (error) {
                 console.error('❌ Error cargando datos:', error);
@@ -1117,6 +1188,9 @@
                         <span class="status-badge ${item.status_class}">
                             ${getStatusText(item.status)}
                         </span>
+                        <span id="blocked-indicator-${item.clickup_id}" class="blocked-indicator" title="Tarea bloqueada" style="display:none;">
+                            <i class="fas fa-ban"></i>
+                        </span>
                     </td>
                     <td>
                         <div class="due-date ${item.due_date_class}">
@@ -1138,6 +1212,9 @@
                              </button>
                              <button class="btn btn-sm btn-outline-danger" onclick="deleteTask('${item.id}')" title="Eliminar tarea">
                                  <i class="fas fa-trash"></i>
+                             </button>
+                             <button class="btn btn-sm btn-outline-primary" onclick="openDependencies('${item.id}', '${item.clickup_id}')" title="Ver dependencias">
+                                 <i class="fas fa-link"></i>
                              </button>
                          </div>
                      </td>
@@ -1377,6 +1454,139 @@
             const modal = document.getElementById('edit-task-modal');
             if (event.target === modal) {
                 closeEditModal();
+            }
+        }
+
+        // ==============================
+        // Dependencias (UI + API calls)
+        // ==============================
+        let currentDependenciesContext = { taskId: null, clickupId: null };
+
+        function openDependencies(taskId, clickupId) {
+            if (!taskId || !clickupId) {
+                alert('ID de tarea inválido');
+                return;
+            }
+            currentDependenciesContext = { taskId, clickupId };
+            document.getElementById('dependencies-task-info').innerText = `Tarea local ${taskId} / ClickUp ${clickupId}`;
+            document.getElementById('dependencies-modal').style.display = 'block';
+            loadDependencies();
+        }
+
+        function closeDependenciesModal() {
+            document.getElementById('dependencies-modal').style.display = 'none';
+            document.getElementById('add-dependency-form').reset();
+            document.getElementById('dependencies-list').innerHTML = '';
+        }
+
+        async function loadDependencies() {
+            const target = document.getElementById('dependencies-list');
+            target.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-spinner loading-spinner"></i>
+                    <h3>Cargando dependencias...</h3>
+                </div>
+            `;
+            try {
+                const resp = await fetch(`/api/v1/tasks/${currentDependenciesContext.clickupId}/relationships`);
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    throw new Error(err.detail || `HTTP ${resp.status}`);
+                }
+                const data = await resp.json();
+                renderDependencies(data);
+            } catch (e) {
+                target.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle" style="color:#dc2626;"></i>
+                        <h3>Error cargando dependencias</h3>
+                        <p>${e.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderDependencies(data) {
+            const target = document.getElementById('dependencies-list');
+            const items = [];
+            const relLists = [
+                Array.isArray(data?.relationships) ? data.relationships : [],
+                Array.isArray(data?.data) ? data.data : [],
+                Array.isArray(data?.items) ? data.items : [],
+                Array.isArray(data?.dependencies) ? data.dependencies : []
+            ];
+            for (const list of relLists) {
+                for (const r of list) items.push(r);
+            }
+            if (items.length === 0) {
+                target.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-link"></i>
+                        <h3>Sin dependencias</h3>
+                        <p>No se encontraron relaciones para esta tarea</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const rows = items.map((r) => {
+                const relType = (r.relationship_type || r.type || '').toString();
+                const toTask = r.to_task || r.task_id || r.source_task || r.id || '';
+                const relId = r.id || r.relationship_id || '';
+                const canDelete = !!relId;
+                return `
+                    <div style="display:flex; justify-content:space-between; align-items:center; border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:8px;">
+                        <div>
+                            <div><strong>Tipo:</strong> ${relType || 'N/D'}</div>
+                            <div><strong>Tarea relacionada:</strong> ${toTask || 'N/D'}</div>
+                            ${relId ? `<div><small>ID relación: ${relId}</small></div>` : ''}
+                        </div>
+                        <div>
+                            ${canDelete ? `<button class="btn btn-sm btn-outline-danger" onclick="deleteDependency('${relId}')"><i class='fas fa-trash'></i></button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            target.innerHTML = rows;
+        }
+
+        async function handleAddDependency(event) {
+            event.preventDefault();
+            const toTaskId = document.getElementById('dependency-to-task-id').value.trim();
+            const relType = document.getElementById('dependency-type').value;
+            if (!toTaskId || !relType) return;
+            try {
+                const resp = await fetch(`/api/v1/tasks/${currentDependenciesContext.clickupId}/relationships`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ to_task_id: toTaskId, relationship_type: relType })
+                });
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    throw new Error(err.detail || `HTTP ${resp.status}`);
+                }
+                await loadData();
+                await loadDependencies();
+                document.getElementById('add-dependency-form').reset();
+                alert('Dependencia creada correctamente');
+            } catch (e) {
+                alert(`Error creando dependencia: ${e.message}`);
+            }
+        }
+
+        async function deleteDependency(relationshipId) {
+            if (!relationshipId) return;
+            if (!confirm('¿Eliminar esta relación?')) return;
+            try {
+                const resp = await fetch(`/api/v1/tasks/${currentDependenciesContext.clickupId}/relationships/${relationshipId}`, { method: 'DELETE' });
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    throw new Error(err.detail || `HTTP ${resp.status}`);
+                }
+                await loadDependencies();
+                alert('Relación eliminada');
+            } catch (e) {
+                alert(`Error eliminando relación: ${e.message}`);
             }
         }
     </script>

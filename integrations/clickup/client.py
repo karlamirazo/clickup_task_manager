@@ -401,6 +401,103 @@ class ClickUpClient:
             update_data = {"custom_fields": [{"id": field_id, "value": value}]}
             return await self.update_task(task_id, update_data)
 
+    # ==========================
+    # Relaciones / Dependencias
+    # ==========================
+    async def get_task_relationships(self, task_id: str) -> Dict[str, Any]:
+        """Obtiene relaciones de una tarea (dependencias y relaciones).
+
+        Intenta primero el endpoint dedicado de relaciones y si no está disponible
+        hace fallback a leer la tarea y extraer campos relacionados (dependencies).
+        """
+        # Intentar endpoint dedicado (si está habilitado en API)
+        try:
+            return await self._make_request("GET", f"task/{task_id}/relationship")
+        except Exception:
+            pass
+
+        # Fallback: obtener la tarea y devolver posibles campos de dependencias
+        task = await self.get_task(task_id)
+        return {
+            "task": task,
+            "dependencies": task.get("dependencies", []),
+            "dependency_of": task.get("dependency_of", []),
+        }
+
+    async def create_task_relationship(self, task_id: str, to_task_id: str, relationship_type: str) -> Dict[str, Any]:
+        """Crea una relación entre tareas.
+
+        relationship_type soporta alias comunes:
+        - "blocks" (esta tarea bloquea a otra)
+        - "blocked_by" / "is_blocked_by" (esta tarea está bloqueada por otra)
+        - "waiting_on" (alias de blocked_by)
+        """
+        normalized = relationship_type.strip().lower().replace(" ", "_")
+        if normalized in {"is_blocked_by", "blocked_by", "waiting_on"}:
+            normalized = "blocked_by"
+        elif normalized in {"blocks", "blocking"}:
+            normalized = "blocks"
+
+        payload = {
+            "to_task": to_task_id,
+            "relationship_type": normalized,
+        }
+        return await self._make_request("POST", f"task/{task_id}/relationship", data=payload)
+
+    async def delete_task_relationship(self, task_id: str, relationship_id: str) -> bool:
+        """Elimina una relación específica por su ID."""
+        await self._make_request("DELETE", f"task/{task_id}/relationship/{relationship_id}")
+        return True
+
+    async def get_blocking_tasks(self, task_id: str) -> List[Dict[str, Any]]:
+        """Devuelve las tareas que bloquean a la tarea dada.
+
+        Intenta interpretar la respuesta del endpoint de relaciones o los campos
+        "dependencies" del detalle de la tarea, retornando una lista de tareas
+        (objetos completos) que actúan como bloqueadores.
+        """
+        try:
+            relationships = await self.get_task_relationships(task_id)
+        except Exception:
+            relationships = {}
+
+        blocking_task_ids: List[str] = []
+
+        # Caso 1: estructura del endpoint dedicado
+        rel_items: List[Dict[str, Any]] = []
+        for key in ("relationships", "data", "items"):
+            if isinstance(relationships.get(key), list):
+                rel_items = relationships[key]  # type: ignore[assignment]
+                break
+
+        for rel in rel_items:
+            rel_type = str(rel.get("relationship_type") or rel.get("type") or "").lower()
+            # blocked_by / waiting_on implican que OTRO task bloquea a este
+            if any(alias in rel_type for alias in ["blocked", "waiting_on"]):
+                # Algunas respuestas incluyen to_task o task_id
+                to_task = rel.get("to_task") or rel.get("task_id") or rel.get("source_task")
+                if to_task and isinstance(to_task, (str, int)):
+                    blocking_task_ids.append(str(to_task))
+
+        # Caso 2: fallback usando campos de la tarea
+        if not blocking_task_ids:
+            deps = relationships.get("dependencies") or []
+            for dep in deps if isinstance(deps, list) else []:
+                # Los esquemas varían; buscar claves comunes
+                candidate = dep.get("task_id") or dep.get("depends_on") or dep.get("id")
+                if candidate:
+                    blocking_task_ids.append(str(candidate))
+
+        # Obtener detalles de tareas bloqueadoras
+        blocking_tasks: List[Dict[str, Any]] = []
+        for bid in blocking_task_ids:
+            try:
+                blocking_tasks.append(await self.get_task(bid))
+            except Exception:
+                continue
+
+        return blocking_tasks
+
 # ===== FUNCION DE DEPENDENCIA PARA FASTAPI =====
 def get_clickup_client() -> ClickUpClient:
     """Funcion de dependencia para FastAPI que retorna una instancia de ClickUpClient"""

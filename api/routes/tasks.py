@@ -600,6 +600,47 @@ async def update_task(
         
         print(f"✅ Tarea encontrada en BD local: {local_task.name} (ID: {local_task.id}, ClickUp ID: {local_task.clickup_id})")
         
+        # Enforzar dependencias ANTES de permitir ciertos cambios de estado
+        try:
+            # Si se intenta avanzar a un estado de "en curso" o "completado",
+            # verificar que no existan bloqueos pendientes
+            requested_status = (task_update.status or local_task.status or "").lower()
+            moving_forward = requested_status in {
+                "en curso", "en progreso", "in progress", "review", "testing", "complete", "completed", "completado", "done"
+            }
+            if moving_forward:
+                blocking_tasks = await clickup_client.get_blocking_tasks(local_task.clickup_id)
+                pending_blockers = []
+                for bt in blocking_tasks:
+                    bt_status = ""
+                    if isinstance(bt.get("status"), dict):
+                        bt_status = str(bt["status"].get("status", "")).lower()
+                    else:
+                        bt_status = str(bt.get("status", "")).lower()
+                    if bt_status not in {"complete", "completed", "completado", "done"}:
+                        pending_blockers.append({
+                            "id": bt.get("id"),
+                            "name": bt.get("name"),
+                            "status": bt_status,
+                        })
+                if pending_blockers:
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail={
+                            "message": "La tarea está bloqueada por otras tareas sin completar",
+                            "blocking": pending_blockers,
+                        },
+                    )
+        except HTTPException:
+            raise
+        except Exception as dep_check_err:
+            # En caso de error consultando dependencias, por seguridad impedir avance a completado
+            if (task_update.status or "").lower() in {"complete", "completed", "completado", "done"}:
+                raise HTTPException(
+                    status_code=status.HTTP_424_FAILED_DEPENDENCY,
+                    detail=f"No se pudieron verificar dependencias: {dep_check_err}",
+                )
+
         # Preparar datos para actualización en ClickUp
         clickup_update_data = {}
         
@@ -1240,6 +1281,51 @@ async def get_tasks(
 async def test_endpoint():
     """Endpoint de prueba simple"""
     return {"message": "✅ Endpoint de tasks funcionando", "status": "ok"}
+
+# ===== ENDPOINTS DE RELACIONES / DEPENDENCIAS =====
+class RelationshipCreate(BaseModel):
+    to_task_id: str
+    relationship_type: str  # "blocks" | "blocked_by" | "is_blocked_by" | "waiting_on"
+
+@router.get("/{task_id}/relationships", response_model=Dict[str, Any])
+async def list_task_relationships(
+    task_id: str,
+    clickup_client: ClickUpClient = Depends(get_clickup_client)
+):
+    """Listar relaciones/dependencias de una tarea."""
+    try:
+        return await clickup_client.get_task_relationships(task_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error obteniendo relaciones: {str(e)}")
+
+@router.post("/{task_id}/relationships", response_model=Dict[str, Any])
+async def create_task_relationship(
+    task_id: str,
+    payload: RelationshipCreate,
+    clickup_client: ClickUpClient = Depends(get_clickup_client)
+):
+    """Crear relación (blocks / blocked_by) entre tareas."""
+    try:
+        return await clickup_client.create_task_relationship(
+            task_id=task_id,
+            to_task_id=payload.to_task_id,
+            relationship_type=payload.relationship_type,
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creando relación: {str(e)}")
+
+@router.delete("/{task_id}/relationships/{relationship_id}", response_model=Dict[str, Any])
+async def delete_task_relationship(
+    task_id: str,
+    relationship_id: str,
+    clickup_client: ClickUpClient = Depends(get_clickup_client)
+):
+    """Eliminar una relación específica de una tarea."""
+    try:
+        await clickup_client.delete_task_relationship(task_id, relationship_id)
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error eliminando relación: {str(e)}")
 
 @router.get("/config")
 async def show_config():
