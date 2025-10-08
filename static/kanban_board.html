@@ -616,6 +616,47 @@
         </div>
     </div>
 
+    <!-- Modal de Dependencias (reutilizable) -->
+    <div id="kanban-dependencies-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeKanbanDependenciesModal()">&times;</span>
+            <h2><i class="fas fa-link"></i> Dependencias de la Tarea</h2>
+
+            <div id="kanban-dependencies-task-info" style="margin: 10px 0 20px 0; color: #6c757d;"></div>
+
+            <div id="kanban-dependencies-list">
+                <div class="empty-state">
+                    <i class="fas fa-spinner loading-spinner"></i>
+                    <h3>Cargando dependencias...</h3>
+                </div>
+            </div>
+
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+            <h3 style="margin-bottom: 10px;"><i class="fas fa-plus-circle"></i> Agregar dependencia</h3>
+            <form id="kanban-add-dependency-form" onsubmit="handleKanbanAddDependency(event)">
+                <div class="form-group">
+                    <label for="kanban-dependency-to-task-id">ID de tarea a relacionar</label>
+                    <input type="text" id="kanban-dependency-to-task-id" list="kanban-dependency-to-task-datalist" placeholder="ID de la tarea bloqueadora o bloqueada" required>
+                    <datalist id="kanban-dependency-to-task-datalist"></datalist>
+                </div>
+                <div class="form-group">
+                    <label for="kanban-dependency-type">Tipo de relación</label>
+                    <select id="kanban-dependency-type" required>
+                        <option value="blocked_by">Esta tarea está bloqueada por</option>
+                        <option value="blocks">Esta tarea bloquea a</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeKanbanDependenciesModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar Dependencia
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Modal para crear tarea -->
     <div id="create-task-modal" class="modal">
         <div class="modal-content">
@@ -836,6 +877,139 @@
                 console.error('Error cargando tareas:', error);
                 allTasks = [];
                 filteredTasks = [];
+            }
+        }
+
+        // ===== Dependencias: UI + API calls =====
+        let kanbanDependenciesContext = { taskId: null, clickupId: null };
+
+        function openDependencies(taskId, clickupId) {
+            if (!taskId || !clickupId) {
+                alert('ID de tarea inválido');
+                return;
+            }
+            kanbanDependenciesContext = { taskId, clickupId };
+            document.getElementById('kanban-dependencies-task-info').innerText = `Tarea local ${taskId} / ClickUp ${clickupId}`;
+            document.getElementById('kanban-dependencies-modal').style.display = 'block';
+            loadKanbanDependencies();
+            // Poblar datalist
+            try {
+                const datalist = document.getElementById('kanban-dependency-to-task-datalist');
+                if (datalist) {
+                    const opts = allTasks.map(t => `<option value="${t.clickup_id}">${(t.name || '').replace(/"/g, '')}</option>`).join('');
+                    datalist.innerHTML = opts;
+                }
+            } catch(_e) {}
+        }
+
+        function closeKanbanDependenciesModal() {
+            document.getElementById('kanban-dependencies-modal').style.display = 'none';
+            const form = document.getElementById('kanban-add-dependency-form');
+            form && form.reset();
+            document.getElementById('kanban-dependencies-list').innerHTML = '';
+        }
+
+        async function loadKanbanDependencies() {
+            const target = document.getElementById('kanban-dependencies-list');
+            target.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-spinner loading-spinner"></i>
+                    <h3>Cargando dependencias...</h3>
+                </div>
+            `;
+            try {
+                const resp = await fetch(`/api/v1/tasks/${kanbanDependenciesContext.clickupId}/relationships`);
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    throw new Error(err.detail || `HTTP ${resp.status}`);
+                }
+                const data = await resp.json();
+                const items = [];
+                const relLists = [
+                    Array.isArray(data?.items) ? data.items : [],
+                    Array.isArray(data?.relationships) ? data.relationships : [],
+                    Array.isArray(data?.data) ? data.data : [],
+                    Array.isArray(data?.dependencies) ? data.dependencies : []
+                ];
+                for (const list of relLists) for (const r of list) items.push(r);
+                if (items.length === 0) {
+                    target.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-link"></i>
+                            <h3>Sin dependencias</h3>
+                            <p>No se encontraron relaciones para esta tarea</p>
+                        </div>
+                    `;
+                    return;
+                }
+                const rows = items.map((r) => {
+                    const relType = (r.relationship_type || r.type || '').toString();
+                    const toTaskId = r.to_task || r.task_id || r.source_task || r.id || '';
+                    const toTaskName = r.to_task_name || '';
+                    const relId = r.id || r.relationship_id || '';
+                    const canDelete = !!relId;
+                    const displayName = toTaskName || toTaskId || 'N/D';
+                    return `
+                        <div style="display:flex; justify-content:space-between; align-items:center; border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:8px;">
+                            <div>
+                                <div><strong>Tipo:</strong> ${relType || 'N/D'}</div>
+                                <div><strong>Tarea relacionada:</strong> ${displayName}</div>
+                                ${toTaskName && toTaskId ? `<div><small>ID: ${toTaskId}</small></div>` : ''}
+                                ${relId ? `<div><small>ID relación: ${relId}</small></div>` : ''}
+                            </div>
+                            <div>
+                                ${canDelete ? `<button class="task-action-btn" onclick="deleteKanbanDependency('${relId}')"><i class='fas fa-trash'></i></button>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                target.innerHTML = rows;
+            } catch (e) {
+                target.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle" style="color:#dc2626;"></i>
+                        <h3>Error cargando dependencias</h3>
+                        <p>${e.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function handleKanbanAddDependency(event) {
+            event.preventDefault();
+            const toTaskId = document.getElementById('kanban-dependency-to-task-id').value.trim();
+            const relType = document.getElementById('kanban-dependency-type').value;
+            if (!toTaskId || !relType) return;
+            try {
+                const resp = await fetch(`/api/v1/tasks/${kanbanDependenciesContext.clickupId}/relationships`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ to_task_id: toTaskId, relationship_type: relType })
+                });
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    throw new Error(err.detail || `HTTP ${resp.status}`);
+                }
+                await loadKanbanDependencies();
+                showNotification('Dependencia creada correctamente', 'success');
+            } catch (e) {
+                showNotification(`Error creando dependencia: ${e.message}`, 'error');
+            }
+        }
+
+        async function deleteKanbanDependency(relationshipId) {
+            if (!relationshipId) return;
+            if (!confirm('¿Eliminar esta relación?')) return;
+            try {
+                const resp = await fetch(`/api/v1/tasks/${kanbanDependenciesContext.clickupId}/relationships/${relationshipId}`, { method: 'DELETE' });
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    throw new Error(err.detail || `HTTP ${resp.status}`);
+                }
+                await loadKanbanDependencies();
+                showNotification('Relación eliminada', 'success');
+            } catch (e) {
+                showNotification(`Error eliminando relación: ${e.message}`, 'error');
             }
         }
 
@@ -1061,6 +1235,9 @@
                     <div class="task-footer">
                         <span class="task-priority priority-${priorityClass}">${priorityText}</span>
                         <div class="task-actions">
+                            <button class="task-action-btn" onclick="openDependencies('${task.id}', '${task.clickup_id || task.id}')" title="Dependencias">
+                                <i class="fas fa-link"></i>
+                            </button>
                             <button class="task-action-btn" onclick="editTask('${task.id}')" title="Editar">
                                 <i class="fas fa-edit"></i>
                             </button>
