@@ -919,11 +919,20 @@
             `;
             try {
                 const resp = await fetch(`/api/v1/tasks/${kanbanDependenciesContext.clickupId}/relationships`);
+                const data = await resp.json().catch(() => ({}));
                 if (!resp.ok) {
-                    const err = await resp.json().catch(() => ({}));
-                    throw new Error(err.detail || `HTTP ${resp.status}`);
+                    if (data?.rate_limited || data?.not_supported) {
+                        target.innerHTML = `
+                            <div class="empty-state">
+                                <i class="fas fa-link"></i>
+                                <h3>Sin dependencias</h3>
+                                <p>No hay dependencias para esta tarea</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    throw new Error(data?.detail || `HTTP ${resp.status}`);
                 }
-                const data = await resp.json();
                 const items = [];
                 const relLists = [
                     Array.isArray(data?.items) ? data.items : [],

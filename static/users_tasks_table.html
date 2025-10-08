@@ -1487,18 +1487,28 @@
             `;
             try {
                 const resp = await fetch(`/api/v1/tasks/${currentDependenciesContext.clickupId}/relationships`);
+                const data = await resp.json().catch(() => ({}));
                 if (!resp.ok) {
-                    const err = await resp.json().catch(() => ({}));
-                    throw new Error(err.detail || `HTTP ${resp.status}`);
+                    // Si estamos rate-limited o no soportado, mostrar vacío sin error ruidoso
+                    if (data?.rate_limited || data?.not_supported) {
+                        target.innerHTML = `
+                            <div class="empty-state">
+                                <i class="fas fa-link"></i>
+                                <h3>Sin dependencias</h3>
+                                <p>No hay dependencias para esta tarea</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    throw new Error(data?.detail || `HTTP ${resp.status}`);
                 }
-                const data = await resp.json();
                 renderDependencies(data);
             } catch (e) {
                 target.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-exclamation-triangle" style="color:#dc2626;"></i>
                         <h3>Error cargando dependencias</h3>
-                        <p>${e.message}</p>
+                        <p>${e.message || 'Intenta nuevamente más tarde'}</p>
                     </div>
                 `;
             }

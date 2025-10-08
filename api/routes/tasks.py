@@ -1365,7 +1365,15 @@ async def list_task_relationships(
 
         return {"items": normalized_items, "raw": raw}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error obteniendo relaciones: {str(e)}")
+        msg = str(e)
+        # Graceful fallback en caso de rate limit u otros errores temporales
+        if "429" in msg or "Too Many Requests" in msg:
+            return {"items": [], "raw": {}, "rate_limited": True}
+        # Si el endpoint no existe en ClickUp para el plan/espacio
+        if "Route not found" in msg or "APP_001" in msg or "404" in msg:
+            return {"items": [], "raw": {}, "not_supported": True}
+        # Fallback por defecto: no romper la UI
+        return {"items": [], "raw": {}, "error": msg}
 
 @router.post("/{task_id}/relationships", response_model=Dict[str, Any])
 async def create_task_relationship(
