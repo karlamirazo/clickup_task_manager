@@ -890,12 +890,10 @@
                     for (const t of tasks.slice(0, 100)) { // limitar por rendimiento
                         const el = document.getElementById(`blocked-indicator-${t.clickup_id}`);
                         if (!el) continue;
-                        const resp = await fetch(`/api/v1/tasks/${t.clickup_id}/relationships`);
+                        const resp = await fetch(`/api/v1/tasks/${t.clickup_id}/blocking`);
                         if (!resp.ok) continue;
                         const data = await resp.json();
-                        const lists = [data?.relationships, data?.data, data?.items, data?.dependencies].filter(Array.isArray);
-                        const anyItems = lists.some(arr => (arr || []).length > 0);
-                        if (anyItems) el.style.display = 'inline-block';
+                        el.style.display = data.has_pending_blockers ? 'inline-block' : 'none';
                     }
                 } catch (e) {
                     console.warn('No se pudieron cargar indicadores de bloqueo:', e);

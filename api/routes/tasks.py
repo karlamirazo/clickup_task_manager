@@ -1122,6 +1122,35 @@ async def sync_tasks_emergency(workspace_id: str = Query(None, description="ID d
         
         raise HTTPException(status_code=500, detail=error_msg)
 
+# ===== ENDPOINT: BLOQUEADORES DE UNA TAREA =====
+@router.get("/{task_id}/blocking", response_model=dict)
+async def get_task_blocking(
+    task_id: str,
+    clickup_client: ClickUpClient = Depends(get_clickup_client)
+):
+    """Devuelve las tareas que bloquean a la tarea dada y cuáles están pendientes."""
+    try:
+        blocking_tasks = await clickup_client.get_blocking_tasks(task_id)
+        blockers = []
+        pending_blockers = []
+        for bt in blocking_tasks:
+            # Normalizar status
+            if isinstance(bt.get("status"), dict):
+                st = str(bt["status"].get("status", "")).lower()
+            else:
+                st = str(bt.get("status", "")).lower()
+            item = {"id": bt.get("id"), "name": bt.get("name"), "status": st}
+            blockers.append(item)
+            if st not in {"complete", "completed", "completado", "done"}:
+                pending_blockers.append(item)
+        return {
+            "blocking_tasks": blockers,
+            "pending_blockers": pending_blockers,
+            "has_pending_blockers": len(pending_blockers) > 0,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error obteniendo bloqueadores: {str(e)}")
+
 # ===== ENDPOINT DE SINCRONIZACION CON PARAMETROS =====
 @router.post("/sync")
 async def sync_tasks(workspace_id: str = Query(None, description="ID del workspace de ClickUp")):

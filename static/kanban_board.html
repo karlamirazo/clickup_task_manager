@@ -1164,6 +1164,29 @@
                     `;
                 } else {
                     container.innerHTML = tasksInStatus.map(task => createTaskCard(task)).join('');
+                    // Best-effort: marcar tarjetas con bloqueadores pendientes
+                    setTimeout(async () => {
+                        try {
+                            for (const t of tasksInStatus.slice(0, 60)) {
+                                const badgeId = `kanban-blocked-${t.clickup_id}`;
+                                let badge = document.getElementById(badgeId);
+                                if (!badge) {
+                                    const card = container.querySelector(`[data-task-id="${t.id}"] .task-header`);
+                                    if (!card) continue;
+                                    badge = document.createElement('span');
+                                    badge.id = badgeId;
+                                    badge.title = 'Tarea bloqueada';
+                                    badge.style.cssText = 'margin-left:8px;color:#dc2626;display:none;';
+                                    badge.innerHTML = '<i class="fas fa-ban"></i>';
+                                    card.appendChild(badge);
+                                }
+                                const resp = await fetch(`/api/v1/tasks/${t.clickup_id}/blocking`);
+                                if (!resp.ok) continue;
+                                const data = await resp.json();
+                                badge.style.display = data.has_pending_blockers ? 'inline-block' : 'none';
+                            }
+                        } catch(e) { console.warn('No se pudieron marcar bloqueadas en Kanban:', e); }
+                    }, 0);
                 }
             });
         }
