@@ -477,16 +477,21 @@ class ClickUpClient:
                 # Algunas respuestas incluyen to_task o task_id
                 to_task = rel.get("to_task") or rel.get("task_id") or rel.get("source_task")
                 if to_task and isinstance(to_task, (str, int)):
-                    blocking_task_ids.append(str(to_task))
+                    if str(to_task) != str(task_id):  # evitar auto-referencias
+                        blocking_task_ids.append(str(to_task))
 
         # Caso 2: fallback usando campos de la tarea
         if not blocking_task_ids:
+            # En la estructura de ClickUp, "dependencies" suele representar tareas de las que
+            # ESTE task depende (i.e., bloqueadores). "dependency_of" representa tareas que
+            # dependen de ESTE task (no son bloqueadores). Por eso usamos solo "dependencies".
             deps = relationships.get("dependencies") or []
             for dep in deps if isinstance(deps, list) else []:
                 # Los esquemas varían; buscar claves comunes
                 candidate = dep.get("task_id") or dep.get("depends_on") or dep.get("id")
                 if candidate:
-                    blocking_task_ids.append(str(candidate))
+                    if str(candidate) != str(task_id):  # evitar auto-referencias
+                        blocking_task_ids.append(str(candidate))
 
         # Obtener detalles de tareas bloqueadoras
         blocking_tasks: List[Dict[str, Any]] = []
