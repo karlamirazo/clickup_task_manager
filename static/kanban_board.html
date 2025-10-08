@@ -726,6 +726,23 @@
                         <option value="">Selecciona un workspace</option>
                     </select>
                 </div>
+
+                <hr style="margin: 16px 0; border: 0; border-top: 1px solid #eee;">
+                <h3 style="margin-bottom: 6px;"><i class="fas fa-link"></i> Dependencias (opcional)</h3>
+                <div class="form-group">
+                    <label for="task-deps-to-task">Agregar dependencia</label>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <input type="text" id="task-deps-to-task" list="task-deps-datalist" placeholder="ID de tarea relacionada">
+                        <select id="task-deps-type">
+                            <option value="blocked_by">Esta tarea está bloqueada por</option>
+                            <option value="blocks">Esta tarea bloquea a</option>
+                        </select>
+                        <button type="button" class="btn btn-secondary" onclick="addTempDependency()">Añadir</button>
+                    </div>
+                    <datalist id="task-deps-datalist"></datalist>
+                    <small class="form-help">Puedes añadir varias relaciones antes de crear la tarea.</small>
+                </div>
+                <div id="task-deps-list"></div>
                 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">
@@ -1193,6 +1210,12 @@
                                 if (!resp.ok) continue;
                                 const data = await resp.json();
                                 badge.style.display = data.has_pending_blockers ? 'inline-block' : 'none';
+                                if (data.has_pending_blockers) {
+                                    const names = (data.pending_blockers || []).map(b => b.name || b.id).join(', ');
+                                    badge.title = names ? `Bloqueada por: ${names}` : 'Tarea bloqueada';
+                                } else {
+                                    badge.title = '';
+                                }
                             }
                         } catch(e) { console.warn('No se pudieron marcar bloqueadas en Kanban:', e); }
                     }, 0);
@@ -1546,9 +1569,45 @@
                         });
                     }
                 }
+                // Poblar datalist de dependencias con tareas cargadas en el tablero
+                try {
+                    const dl = document.getElementById('task-deps-datalist');
+                    if (dl) {
+                        const opts = allTasks.map(t => `<option value="${t.clickup_id}">${(t.name || '').replace(/"/g, '')}</option>`).join('');
+                        dl.innerHTML = opts;
+                    }
+                } catch(_e) {}
             } catch (error) {
                 console.error('Error cargando listas de ClickUp:', error);
             }
+        }
+
+        // Gestión temporal de dependencias en modal de creación
+        const tempDeps = [];
+        function addTempDependency() {
+            const toId = (document.getElementById('task-deps-to-task').value || '').trim();
+            const type = document.getElementById('task-deps-type').value;
+            if (!toId) return;
+            tempDeps.push({ to_task_id: toId, relationship_type: type });
+            document.getElementById('task-deps-to-task').value = '';
+            renderTempDeps();
+        }
+        function removeTempDependency(idx) {
+            tempDeps.splice(idx, 1);
+            renderTempDeps();
+        }
+        function renderTempDeps() {
+            const host = document.getElementById('task-deps-list');
+            if (!host) return;
+            if (tempDeps.length === 0) { host.innerHTML = ''; return; }
+            host.innerHTML = tempDeps.map((d, i) => `
+                <div style="display:flex; justify-content:space-between; align-items:center; border:1px solid #eee; border-radius:8px; padding:8px; margin-top:6px;">
+                    <div>
+                        <div><strong>${d.relationship_type === 'blocked_by' ? 'Bloqueada por' : 'Bloquea a'}:</strong> ${d.to_task_id}</div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="removeTempDependency(${i})">Quitar</button>
+                </div>
+            `).join('');
         }
 
         async function submitCreateTask() {
@@ -1596,6 +1655,22 @@
                 
                 const result = await response.json();
                 console.log('✅ Tarea creada exitosamente:', result);
+
+                // Crear dependencias si el usuario añadió alguna
+                try {
+                    if (Array.isArray(tempDeps) && tempDeps.length > 0 && result && result.clickup_id) {
+                        for (const dep of tempDeps) {
+                            await fetch(`/api/v1/tasks/${result.clickup_id}/relationships`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(dep)
+                            });
+                        }
+                        // Limpiar temporales
+                        tempDeps.length = 0;
+                        renderTempDeps();
+                    }
+                } catch(e) { console.warn('No se pudieron crear dependencias al crear tarea:', e); }
                 
                 // Cerrar modal y recargar
                 closeModal('create-task-modal');
@@ -1725,6 +1800,12 @@
                         if (!resp2.ok) continue;
                         const data2 = await resp2.json();
                         badge.style.display = data2.has_pending_blockers ? 'inline-block' : 'none';
+                        if (data2.has_pending_blockers) {
+                            const names = (data2.pending_blockers || []).map(b => b.name || b.id).join(', ');
+                            badge.title = names ? `Bloqueada por: ${names}` : 'Tarea bloqueada';
+                        } else {
+                            badge.title = '';
+                        }
                     }
                 } catch(e) { console.warn('No se pudieron refrescar badges Kanban:', e); }
                 showNotification('Tarea actualizada', 'success');

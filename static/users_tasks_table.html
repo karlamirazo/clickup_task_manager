@@ -894,6 +894,12 @@
                         if (!resp.ok) continue;
                         const data = await resp.json();
                         el.style.display = data.has_pending_blockers ? 'inline-block' : 'none';
+                        if (data.has_pending_blockers) {
+                            const names = (data.pending_blockers || []).map(b => b.name || b.id).join(', ');
+                            el.title = names ? `Bloqueada por: ${names}` : 'Tarea bloqueada';
+                        } else {
+                            el.title = '';
+                        }
                     }
                 } catch (e) {
                     console.warn('No se pudieron cargar indicadores de bloqueo:', e);
@@ -916,6 +922,12 @@
                     if (!resp.ok) continue;
                     const data = await resp.json();
                     el.style.display = data.has_pending_blockers ? 'inline-block' : 'none';
+                    if (data.has_pending_blockers) {
+                        const names = (data.pending_blockers || []).map(b => b.name || b.id).join(', ');
+                        el.title = names ? `Bloqueada por: ${names}` : 'Tarea bloqueada';
+                    } else {
+                        el.title = '';
+                    }
                 }
             } catch (e) {
                 console.warn('No se pudieron refrescar badges de bloqueo:', e);
