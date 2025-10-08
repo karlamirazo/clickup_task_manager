@@ -1290,6 +1290,9 @@
                     <div class="task-footer">
                         <span class="task-priority priority-${priorityClass}">${priorityText}</span>
                         <div class="task-actions">
+                            <button class="task-action-btn" onclick="refreshCardFromClickUp('${task.clickup_id || task.id}')" title="Refrescar desde ClickUp">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
                             <button class="task-action-btn" onclick="openDependencies('${task.id}', '${task.clickup_id || task.id}')" title="Dependencias">
                                 <i class="fas fa-link"></i>
                             </button>
@@ -2045,6 +2048,37 @@
             }
             
             console.log('🐛 === FIN DEBUG ===');
+        }
+
+        // Refrescar tarjeta desde ClickUp (alinear nombre/descr/estado)
+        async function refreshCardFromClickUp(clickupId) {
+            try {
+                if (!clickupId) return;
+                const btn = event && event.currentTarget;
+                let originalHTML = '';
+                if (btn) { originalHTML = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true; }
+                const resp = await fetch(`/api/v1/tasks/${clickupId}/refresh`, { method: 'POST' });
+                if (!resp.ok) {
+                    const err = await resp.text();
+                    throw new Error(err || `HTTP ${resp.status}`);
+                }
+                const updated = await resp.json();
+                // Actualizar en memoria
+                const idx = allTasks.findIndex(t => String(t.clickup_id) === String(clickupId));
+                if (idx !== -1) {
+                    allTasks[idx] = updated;
+                    filteredTasks = [...allTasks];
+                }
+                renderKanbanBoard();
+                await updateKanbanCounters();
+                showNotification('Tarjeta refrescada desde ClickUp', 'success');
+            } catch (e) {
+                console.error('Error refrescando desde ClickUp:', e);
+                showNotification('Error refrescando desde ClickUp: ' + e.message, 'error');
+            } finally {
+                const btn = event && event.currentTarget;
+                if (btn) { btn.innerHTML = '<i class="fas fa-sync-alt"></i>'; btn.disabled = false; }
+            }
         }
 
         // Función para sincronizar tareas desde ClickUp

@@ -1808,6 +1808,111 @@ async def get_task(task_id: str, db: Session = Depends(get_db)):
         )
 
 
+@router.post("/{clickup_task_id}/refresh", response_model=TaskResponse)
+async def refresh_task_from_clickup(
+    clickup_task_id: str,
+    db: Session = Depends(get_db),
+    clickup_client: ClickUpClient = Depends(get_clickup_client)
+):
+    """Refresca una tarea local trayendo los datos actuales desde ClickUp.
+    Si no existe localmente, la crea con datos mínimos.
+    """
+    try:
+        # Obtener datos desde ClickUp
+        remote = await clickup_client.get_task(clickup_task_id)
+        if not remote:
+            raise HTTPException(status_code=404, detail="Tarea no encontrada en ClickUp")
+
+        # Parsear campos básicos
+        remote_name = remote.get("name", "Sin nombre")
+        remote_description = remote.get("description", "")
+        remote_status = remote.get("status", {})
+        if isinstance(remote_status, dict):
+            remote_status = remote_status.get("status", "to do")
+        else:
+            remote_status = str(remote_status or "to do")
+
+        # Prioridad puede venir como dict o entero
+        priority_val = remote.get("priority")
+        if isinstance(priority_val, dict):
+            try:
+                priority_val = int(priority_val.get("id", 3))
+            except Exception:
+                priority_val = 3
+        else:
+            try:
+                priority_val = int(priority_val or 3)
+            except Exception:
+                priority_val = 3
+
+        # Fechas
+        due_dt = safe_timestamp_to_datetime(remote.get("due_date"))
+
+        # Buscar/crear local
+        local_task = db.query(Task).filter(Task.clickup_id == clickup_task_id).first()
+
+        if not local_task:
+            # Crear con datos mínimos
+            from core.config import settings as _settings
+            list_id = None
+            try:
+                list_id = (remote.get("list") or {}).get("id")
+            except Exception:
+                list_id = None
+            local_task = Task(
+                clickup_id=clickup_task_id,
+                name=remote_name,
+                description=remote_description,
+                status=str(remote_status),
+                priority=priority_val,
+                due_date=due_dt,
+                workspace_id=str(getattr(_settings, "CLICKUP_WORKSPACE_ID", "unknown")),
+                list_id=str(list_id or "unknown"),
+                creator_id=str((remote.get("creator") or {}).get("id", "system")),
+                assignee_id=(remote.get("assignees") or [{}])[0].get("id") if remote.get("assignees") else None,
+                custom_fields=remote.get("custom_fields", {}),
+                is_synced=True
+            )
+            db.add(local_task)
+        else:
+            # Actualizar existentes
+            local_task.name = remote_name
+            local_task.description = remote_description
+            local_task.status = str(remote_status)
+            local_task.priority = priority_val
+            local_task.due_date = due_dt
+            if remote.get("assignees"):
+                local_task.assignee_id = (remote.get("assignees") or [{}])[0].get("id")
+            if remote.get("custom_fields") is not None:
+                local_task.custom_fields = remote.get("custom_fields")
+            local_task.is_synced = True
+
+        db.commit()
+        db.refresh(local_task)
+
+        # Responder
+        return TaskResponse(
+            id=local_task.id,
+            clickup_id=local_task.clickup_id,
+            name=local_task.name,
+            description=local_task.description,
+            status=local_task.status,
+            priority=local_task.priority,
+            due_date=local_task.due_date,
+            workspace_id=local_task.workspace_id,
+            list_id=local_task.list_id,
+            assignee_id=local_task.assignee_id,
+            creator_id=local_task.creator_id,
+            custom_fields=local_task.custom_fields,
+            created_at=local_task.created_at,
+            updated_at=local_task.updated_at,
+            is_synced=local_task.is_synced,
+            last_sync=local_task.last_sync
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error refrescando tarea: {str(e)}")
 @router.post("/sync-missing-tasks")
 async def sync_missing_tasks_endpoint(db: Session = Depends(get_db)):
     """
