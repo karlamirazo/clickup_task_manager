@@ -1703,6 +1703,30 @@
                 closeModal('edit-task-modal');
                 renderKanbanBoard();
                 await updateKanbanCounters();
+                // Refrescar indicadores de bloqueo en tarjetas visibles
+                try {
+                    const tasksInDom = document.querySelectorAll('.task-card .task-header');
+                    for (const header of tasksInDom) {
+                        const card = header.closest('.task-card');
+                        const tid = card ? card.getAttribute('data-task-id') : null;
+                        if (!tid) continue;
+                        const t = allTasks.find(x => String(x.id) === String(tid));
+                        if (!t || !t.clickup_id) continue;
+                        let badge = header.querySelector(`[id="kanban-blocked-${t.clickup_id}"]`);
+                        if (!badge) {
+                            badge = document.createElement('span');
+                            badge.id = `kanban-blocked-${t.clickup_id}`;
+                            badge.title = 'Tarea bloqueada';
+                            badge.style.cssText = 'margin-left:8px;color:#dc2626;display:none;';
+                            badge.innerHTML = '<i class="fas fa-ban"></i>';
+                            header.appendChild(badge);
+                        }
+                        const resp2 = await fetch(`/api/v1/tasks/${t.clickup_id}/blocking`);
+                        if (!resp2.ok) continue;
+                        const data2 = await resp2.json();
+                        badge.style.display = data2.has_pending_blockers ? 'inline-block' : 'none';
+                    }
+                } catch(e) { console.warn('No se pudieron refrescar badges Kanban:', e); }
                 showNotification('Tarea actualizada', 'success');
             } catch (e) {
                 console.error('Error guardando edición:', e);
