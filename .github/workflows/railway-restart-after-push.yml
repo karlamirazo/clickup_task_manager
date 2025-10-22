@@ -1,0 +1,53 @@
+name: Restart Railway after push
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  restart:
+    runs-on: ubuntu-latest
+    env:
+      RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
+      PROJECT_ID: ff751b77-21e2-4508-a247-5e4bbb9c00f9
+      SERVICE_ID: 203045a3-fb41-4abf-b28f-32653251621d
+      ENVIRONMENT_ID: 43e813bd-acb3-48df-81b3-5a7db854b9e9
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restart Railway service
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$RAILWAY_API_TOKEN" ]; then
+            echo "RAILWAY_API_TOKEN GitHub Secret no configurado" >&2
+            exit 1
+          fi
+          cat > payload.json <<'JSON'
+          {
+            "query": "mutation ServiceRestart($serviceId: String!, $environmentId: String!) { serviceRestart(serviceId: $serviceId, environmentId: $environmentId) }",
+            "operationName": "ServiceRestart",
+            "variables": {
+              "serviceId": "${SERVICE_ID}",
+              "environmentId": "${ENVIRONMENT_ID}"
+            }
+          }
+          JSON
+          # Sustituir variables dentro del JSON
+          sed -i "s|\${SERVICE_ID}|${SERVICE_ID}|g" payload.json
+          sed -i "s|\${ENVIRONMENT_ID}|${ENVIRONMENT_ID}|g" payload.json
+
+          http_code=$(curl -s -o resp.json -w "%{http_code}" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${RAILWAY_API_TOKEN}" \
+            -X POST https://backboard.railway.app/graphql/v2 \
+            --data @payload.json)
+          echo "HTTP ${http_code}"
+          cat resp.json
+          jq -e '.data.serviceRestart == true' resp.json >/dev/null || {
+            echo "Restart no confirmado por API" >&2
+            exit 1
+          }
+          echo "✅ Restart solicitado correctamente"
+
