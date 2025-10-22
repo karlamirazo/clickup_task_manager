@@ -26,6 +26,7 @@ class WhatsAppMessageRequest(BaseModel):
     phone_number: str = Field(..., description="Número de teléfono del destinatario")
     message: str = Field(..., description="Contenido del mensaje")
     message_type: str = Field(default="text", description="Tipo de mensaje")
+    sync: Optional[bool] = Field(default=True, description="Si true, espera el resultado del envío")
 
 class WhatsAppTaskNotificationRequest(BaseModel):
     """Modelo para notificaciones de tareas"""
@@ -123,15 +124,15 @@ async def send_whatsapp_message(
                 result.success, result.used_fallback, len(result.attempts)
             )
 
-        # Preferir background para respuesta rápida
-        if background_tasks:
+        # Enviar en background solo si explícitamente se solicita async
+        if background_tasks and request.sync is False:
             background_tasks.add_task(send_message_robust)
             return JSONResponse(
                 content={"success": True, "message": "Mensaje enviado en background", "task_id": "background_send"},
                 status_code=202
             )
 
-        # Envío síncrono si no se provee background
+        # Envío síncrono por defecto
         result = await whatsapp_service.send_message_with_retries(
             phone_number=request.phone_number,
             message=request.message,
@@ -139,8 +140,13 @@ async def send_whatsapp_message(
             notification_type="custom"
         )
         return JSONResponse(
-            content={"success": result.success, "used_fallback": result.used_fallback, "attempts": len(result.attempts)},
-            status_code=200 if result.success else 500
+            content={
+                "success": result.success,
+                "used_fallback": result.used_fallback,
+                "attempts": len(result.attempts),
+                "error_summary": result.error_summary
+            },
+            status_code=200 if result.success else 502
         )
 
     except HTTPException:
