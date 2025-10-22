@@ -1096,6 +1096,24 @@ async function handleCreateTask(event) {
     
     // Recopilar custom_fields desde el formulario con nombres como claves
     const customFields = {};
+
+    // Capturar campos de contacto del formulario para WhatsApp/Email
+    try {
+        const phoneInput = document.getElementById('task-phone');
+        const emailInput = document.getElementById('task-email');
+        const phoneValue = phoneInput ? (phoneInput.value || '').trim() : '';
+        const emailValue = emailInput ? (emailInput.value || '').trim() : '';
+        
+        if (phoneValue) {
+            // El backend espera el nombre 'Celular' y lo mapea a ClickUp
+            customFields['Celular'] = phoneValue;
+        }
+        if (emailValue) {
+            customFields['Email'] = emailValue;
+        }
+    } catch (e) {
+        console.warn('No se pudieron capturar campos de contacto:', e);
+    }
     
     // Usuario asignado (obligatorio)
     const assigneeId = document.getElementById('task-assignee').value.trim();

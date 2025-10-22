@@ -832,14 +832,7 @@
         });
 
         function setupEventListeners() {
-            // Configurar formulario de creación de tareas
-            const form = document.getElementById('create-task-form');
-            if (form) {
-                form.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    await submitCreateTask();
-                });
-            }
+            // El submit lo gestiona static/script.js; aquí no registramos otro listener
 
             // Configurar formulario de edición de tareas
             const editForm = document.getElementById('edit-task-form');

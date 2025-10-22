@@ -1304,51 +1304,35 @@
             }
         }
 
-        // Configurar el formulario para crear tareas
+        // Configurar solo la UI de preview (el submit lo maneja static/script.js)
         document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('create-task-form');
-            if (form) {
-                form.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    await submitCreateTask();
-                });
-                
-                // Agregar event listeners para preview de descripción
-                const descriptionField = document.getElementById('task-description');
-                const phoneField = document.getElementById('task-phone');
-                const previewIndicator = document.getElementById('description-preview-indicator');
-                const phoneCharCount = document.getElementById('phone-char-count');
-                
-                if (descriptionField && phoneField && previewIndicator && phoneCharCount) {
-                    const updatePreview = () => {
-                        const description = descriptionField.value || '';
-                        const phone = phoneField.value || '';
-                        
-                        // Actualizar contador de caracteres
-                        phoneCharCount.textContent = `${phone.length}/20`;
-                        
-                        if (phone.trim()) {
-                            const phoneText = `\n\n📱 **Número de Celular para WhatsApp:** ${phone.trim()}`;
-                            const preview = description + phoneText;
-                            
-                            // Mostrar preview en el campo de descripción (solo visual)
-                            descriptionField.setAttribute('data-preview', preview);
-                            descriptionField.title = `Vista previa de la descripción final:\n\n${preview}`;
-                            
-                            // Mostrar indicador de preview
-                            previewIndicator.style.display = 'inline-block';
-                        } else {
-                            descriptionField.removeAttribute('data-preview');
-                            descriptionField.title = '';
-                            
-                            // Ocultar indicador de preview
-                            previewIndicator.style.display = 'none';
-                        }
-                    };
+            const descriptionField = document.getElementById('task-description');
+            const phoneField = document.getElementById('task-phone');
+            const previewIndicator = document.getElementById('description-preview-indicator');
+            const phoneCharCount = document.getElementById('phone-char-count');
+            
+            if (descriptionField && phoneField && previewIndicator && phoneCharCount) {
+                const updatePreview = () => {
+                    const description = descriptionField.value || '';
+                    const phone = phoneField.value || '';
                     
-                    descriptionField.addEventListener('input', updatePreview);
-                    phoneField.addEventListener('input', updatePreview);
-                }
+                    phoneCharCount.textContent = `${phone.length}/20`;
+                    
+                    if (phone.trim()) {
+                        const phoneText = `\n\n📱 **Número de Celular para WhatsApp:** ${phone.trim()}`;
+                        const preview = description + phoneText;
+                        descriptionField.setAttribute('data-preview', preview);
+                        descriptionField.title = `Vista previa de la descripción final:\n\n${preview}`;
+                        previewIndicator.style.display = 'inline-block';
+                    } else {
+                        descriptionField.removeAttribute('data-preview');
+                        descriptionField.title = '';
+                        previewIndicator.style.display = 'none';
+                    }
+                };
+                
+                descriptionField.addEventListener('input', updatePreview);
+                phoneField.addEventListener('input', updatePreview);
             }
         });
 

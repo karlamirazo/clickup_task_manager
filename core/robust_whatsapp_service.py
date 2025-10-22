@@ -92,7 +92,7 @@ class RobustWhatsAppService:
     def enabled(self) -> bool:
         """Verifica si el servicio está habilitado"""
         try:
-            from .config import settings
+            # Usar la configuración global importada desde core.config
             return (
                 settings.WHATSAPP_ENABLED and 
                 settings.WHATSAPP_NOTIFICATIONS_ENABLED and
