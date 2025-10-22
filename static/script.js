@@ -1115,14 +1115,14 @@ async function handleCreateTask(event) {
         console.warn('No se pudieron capturar campos de contacto:', e);
     }
     
-    // Usuario asignado (obligatorio)
-    const assigneeId = document.getElementById('task-assignee').value.trim();
+    // Usuario asignado (opcional)
+    const assigneeField = document.getElementById('task-assignee');
+    const assigneeId = assigneeField ? (assigneeField.value || '').trim() : '';
     if (!assigneeId) {
-        console.error('ERROR: Usuario asignado es obligatorio');
-        alert('Debes seleccionar un usuario asignado para la tarea');
-        return; // Stop execution if assignee is missing
+        console.warn('WARNING: Usuario asignado no seleccionado; se enviará sin asignado');
+    } else {
+        console.log('INFO: Usuario asignado seleccionado:', assigneeId);
     }
-    console.log('INFO: Usuario asignado seleccionado:', assigneeId);
     
     // Obtener fecha límite
     const dueDateValue = document.getElementById('task-due-date').value;
