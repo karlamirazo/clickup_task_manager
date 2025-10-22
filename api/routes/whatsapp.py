@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 import logging
 
 from integrations.whatsapp.client import WhatsAppNotificationService, WhatsAppClient
+from integrations.whatsapp.service import get_robust_whatsapp_service
 from integrations.whatsapp.integrator import WhatsAppClickUpIntegrator
 from core.phone_extractor import extract_whatsapp_numbers_from_task, get_primary_whatsapp_number
 from core.config import settings
@@ -104,28 +105,46 @@ async def send_whatsapp_message(
     request: WhatsAppMessageRequest,
     background_tasks: BackgroundTasks
 ):
-    """Envía un mensaje de WhatsApp"""
+    """Envía un texto por WhatsApp usando servicio robusto (reintentos + fallback)."""
     try:
-        # Enviar mensaje en background para no bloquear la respuesta
-        async def send_message():
-            async with WhatsAppClient.client:
-                result = await WhatsAppClient.client.send_text_message(
-                    request.phone_number, 
-                    request.message
-                )
-                logger.info(f"WhatsApp message sent: {result.dict()}")
-        
-        background_tasks.add_task(send_message)
-        
-        return JSONResponse(
-            content={
-                "success": True,
-                "message": "Mensaje enviado en background",
-                "task_id": "background_send"
-            },
-            status_code=202
+        whatsapp_service = await get_robust_whatsapp_service()
+        if not whatsapp_service.enabled:
+            raise HTTPException(status_code=503, detail="WhatsApp service disabled or misconfigured")
+
+        async def send_message_robust():
+            result = await whatsapp_service.send_message_with_retries(
+                phone_number=request.phone_number,
+                message=request.message,
+                message_type=request.message_type or "text",
+                notification_type="custom"
+            )
+            logger.info(
+                "Robust WA result: success=%s used_fallback=%s attempts=%s",
+                result.success, result.used_fallback, len(result.attempts)
+            )
+
+        # Preferir background para respuesta rápida
+        if background_tasks:
+            background_tasks.add_task(send_message_robust)
+            return JSONResponse(
+                content={"success": True, "message": "Mensaje enviado en background", "task_id": "background_send"},
+                status_code=202
+            )
+
+        # Envío síncrono si no se provee background
+        result = await whatsapp_service.send_message_with_retries(
+            phone_number=request.phone_number,
+            message=request.message,
+            message_type=request.message_type or "text",
+            notification_type="custom"
         )
-        
+        return JSONResponse(
+            content={"success": result.success, "used_fallback": result.used_fallback, "attempts": len(result.attempts)},
+            status_code=200 if result.success else 500
+        )
+
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error sending WhatsApp message: {e}")
         raise HTTPException(status_code=500, detail=f"Error sending message: {str(e)}")
