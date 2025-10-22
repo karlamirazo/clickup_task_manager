@@ -153,7 +153,7 @@ async def dashboard(token: str = None, oauth: str = None, error: str = None):
 app.include_router(auth.router, prefix="/api")
 
 # Importar y agregar routers de API
-from api.routes import dashboard, tasks, workspaces, users, lists
+from api.routes import dashboard, tasks, workspaces, users, lists, whatsapp, webhooks
 app.include_router(dashboard.router, prefix="/api/v1/dashboard")
 # Alinear prefijos con el frontend: tasks bajo /api/v1/tasks
 app.include_router(tasks.router, prefix="/api/v1/tasks")
@@ -161,6 +161,9 @@ app.include_router(tasks.router, prefix="/api/v1/tasks")
 app.include_router(workspaces.router, prefix="/api/v1/workspaces")
 app.include_router(users.router, prefix="/api/v1/users")
 app.include_router(lists.router, prefix="/api/v1/lists")
+# Exponer WhatsApp y Webhooks
+app.include_router(whatsapp.router, prefix="/api/v1")
+app.include_router(webhooks.router, prefix="/api/v1/webhooks")
 
 # Endpoint para lista de usuarios y tareas
 @app.get("/users-tasks", response_class=HTMLResponse)
