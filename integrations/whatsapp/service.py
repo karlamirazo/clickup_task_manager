@@ -11,10 +11,9 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass
 from enum import Enum
 
-from .whatsapp_client import WhatsAppNotificationService, WhatsAppResponse
-from .whatsapp_simulator import WhatsAppSimulator
-from .evolution_api_config import get_evolution_config, evolution_config
-from .config import settings
+from .client import WhatsAppNotificationService, WhatsAppResponse
+from .simulator import WhatsAppSimulator
+from core.config import settings
 
 # Configurar logging
 logger = logging.getLogger(__name__)
@@ -62,14 +61,17 @@ class RobustWhatsAppService:
     """Servicio robusto de WhatsApp con reintentos y fallback"""
     
     def __init__(self):
-        self.evolution_config = get_evolution_config()
         self.whatsapp_service = WhatsAppNotificationService()
         self.simulator = WhatsAppSimulator()
         
         # Configuración de reintentos
-        self.max_retries = self.evolution_config.max_retries
-        self.base_retry_delay = self.evolution_config.retry_delay
+        self.max_retries = 3
+        self.base_retry_delay = 1.0
         self.max_retry_delay = 60.0  # Máximo 60 segundos entre reintentos
+
+        # Rate limiting (opcional)
+        self.rate_limit_enabled = False
+        self.max_messages_per_minute = 60
         
         # Estadísticas
         self.total_messages_sent = 0
@@ -83,8 +85,8 @@ class RobustWhatsAppService:
         self.rate_limit_window = 60  # Ventana de 1 minuto
         
         logger.info(f"🚀 Servicio robusto de WhatsApp inicializado")
-        logger.info(f"   📱 Evolution API: {self.evolution_config.base_url}")
-        logger.info(f"   🔑 Instancia: {self.evolution_config.instance_name}")
+        logger.info(f"   📱 Evolution API: {settings.WHATSAPP_EVOLUTION_URL}")
+        logger.info(f"   🔑 Instancia: {settings.WHATSAPP_INSTANCE_NAME}")
         logger.info(f"   🔄 Máximo reintentos: {self.max_retries}")
         logger.info(f"   ⏱️ Delay base: {self.base_retry_delay}s")
     
@@ -92,13 +94,12 @@ class RobustWhatsAppService:
     def enabled(self) -> bool:
         """Verifica si el servicio está habilitado"""
         try:
-            from .config import settings
             return (
                 settings.WHATSAPP_ENABLED and 
                 settings.WHATSAPP_NOTIFICATIONS_ENABLED and
-                bool(settings.WHATSAPP_EVOLUTION_URL) and
-                bool(settings.WHATSAPP_EVOLUTION_API_KEY) and
-                bool(settings.WHATSAPP_INSTANCE_NAME)
+                bool(getattr(settings, "WHATSAPP_EVOLUTION_URL", "")) and
+                bool(getattr(settings, "WHATSAPP_EVOLUTION_API_KEY", "")) and
+                bool(getattr(settings, "WHATSAPP_INSTANCE_NAME", ""))
             )
         except Exception as e:
             logger.warning(f"⚠️ Error verificando configuración de WhatsApp: {e}")
@@ -378,7 +379,7 @@ class RobustWhatsAppService:
     
     def _check_rate_limit(self) -> bool:
         """Verifica si se puede enviar un mensaje según el rate limit"""
-        if not self.evolution_config.rate_limit_enabled:
+        if not self.rate_limit_enabled:
             return True
         
         now = time.time()
@@ -388,7 +389,7 @@ class RobustWhatsAppService:
         self.message_timestamps = [ts for ts in self.message_timestamps if ts > window_start]
         
         # Verificar si se puede enviar
-        if len(self.message_timestamps) < self.evolution_config.max_messages_per_minute:
+        if len(self.message_timestamps) < self.max_messages_per_minute:
             return True
         
         logger.warning(f"⚠️ Rate limit alcanzado: {len(self.message_timestamps)} mensajes en {self.rate_limit_window}s")
@@ -396,7 +397,7 @@ class RobustWhatsAppService:
     
     def _update_rate_limit(self):
         """Actualiza el registro de rate limiting"""
-        if self.evolution_config.rate_limit_enabled:
+        if self.rate_limit_enabled:
             self.message_timestamps.append(time.time())
     
     async def health_check(self) -> Dict[str, Any]:
@@ -439,15 +440,15 @@ class RobustWhatsAppService:
                 # Por ahora, asumimos que está funcionando si no hay excepción
                 return {
                     "healthy": True,
-                    "url": self.evolution_config.base_url,
-                    "instance": self.evolution_config.instance_name,
+                    "url": settings.WHATSAPP_EVOLUTION_URL,
+                    "instance": settings.WHATSAPP_INSTANCE_NAME,
                     "message": "Evolution API responde correctamente"
                 }
         except Exception as e:
             return {
                 "healthy": False,
-                "url": self.evolution_config.base_url,
-                "instance": self.evolution_config.instance_name,
+                "url": settings.WHATSAPP_EVOLUTION_URL,
+                "instance": settings.WHATSAPP_INSTANCE_NAME,
                 "error": str(e),
                 "message": "Evolution API no responde"
             }
