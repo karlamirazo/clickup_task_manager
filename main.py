@@ -41,25 +41,29 @@ async def startup_bootstrap():
         auto_bootstrap = os.getenv("AUTO_DB_BOOTSTRAP", "true").lower() == "true"
         auto_sync = os.getenv("AUTO_SYNC_ON_START", "false").lower() == "true"
 
+        # Ejecutar SIEMPRE en background para no bloquear el arranque ni el healthcheck
         if settings.ENVIRONMENT == "production" and auto_bootstrap:
-            from core.database import init_db
-            print("🔧 Inicializando base de datos en startup...")
-            init_db()
-            print("✅ Base de datos inicializada en startup")
+            async def _init_db_bg():
+                try:
+                    print("🔧 Inicializando base de datos en background...")
+                    from core.database import init_db
+                    await asyncio.to_thread(init_db)
+                    print("✅ Base de datos inicializada (background)")
+                except Exception as e:
+                    print(f"⚠️ Error inicializando BD (background): {e}")
+            asyncio.create_task(_init_db_bg())
 
         if settings.ENVIRONMENT == "production" and auto_sync:
-            # Ejecutar sincronización en segundo plano para no bloquear el arranque
             async def _run_initial_sync():
                 try:
                     print("🔄 Iniciando sincronización inicial en segundo plano...")
                     from integrations.clickup.simple_sync import simple_sync_service
-                    # Workspace predeterminado desde settings o fallback
                     workspace_id = getattr(settings, "CLICKUP_WORKSPACE_ID", "9014943317")
                     await simple_sync_service.sync_workspace_tasks(workspace_id)
                     print("✅ Sincronización inicial completada")
                 except Exception as e:
                     print(f"⚠️ Error en sincronización inicial: {e}")
-
+            # Dar unos segundos para que la BD esté lista si aplica
             asyncio.create_task(_run_initial_sync())
     except Exception as e:
         print(f"⚠️ Error en bootstrap de startup: {e}")
