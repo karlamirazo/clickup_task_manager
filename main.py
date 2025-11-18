@@ -103,9 +103,20 @@ async def root(code: str = None, state: str = None, error: str = None):
         print("❌ No se recibió código OAuth")
         return RedirectResponse(url="/api/auth/login?error=No_authorization_code")
     
-    # Si no hay parámetros OAuth, mostrar página principal
-    print("🏠 Acceso normal a página principal")
-    return RedirectResponse(url="/api/auth/login")
+    # Si no hay parámetros OAuth, mostrar landing directamente (evitar depender solo de redirecciones)
+    print("🏠 Acceso normal a página principal - sirviendo landing estática si existe")
+    try:
+        # Preferencias de landing
+        for candidate in ["static/railway_dashboard.html", "static/index_fixed.html", "static/index.html"]:
+            if Path(candidate).exists():
+                with open(candidate, "r", encoding="utf-8") as f:
+                    return HTMLResponse(content=f.read())
+        # Fallback al dashboard si estuviera disponible
+        with open("static/dashboard.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except Exception as e:
+        print(f"ℹ️ Landing estática no disponible ({e}), redirigiendo a login")
+        return RedirectResponse(url="/api/auth/login")
 
 # Callback de OAuth desde ClickUp - ENDPOINT PRINCIPAL
 @app.get("/callback")
